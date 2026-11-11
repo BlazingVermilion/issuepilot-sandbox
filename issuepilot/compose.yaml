@@ -1,0 +1,95 @@
+name: issuepilot
+x-app: &app
+  image: ${ISSUEPILOT_IMAGE:-issuepilot:local}
+  build: .
+  env_file: .env
+  environment:
+    IP_DATABASE_URL: postgresql+psycopg://issuepilot:${POSTGRES_PASSWORD:?Run init_env.py}@postgres:5432/issuepilot
+    IP_CHECKPOINT_URL: postgresql://issuepilot:${POSTGRES_PASSWORD}@postgres:5432/issuepilot
+    LANGGRAPH_STRICT_MSGPACK: 'true'
+  extra_hosts:
+    - host.docker.internal:host-gateway
+  volumes:
+    - ./policies:/app/policies:ro
+  restart: unless-stopped
+services:
+  postgres:
+    image: postgres:17-bookworm
+    environment:
+      POSTGRES_USER: issuepilot
+      POSTGRES_DB: issuepilot
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Run init_env.py}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U issuepilot -d issuepilot']
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
+  api:
+    <<: *app
+    ports: ['127.0.0.1:8000:8000']
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+  worker:
+    <<: *app
+    command: [python, -m, issuepilot.worker]
+    depends_on:
+      api:
+        condition: service_healthy
+  n8n:
+    image: ${N8N_IMAGE:?Choose a tested n8n image}
+    profiles: [automation]
+    ports: ['127.0.0.1:5678:5678']
+    environment:
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY:?Run init_env.py}
+      N8N_SECURE_COOKIE: 'false'
+      EXECUTIONS_DATA_SAVE_ON_SUCCESS: none
+      EXECUTIONS_DATA_SAVE_ON_ERROR: none
+      N8N_PAYLOAD_SIZE_MAX: '1'
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./n8n:/workflows:ro
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+  analytics:
+    <<: *app
+    image: issuepilot-analytics:local
+    profiles: [analytics]
+    build:
+      context: .
+      args:
+        INCLUDE_SNOWFLAKE: 'true'
+    environment:
+      IP_DATABASE_URL: postgresql+psycopg://issuepilot:${POSTGRES_PASSWORD}@postgres:5432/issuepilot
+      IP_CHECKPOINT_URL: postgresql://issuepilot:${POSTGRES_PASSWORD}@postgres:5432/issuepilot
+      IP_SF_ACCOUNT: ${IP_SF_ACCOUNT:-}
+      IP_SF_USER: ${IP_SF_USER:-}
+      IP_SF_PRIVATE_KEY_FILE: /run/secrets/snowflake.p8
+      IP_SF_PRIVATE_KEY_PASSWORD: ${IP_SF_PRIVATE_KEY_PASSWORD:-}
+      IP_SF_ROLE: ${IP_SF_ROLE:-ISSUEPILOT_SYNC}
+      IP_SF_WAREHOUSE: ${IP_SF_WAREHOUSE:-ISSUEPILOT_WH}
+      IP_SF_DATABASE: ${IP_SF_DATABASE:-ISSUEPILOT_DB}
+      IP_SF_SCHEMA: ${IP_SF_SCHEMA:-ANALYTICS}
+    volumes:
+      - ./policies:/app/policies:ro
+      - ./secrets:/run/secrets:ro
+      - ./artifacts:/app/artifacts
+    depends_on:
+      api:
+        condition: service_healthy
+    command: [python, scripts/sync_snowflake.py, --export-only]
+    restart: 'no'
+
+volumes:
+  postgres_data:
+  n8n_data:

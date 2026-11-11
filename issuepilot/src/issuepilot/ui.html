@@ -1,0 +1,635 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>IssuePilot · Maintainer workspace</title>
+    <link rel="stylesheet" href="/static/app.css" />
+    <script src="/static/app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to workspace</a>
+    <div class="shell">
+      <aside class="sidebar">
+        <a class="brand" href="#overview"
+          ><span class="brand-mark">ip</span
+          ><span>IssuePilot<small>MAINTAINER WORKSPACE</small></span></a
+        >
+        <div class="nav-label">WORKFLOW</div>
+        <nav
+          aria-label="Workspace sections"
+          role="tablist"
+          aria-orientation="vertical"
+        >
+          <button
+            role="tab"
+            id="tab-overview"
+            aria-controls="panel-overview"
+            aria-selected="true"
+            data-tab="overview"
+          >
+            <span class="nav-icon">◫</span>Overview
+          </button>
+          <button
+            role="tab"
+            id="tab-inbox"
+            aria-controls="panel-inbox"
+            aria-selected="false"
+            tabindex="-1"
+            data-tab="inbox"
+          >
+            <span class="nav-icon">≡</span>Inbox<span
+              class="nav-count"
+              id="nav-count"
+              >—</span
+            >
+          </button>
+          <button
+            role="tab"
+            id="tab-review"
+            aria-controls="panel-review"
+            aria-selected="false"
+            tabindex="-1"
+            data-tab="review"
+          >
+            <span class="nav-icon">✓</span>Review
+          </button>
+          <button
+            role="tab"
+            id="tab-activity"
+            aria-controls="panel-activity"
+            aria-selected="false"
+            tabindex="-1"
+            data-tab="activity"
+          >
+            <span class="nav-icon">↗</span>Activity
+          </button>
+          <button
+            role="tab"
+            id="tab-repository"
+            aria-controls="panel-repository"
+            aria-selected="false"
+            tabindex="-1"
+            data-tab="repository"
+          >
+            <span class="nav-icon">⌘</span>Repository
+          </button>
+        </nav>
+        <div class="sidebar-note">
+          <span class="eyebrow">HUMAN IN CONTROL</span>
+          <p>Inspect the evidence.<br />Approve the exact action.</p>
+          <span class="subtle">No approval, no GitHub write.</span>
+        </div>
+        <div class="sidebar-bottom">
+          <span id="version">v0.2.0</span
+          ><button id="theme" class="theme" aria-label="Switch to dark mode">
+            ◐ <span>Dark mode</span>
+          </button>
+        </div>
+      </aside>
+      <div class="workspace">
+        <header class="topbar">
+          <div class="repo-context">
+            <span class="dot"></span
+            ><span id="repo-name">Connect your workspace</span>
+          </div>
+          <div class="toolbar">
+            <span class="badge" id="runtime">Checking API</span
+            ><span id="identity" class="subtle">Not connected</span
+            ><button class="button quiet" id="refresh">↻ Refresh</button
+            ><button class="button quiet" id="disconnect" hidden>
+              Disconnect
+            </button>
+          </div>
+        </header>
+        <main id="main" tabindex="-1">
+          <div
+            id="notice"
+            class="notice"
+            role="status"
+            aria-live="polite"
+            hidden
+          ></div>
+          <section
+            id="panel-overview"
+            role="tabpanel"
+            aria-labelledby="tab-overview"
+          >
+            <div class="page-head">
+              <div>
+                <span class="eyebrow">01 / START HERE</span>
+                <h1>A clear path from issue to action.</h1>
+                <p class="lead">
+                  Connect, inspect, approve. Every decision has a trace.
+                </p>
+              </div>
+              <span class="badge outline">Maintainer console</span>
+            </div>
+            <div class="overview-grid">
+              <article class="card connect-card">
+                <div class="card-heading">
+                  <span class="step-number">01</span>
+                  <h2>Connect as a reviewer</h2>
+                </div>
+                <p>
+                  Your token identifies who approves each action. Find it in
+                  <code>IP_REVIEWER_TOKENS</code> in your local
+                  <code>.env</code>.
+                </p>
+                <form id="connect-form">
+                  <label for="token">Reviewer token</label>
+                  <div class="input-action">
+                    <input
+                      id="token"
+                      type="password"
+                      autocomplete="off"
+                      placeholder="Paste your reviewer token"
+                      required
+                    /><button class="button primary" type="submit">
+                      Connect →
+                    </button>
+                  </div>
+                </form>
+                <p class="hint">
+                  Kept in this tab's memory only. This is not your GitHub token.
+                </p>
+                <div
+                  id="connection-summary"
+                  class="inline-summary"
+                  hidden
+                ></div>
+              </article>
+              <article class="card next-card">
+                <span class="eyebrow">YOUR NEXT STEP</span>
+                <h2 id="next-title">Connect to load real status</h2>
+                <p id="next-copy">
+                  Once connected, you can see which issues need attention and
+                  which engine actually produced a proposal.
+                </p>
+                <button id="next-action" class="button primary" disabled>
+                  Open inbox →
+                </button>
+                <div class="boundary" id="mode-note">
+                  No issue data has been loaded.
+                </div>
+              </article>
+            </div>
+            <div class="section-heading">
+              <h2>The workflow</h2>
+              <span class="subtle">Follow the case, not a wall of JSON</span>
+            </div>
+            <div class="workflow-grid">
+              <article>
+                <span class="step-number">1</span>
+                <h3>Receive</h3>
+                <p>
+                  GitHub sends an issue through n8n. Demo mode uses a local
+                  sample.
+                </p>
+                <button class="text-button" data-go="inbox">
+                  Open inbox →
+                </button>
+              </article>
+              <article>
+                <span class="step-number">2</span>
+                <h3>Investigate</h3>
+                <p>
+                  The configured engine checks the issue and retrieves
+                  repository policy.
+                </p>
+                <button class="text-button" data-go="review">
+                  Inspect evidence →
+                </button>
+              </article>
+              <article>
+                <span class="step-number">3</span>
+                <h3>Review</h3>
+                <p>
+                  Edit or reject the proposal. Only your approval permits
+                  execution.
+                </p>
+                <button class="text-button" data-go="review">
+                  Review proposal →
+                </button>
+              </article>
+              <article>
+                <span class="step-number">4</span>
+                <h3>Verify</h3>
+                <p>
+                  Check action results and audit history. Confirm live changes
+                  on GitHub.
+                </p>
+                <button class="text-button" data-go="activity">
+                  View activity →
+                </button>
+              </article>
+            </div>
+            <div class="section-heading">
+              <h2>Loaded cases</h2>
+              <span class="subtle">Latest 100 · current repository</span>
+            </div>
+            <div class="metrics">
+              <article>
+                <span>Awaiting review</span
+                ><strong id="metric-review">—</strong>
+              </article>
+              <article>
+                <span>Processing</span><strong id="metric-processing">—</strong>
+              </article>
+              <article>
+                <span>Completed</span><strong id="metric-complete">—</strong>
+              </article>
+              <article>
+                <span>Needs attention</span
+                ><strong id="metric-attention">—</strong>
+              </article>
+            </div>
+          </section>
+          <section
+            id="panel-inbox"
+            role="tabpanel"
+            aria-labelledby="tab-inbox"
+            hidden
+          >
+            <div class="page-head">
+              <div>
+                <span class="eyebrow">02 / INTAKE</span>
+                <h1>Issue inbox</h1>
+                <p class="lead">
+                  Select a case to understand the source and review its
+                  proposal.
+                </p>
+              </div>
+              <a
+                id="new-github"
+                class="button primary"
+                target="_blank"
+                rel="noopener noreferrer"
+                hidden
+                >Create GitHub issue ↗</a
+              >
+            </div>
+            <div class="card intake-banner" id="intake-note">
+              Connect from Overview to load cases.
+            </div>
+            <div class="card">
+              <div class="list-tools">
+                <div>
+                  <label class="sr-only" for="search">Search issues</label
+                  ><input
+                    id="search"
+                    type="search"
+                    placeholder="Search title or issue number"
+                  />
+                </div>
+                <div>
+                  <label class="sr-only" for="filter">Filter by status</label
+                  ><select id="filter">
+                    <option value="all">All statuses</option>
+                    <option value="REVIEW">Awaiting review</option>
+                    <option value="QUEUED">Queued</option>
+                    <option value="PROCESSING">Processing</option>
+                    <option value="COMPLETED">Completed</option>
+                    <option value="attention">Needs attention</option>
+                  </select>
+                </div>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Issue</th>
+                      <th>Status</th>
+                      <th>Updated</th>
+                      <th><span class="sr-only">Action</span></th>
+                    </tr>
+                  </thead>
+                  <tbody id="case-rows"></tbody>
+                </table>
+              </div>
+              <div class="empty" id="inbox-empty">
+                <span class="empty-symbol">≡</span>
+                <h3>No cases loaded</h3>
+                <p>Connect your reviewer account to begin.</p>
+              </div>
+            </div>
+            <details class="card" id="demo-box" hidden>
+              <summary>
+                Create a local demo issue
+                <span class="subtle">Simulation only</span>
+              </summary>
+              <p>
+                This creates a database fixture. It does not test n8n or write
+                to GitHub.
+              </p>
+              <form id="demo-form">
+                <div class="form-grid">
+                  <div>
+                    <label for="demo-number">Issue number</label
+                    ><input
+                      id="demo-number"
+                      type="number"
+                      min="1"
+                      value="1"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label for="demo-title">Title</label
+                    ><input
+                      id="demo-title"
+                      value="API crashes when saving a draft"
+                      maxlength="500"
+                      required
+                    />
+                  </div>
+                </div>
+                <label for="demo-body">Description</label
+                ><textarea id="demo-body" rows="4" maxlength="20000">
+The API returns an error when I save a draft.</textarea
+                ><button class="button primary" type="submit">
+                  Create / update demo issue
+                </button>
+              </form>
+            </details>
+          </section>
+          <section
+            id="panel-review"
+            role="tabpanel"
+            aria-labelledby="tab-review"
+            hidden
+          >
+            <div class="page-head">
+              <div>
+                <span class="eyebrow">03 / HUMAN APPROVAL</span>
+                <h1>Review workspace</h1>
+                <p class="lead">
+                  Source on the left. Proposed action on the right. You decide.
+                </p>
+              </div>
+              <a
+                id="issue-link"
+                class="button quiet"
+                target="_blank"
+                rel="noopener noreferrer"
+                hidden
+                >Open on GitHub ↗</a
+              >
+            </div>
+            <div id="review-empty" class="card empty">
+              <span class="empty-symbol">✓</span>
+              <h2>Select an issue first</h2>
+              <p>
+                Open Inbox and choose a case. Its source, evidence and actions
+                will appear here.
+              </p>
+              <button class="button primary" data-go="inbox">
+                Choose an issue →
+              </button>
+            </div>
+            <div id="review-content" hidden>
+              <div class="case-strip">
+                <div>
+                  <span id="case-status" class="badge"></span
+                  ><span id="case-meta" class="subtle"></span>
+                </div>
+                <span id="engine-proof" class="badge outline"></span>
+              </div>
+              <div id="case-guidance" class="notice info"></div>
+              <div class="review-grid">
+                <div>
+                  <article class="card">
+                    <span class="eyebrow">SOURCE ISSUE</span>
+                    <h2 id="issue-title"></h2>
+                    <div id="source-labels" class="chips"></div>
+                    <pre id="issue-body" class="prose"></pre>
+                  </article>
+                  <article class="card">
+                    <div class="section-heading">
+                      <h2>Policy evidence</h2>
+                      <span id="evidence-count" class="badge outline"></span>
+                    </div>
+                    <p class="hint">
+                      A quote is evidence to inspect, not a guarantee that the
+                      recommendation is correct.
+                    </p>
+                    <div id="evidence"></div>
+                  </article>
+                </div>
+                <div>
+                  <article class="card proposal-card">
+                    <div class="section-heading">
+                      <h2>Proposed action</h2>
+                      <span id="proposal-category" class="badge outline"></span>
+                    </div>
+                    <p id="proposal-summary"></p>
+                    <div class="field-block">
+                      <span class="field-label">Why this action?</span>
+                      <p id="proposal-reason"></p>
+                    </div>
+                    <div class="field-block">
+                      <span class="field-label">Missing information</span>
+                      <div id="missing" class="chips"></div>
+                    </div>
+                    <fieldset id="label-field">
+                      <legend>Labels to add</legend>
+                      <p class="hint">
+                        Only existing repository labels permitted by policy are
+                        selectable.
+                      </p>
+                      <div id="label-options" class="chips"></div>
+                    </fieldset>
+                    <label for="comment">Comment to publish</label
+                    ><textarea
+                      id="comment"
+                      rows="6"
+                      maxlength="2500"
+                      placeholder="No comment proposed"
+                    ></textarea>
+                    <p class="hint">
+                      Leave empty to publish no comment. Existing labels are not
+                      removed.
+                    </p>
+                    <div class="field-block">
+                      <span class="field-label">Assignees</span>
+                      <div id="assignees" class="chips"></div>
+                    </div>
+                    <div class="decision-bar">
+                      <button id="approve" class="button primary" disabled>
+                        Review & approve</button
+                      ><button id="reject" class="button danger" disabled>
+                        Reject proposal
+                      </button>
+                    </div>
+                    <p id="approval-note" class="hint"></p>
+                  </article>
+                  <article class="card">
+                    <h2>Execution trace</h2>
+                    <div id="tool-trace"></div>
+                    <div class="recovery-actions">
+                      <button id="regenerate" class="button quiet" hidden>
+                        Generate a fresh proposal</button
+                      ><button id="reconcile" class="button quiet" hidden>
+                        Check uncertain writes</button
+                      ><button class="text-button" data-go="activity">
+                        Open audit history →
+                      </button>
+                    </div>
+                    <details>
+                      <summary>Technical details</summary>
+                      <pre id="technical"></pre>
+                    </details>
+                  </article>
+                </div>
+              </div>
+            </div>
+          </section>
+          <section
+            id="panel-activity"
+            role="tabpanel"
+            aria-labelledby="tab-activity"
+            hidden
+          >
+            <div class="page-head">
+              <div>
+                <span class="eyebrow">04 / VERIFY</span>
+                <h1>Activity & outcomes</h1>
+                <p class="lead">
+                  Check what was approved, what ran, and what still needs
+                  investigation.
+                </p>
+              </div>
+            </div>
+            <div id="activity-empty" class="card empty">
+              <h2>No case selected</h2>
+              <p>Choose a case from Inbox to see its recorded history.</p>
+              <button class="button primary" data-go="inbox">
+                Open inbox →
+              </button>
+            </div>
+            <div id="activity-content" hidden>
+              <div class="card">
+                <h2 id="activity-title"></h2>
+                <p id="decision-summary"></p>
+                <div id="action-results" class="action-results"></div>
+              </div>
+              <article class="card">
+                <h2>Audit timeline</h2>
+                <ol id="timeline" class="timeline"></ol>
+              </article>
+            </div>
+            <article class="card">
+              <h2>External verification</h2>
+              <p>
+                Snowflake sync and CI/CD run outside this console. Their status
+                is not inferred from an approved case.
+              </p>
+              <div class="external-grid">
+                <div>
+                  <span class="badge outline">Not checked here</span>
+                  <h3>Snowflake</h3>
+                  <p>
+                    Run the sync command and verify the event mirror in your
+                    account.
+                  </p>
+                </div>
+                <div>
+                  <span class="badge outline">Not checked here</span>
+                  <h3>CI / deployment</h3>
+                  <p>Inspect GitHub Actions and the deployed image digest.</p>
+                </div>
+              </div>
+            </article>
+          </section>
+          <section
+            id="panel-repository"
+            role="tabpanel"
+            aria-labelledby="tab-repository"
+            hidden
+          >
+            <div class="page-head">
+              <div>
+                <span class="eyebrow">05 / CONFIGURATION</span>
+                <h1>Repository & label policy</h1>
+                <p class="lead">
+                  GitHub defines the vocabulary. Your policy defines permission.
+                </p>
+              </div>
+              <button id="reload-labels" class="button primary">
+                Refresh labels
+              </button>
+            </div>
+            <div id="repo-settings" class="card">
+              <p>Connect from Overview to inspect configuration.</p>
+            </div>
+            <div class="notice info">
+              Reading a label does not grant the agent permission to use it. No
+              labels are created automatically.
+            </div>
+            <div id="label-warning" class="notice" hidden></div>
+            <article class="card">
+              <div class="section-heading">
+                <h2>Label catalog</h2>
+                <span id="catalog-source" class="badge outline"
+                  >Not loaded</span
+                >
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Label</th>
+                      <th>Description</th>
+                      <th>Agent permission</th>
+                    </tr>
+                  </thead>
+                  <tbody id="catalog-rows"></tbody>
+                </table>
+              </div>
+              <p id="catalog-note" class="hint">
+                Refresh to fetch the configured repository's labels.
+              </p>
+            </article>
+            <article class="card">
+              <h2>How to change permissions</h2>
+              <p>
+                Edit <code>policies/label_rules.json</code> and the matching
+                guidance in <code>policies/triage.md</code>. Adding a label on
+                GitHub alone does not authorize it. Pending proposals are
+                invalidated when the catalog or permission policy changes.
+              </p>
+              <p class="hint">
+                Credentials and engine selection remain in your server's .env,
+                never in this browser form.
+              </p>
+            </article>
+          </section>
+        </main>
+        <footer>
+          IssuePilot <span>Evidence first. Human approved.</span
+          ><span id="last-refresh">Not connected</span>
+        </footer>
+      </div>
+    </div>
+    <dialog id="confirm">
+      <form method="dialog">
+        <span class="eyebrow">FINAL CHECK</span>
+        <h2 id="confirm-title">Approve this proposal?</h2>
+        <p id="confirm-target"></p>
+        <div id="confirm-labels" class="chips"></div>
+        <pre id="confirm-comment" class="prose"></pre>
+        <p class="hint">
+          The backend will check source, policy and labels again. A changed
+          proposal requires a fresh review.
+        </p>
+        <div class="decision-bar">
+          <button class="button quiet" value="cancel">Go back</button
+          ><button id="confirm-submit" class="button primary" value="approve">
+            Approve & execute
+          </button>
+        </div>
+      </form>
+    </dialog>
+  </body>
+</html>

@@ -1,0 +1,49 @@
+name: Deploy approved image
+on:
+  workflow_dispatch:
+    inputs:
+      image:
+        description: 'Full GHCR image@sha256:digest from a successful release'
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Validate immutable image reference
+        env:
+          IMAGE: ${{ inputs.image }}
+        run: |
+          [[ "$IMAGE" =~ ^ghcr\.io/[a-z0-9._/-]+@sha256:[a-f0-9]{64}$ ]]
+      - name: Deploy to the pre-provisioned host
+        env:
+          IMAGE: ${{ inputs.image }}
+          SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+          HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_LOGIN: ${{ secrets.DEPLOY_USER }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_ed25519
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/id_ed25519 ~/.ssh/known_hosts
+          [[ "$HOST" =~ ^[a-zA-Z0-9.-]+$ ]]
+          [[ "$DEPLOY_LOGIN" =~ ^[a-zA-Z0-9_-]+$ ]]
+          ssh -o BatchMode=yes "$DEPLOY_LOGIN@$HOST" bash -s -- "$IMAGE" <<'REMOTE'
+          set -euo pipefail
+          cd /opt/issuepilot
+          export ISSUEPILOT_IMAGE="$1"
+          docker compose --profile automation -f compose.yaml -f deploy/compose.production.yaml pull api worker
+          docker compose --profile automation -f compose.yaml -f deploy/compose.production.yaml up -d --no-build --wait
+          curl --fail http://localhost:8000/health
+          printf '%s\n' "$ISSUEPILOT_IMAGE" > deployed-image.txt
+          REMOTE
+      - name: Remove SSH material
+        if: always()
+        run: rm -f ~/.ssh/id_ed25519 ~/.ssh/known_hosts

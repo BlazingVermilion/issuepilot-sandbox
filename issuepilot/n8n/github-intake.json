@@ -1,0 +1,87 @@
+{
+  "name": "IssuePilot \u00b7 Signed GitHub intake",
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "nodes": [
+    {
+      "id": "intake",
+      "name": "GitHub delivery",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "issuepilot-github",
+        "responseMode": "lastNode",
+        "options": {
+          "rawBody": true
+        }
+      }
+    },
+    {
+      "id": "envelope",
+      "name": "Preserve signed bytes",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        0
+      ],
+      "parameters": {
+        "jsCode": "const item = $input.first();\n// GitHub signs exact bytes. Never serialize the parsed body to reconstruct them.\nconst raw = await this.helpers.getBinaryDataBuffer(0, 'data');\nif (raw.length > 262144) throw new Error('Payload too large');\nconst headers = item.json.headers;\nreturn [{json: {\n  raw_body_base64: raw.toString('base64'),\n  signature: headers['x-hub-signature-256'] || '',\n  delivery_id: headers['x-github-delivery'] || '',\n  event: headers['x-github-event'] || ''\n}}];"
+      }
+    },
+    {
+      "id": "backend",
+      "name": "Verify and persist",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        480,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://api:8000/webhooks/n8n",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "timeout": 8000
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 500
+    }
+  ],
+  "connections": {
+    "GitHub delivery": {
+      "main": [
+        [
+          {
+            "node": "Preserve signed bytes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preserve signed bytes": {
+      "main": [
+        [
+          {
+            "node": "Verify and persist",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

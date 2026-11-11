@@ -1,0 +1,74 @@
+{
+  "date": "2026-11-11",
+  "delivery_version": "0.2.0",
+  "python": "3.12.14",
+  "executed": [
+    {
+      "command": "uv run ruff check .",
+      "result": "PASSED"
+    },
+    {
+      "command": "uv run ruff format --check .",
+      "result": "PASSED"
+    },
+    {
+      "command": "uv run pytest -q --tb=short",
+      "result": "PASSED",
+      "tests": 32
+    },
+    {
+      "command": "uv run python scripts/evaluate.py --engine rules --out docs/baseline-results.json",
+      "result": "COMPLETED",
+      "cases": 20,
+      "metrics": {
+        "valid_contract": 1.0,
+        "correct_category": 0.9,
+        "correct_missing": 0.8,
+        "correct_abstain": 0.95
+      }
+    },
+    {
+      "command": "uv build --wheel",
+      "result": "PASSED"
+    },
+    {
+      "command": "Chrome browser walkthrough: local SQLite + rules engine",
+      "result": "PASSED",
+      "checks": [
+        "Five workflow tabs",
+        "Light and dark themes",
+        "Synthetic intake to proposal",
+        "Human approval to completed comment and label actions",
+        "Repository catalog permissions",
+        "Explicit demo and rules evidence"
+      ]
+    }
+  ],
+  "not_executed": [
+    "Docker image build and service boot",
+    "PostgreSQL integration suite and checkpointer",
+    "n8n imported workflow replay",
+    "Ollama model-quality evaluation",
+    "Live GitHub sandbox writes",
+    "Snowflake account sync and readback",
+    "GitHub Actions release",
+    "Remote HTTPS deployment",
+    "Mobile viewport acceptance"
+  ],
+  "constraints": [
+    "External integration credentials not configured for this update",
+    "Browser walkthrough uses synthetic demo data; no actual GitHub comment was sent"
+  ],
+  "packages": {
+    "fastapi": "0.162.2",
+    "langgraph": "1.2.20",
+    "langchain-ollama": "1.1.0",
+    "sqlalchemy": "2.1.8",
+    "pytest": "9.2.0"
+  },
+  "source_inspection": {
+    "n8n": "2.47.3",
+    "n8n_nodes_base": "2.47.2",
+    "finding": "Webhook rawBody exposes original bytes in binary.data; source inspected, runtime not executed."
+  }
+}

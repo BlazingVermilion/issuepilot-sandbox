@@ -1,0 +1,16 @@
+{$APP_DOMAIN} {
+    encode gzip
+    request_body {
+        max_size 400KB
+    }
+    reverse_proxy api:8000
+}
+{$WEBHOOK_DOMAIN} {
+    @github path /webhook/issuepilot-github
+    handle @github {
+        reverse_proxy n8n:5678
+    }
+    handle {
+        respond "Not found" 404
+    }
+}

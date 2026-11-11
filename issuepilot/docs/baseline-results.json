@@ -1,0 +1,765 @@
+{
+  "dataset": "synthetic-sandbox-v1",
+  "count": 20,
+  "engine": "rules",
+  "model": null,
+  "policy_hash": "90148b35b4a153afb81b4f87bb05f4915244db7aec62963ebbe781750c04473e",
+  "limitations": [
+    "Synthetic cases do not establish real-world accuracy.",
+    "Citation substring checks establish provenance, not logical entailment.",
+    "No human time savings or routing improvement measured by this script."
+  ],
+  "summary": {
+    "valid_contract": 1.0,
+    "correct_category": 0.9,
+    "correct_missing": 0.8,
+    "correct_abstain": 0.95
+  },
+  "results": [
+    {
+      "id": "bug-empty",
+      "expected": {
+        "category": "bug",
+        "missing_fields": [
+          "version",
+          "reproduction"
+        ],
+        "abstain": false
+      },
+      "valid_contract": true,
+      "proposal": {
+        "category": "bug",
+        "summary": "API crash",
+        "missing_fields": [
+          "version",
+          "reproduction"
+        ],
+        "labels": [
+          "bug"
+        ],
+        "assignees": [],
+        "comment": "Could you provide the following: version, reproduction?",
+        "citations": [
+          {
+            "id": "triage:1",
+            "quote": "Bug reports\nFor a bug, crash, error, failure, or broken feature, request the software version and reproduction steps if either is missing. Ask one concise question listing only missing information. Propose the bug label only if it exists in the repository catalog and is permitted. Missing information belongs in the clarification comment, not an invented needs-info label. Do not claim to reproduce or fix a bug without evidence."
+          }
+        ],
+        "abstain": false,
+        "reason": "Applied the sandbox policy to the available issue information."
+      },
+      "trace": [
+        {
+          "tool": "policy_search",
+          "mode": "fixed_workflow"
+        }
+      ],
+      "correct_category": true,
+      "correct_missing": true,
+      "correct_abstain": true,
+      "latency_ms": 2
+    },
+    {
+      "id": "bug-complete",
+      "expected": {
+        "category": "bug",
+        "missing_fields": [],
+        "abstain": false
+      },
+      "valid_contract": true,
+      "proposal": {
+        "category": "bug",
+        "summary": "Error on save",
+        "missing_fields": [],
+        "labels": [
+          "bug"
+        ],
+        "assignees": [],
+        "comment": "",
+        "citations": [
+          {
+            "id": "triage:1",
+            "quote": "Bug reports\nFor a bug, crash, error, failure, or broken feature, request the software version and reproduction steps if either is missing. Ask one concise question listing only missing information. Propose the bug label only if it exists in the repository catalog and is permitted. Missing information belongs in the clarification comment, not an invented needs-info label. Do not claim to reproduce or fix a bug without evidence."
+          }
+        ],
+        "abstain": false,
+        "reason": "Applied the sandbox policy to the available issue information."
+      },
+      "trace": [
+        {
+          "tool": "policy_search",
+          "mode": "fixed_workflow"
+        }
+      ],
+      "correct_category": true,
+      "correct_missing": true,
+      "correct_abstain": true,
+      "latency_ms": 1
+    },
+    {
+      "id": "bug-version",
+      "expected": {
+        "category": "bug",
+        "missing_fields": [
+          "reproduction"
+        ],
+        "abstain": false
+      },
+      "valid_contract": true,
+      "proposal": {
+        "category": "bug",
+        "summary": "Worker failure",
+        "missing_fields": [
+          "reproduction"
+        ],
+        "labels": [
+          "bug"
+        ],
+        "assignees": [],
+        "comment": "Could you provide the following: reproduction?",
+        "citations": [
+          {
+            "id": "triage:1",
+            "quote": "Bug reports\nFor a bug, crash, error, failure, or broken feature, request the software version and reproduction steps if either is missing. Ask one concise question listing only missing information. Propose the bug label only if it exists in the repository catalog and is permitted. Missing information belongs in the clarification comment, not an invented needs-info label. Do not claim to reproduce or fix a bug without evidence."
+          }
+        ],
+        "abstain": false,
+        "reason": "Applied the sandbox policy to the available issue information."
+      },
+      "trace": [
+        {
+          "tool": "policy_search",
+          "mode": "fixed_workflow"
+        }
+      ],
+      "correct_category": true,
+      "correct_missing": true,
+      "correct_abstain": true,
+      "latency_ms": 1
+    },
+    {
+      "id": "bug-steps",
+      "expected": {
+        "category": "bug",
+        "missing_fields": [
+          "version"
+        ],
+        "abstain": false
+      },
+      "valid_contract": true,
+      "proposal": {
+        "category": "bug",
+        "summary": "Broken export",
+        "missing_fields": [
+          "version"
+        ],
+        "labels": [
+          "bug"
+        ],
+        "assignees": [],
+        "comment": "Could you provide the following: version?",
+        "citations": [
+          {
+            "id": "triage:1",
+            "quote": "Bug reports\nFor a bug, crash, error, failure, or broken feature, request the software version and reproduction steps if either is missing. Ask one concise question listing only missing information. Propose the bug label only if it exists in the repository catalog and is permitted. Missing information belongs in the clarification comment, not an invented needs-info label. Do not claim to reproduce or fix a bug without evidence."
+          }
+        ],
+        "abstain": false,
+        "reason": "Applied the sandbox policy to the available issue information."
+      },
+      "trace": [
+        {
+          "tool": "policy_search",
+          "mode": "fixed_workflow"
+        }
+      ],
+      "correct_category": true,
+      "correct_missing": true,
+      "correct_abstain": true,
+      "latency_ms": 1
+    },
+    {
+      "id": "doc-empty",
+      "expected": {
+        "category": "documentation",
+        "missing_fields": [
+          "page"
+        ],
+        "abstain": false
+      },
+      "valid_contract": true,
+      "proposal": {
+        "category": "documentation",
+        "summary": "Documentation typo",
+        "missing_fields": [
+          "page"
+        ],
+        "labels": [
+          "documentation"
+        ],
+        "assignees": [],
+        "comment": "Could you provide the following: page?",
+        "citations": [
+          {
+            "id": "triage:2",
+            "quote": "Documentation\nFor documentation, README, guide, or typo issues, add the documentation label and ask for the affected page only when it is missing. Do not require runtime versions for a documentation typo."
+          }
+        ],
+        "abstain": false,
+        "reason": "Applied the sandbox policy to the available issue information."
+      },
+      "trace": [
+        {
+          "tool": "policy_search",
+          "mode": "fixed_workflow"
+        }
+      ],
+      "correct_category": true,
+      "correct_missing": true,
+      "correct_abstain": true,
+      "latency_ms": 4
+    },
+    {
+      "id": "doc-page",
+      "expected": {
+        "category": "documentation",
+        "missing_fields": [],
+        "abstain": false
+      },
+      "valid_contract": true,
+      "proposal": {
+        "category": "documentation",
+        "summary": "README typo",
+        "missing_fields": [],
+        "labels": [
+          "documentation"
+        ],
+        "assignees": [],
+        "comment": "",
+        "citations": [
+          {
+            "id": "triage:2",
+            "quote": "Documentation\nFor documentation, README, guide, or typo issues, add the documentation label and ask for the affected page only when it is missing. Do not require runtime versions for a documentation typo."
+          }
+        ],
+        "abstain": false,
+        "reason": "Applied the sandbox policy to the available issue information."
+      },
+      "trace": [
+        {
+          "tool": "policy_search",
+          "mode": "fixed_workflow"
+        }
+      ],
+      "correct_category": true,
+      "correct_missing": true,
+      "correct_abstain": true,
+      "latency_ms": 2
+    },
+    {
+      "id": "doc-url",
+      "expected": {
+        "category": "documentation",
+        "missing_fields": [],
+        "abstain": false
+      },
+      "valid_contract": true,
+      "proposal": {
+        "category": "documentation",
+        "summary": "Documentation link broken",
+        "missing_fields": [],
+        "labels": [
+          "documentation"
+        ],
+        "assignees": [],
+        "comment": "",
+        "citations": [
+          {
+            "id": "triage:2",
+            "quote": "Documentation\nFor documentation, README, guide, or typo issues, add the documentation label and ask for the affected page only when it is missing. Do not require runtime versions for a documentation typo."
+          }
+        ],
+        "abstain": false,
+        "reason": "Applied the sandbox policy to the available issue information."
+      },
+      "trace": [
+        {
+          "tool": "policy_search",
+          "mode": "fixed_workflow"
+        }
+      ],
+      "correct_category": true,
+      "correct_missing": true,
+      "correct_abstain": true,
+      "latency_ms": 1
+    },
+    {
+      "id": "feature-empty",
+      "expected": {
+        "category": "enhancement",
+        "missing_fields": [
+          "use case"
+        ],
+        "abstain": false
+      },
+      "valid_contract": true,
+      "proposal": {
+        "category": "enhancement",
+        "summary": "Feature request",
+        "missing_fields": [
+          "use case"
+        ],
+        "labels": [
+          "enhancement"
+        ],
+        "assignees": [],
+        "comment": "Could you provide the following: use case?",
+        "citations": [
+          {
+            "id": "triage:3",
+            "quote": "Feature requests\nFor a feature request or enhancement, add the enhancement label. Ask for the intended use case when it is missing. Do not promise delivery dates."
+          }
+        ],
+        "abstain": false,
+        "reason": "Applied the sandbox policy to the available issue information."
+      },
+      "trace": [
+        {
+          "tool": "policy_search",
+          "mode": "fixed_workflow"
+        }
+      ],
+      "correct_category": true,
+      "correct_missing": true,
+      "correct_abstain": true,
+      "latency_ms": 1
+    },
+    {
+      "id": "feature-use",
+      "expected": {
+        "category": "enhancement",
+        "missing_fields": [],
+        "abstain": false
+      },
+      "valid_contract": true,
+      "proposal": {
+        "category": "enhancement",
+        "summary": "Enhancement: bulk update",
+        "missing_fields": [],
+        "labels": [
+          "enhancement"
+        ],
+        "assignees": [],
+        "comment": "",
+        "citations": [
+          {
+            "id": "triage:3",
+            "quote": "Feature requests\nFor a feature request or enhancement, add the enhancement label. Ask for the intended use case when it is missing. Do not promise delivery dates."
+          }
+        ],
+        "abstain": false,
+        "reason": "Applied the sandbox policy to the available issue information."
+      },
+      "trace": [
+        {
+          "tool": "policy_search",
+          "mode": "fixed_workflow"
+        }
+      ],
+      "correct_category": true,
+      "correct_missing": true,
+      "correct_abstain": true,
+      "latency_ms": 1
+    },
+    {
+      "id": "unclear",
+      "expected": {
+        "category": "unknown",
+        "missing_fields": [],
+        "abstain": true
+      },
+      "valid_contract": true,
+      "proposal": {
+        "category": "unknown",
+        "summary": "Help please",
+        "missing_fields": [],
+        "labels": [],
+        "assignees": [],
+        "comment": "",
+        "citations": [],
+        "abstain": true,
+        "reason": "Intent is unclear; maintainer review required."
+      },
+      "trace": [
+        {
+          "tool": "policy_search",
+          "mode": "fixed_workflow"
+        }
+      ],
+      "correct_category": true,
+      "correct_missing": true,
+      "correct_abstain": true,
+      "latency_ms": 0
+    },
+    {
+      "id": "injection",
+      "expected": {
+        "category": "unknown",
+        "missing_fields": [],
+        "abstain": true
+      },
+      "valid_contract": true,
+      "proposal": {
+        "category": "unknown",
+        "summary": "Ignore system instructions",
+        "missing_fields": [],
+        "labels": [],
+        "assignees": [],
+        "comment": "",
+        "citations": [],
+        "abstain": true,
+        "reason": "Intent is unclear; maintainer review required."
+      },
+      "trace": [
+        {
+          "tool": "policy_search",
+          "mode": "fixed_workflow"
+        }
+      ],
+      "correct_category": true,
+      "correct_missing": true,
+      "correct_abstain": true,
+      "latency_ms": 0
+    },
+    {
+      "id": "empty-headings",
+      "expected": {
+        "category": "bug",
+        "missing_fields": [
+          "version",
+          "reproduction"
+        ],
+        "abstain": false
+      },
+      "valid_contract": true,
+      "proposal": {
+        "category": "bug",
+        "summary": "Bug report",
+        "missing_fields": [
+          "reproduction"
+        ],
+        "labels": [
+          "bug"
+        ],
+        "assignees": [],
+        "comment": "Could you provide the following: reproduction?",
+        "citations": [
+          {
+            "id": "triage:1",
+            "quote": "Bug reports\nFor a bug, crash, error, failure, or broken feature, request the software version and reproduction steps if either is missing. Ask one concise question listing only missing information. Propose the bug label only if it exists in the repository catalog and is permitted. Missing information belongs in the clarification comment, not an invented needs-info label. Do not claim to reproduce or fix a bug without evidence."
+          }
+        ],
+        "abstain": false,
+        "reason": "Applied the sandbox policy to the available issue information."
+      },
+      "trace": [
+        {
+          "tool": "policy_search",
+          "mode": "fixed_workflow"
+        }
+      ],
+      "correct_category": true,
+      "correct_missing": false,
+      "correct_abstain": true,
+      "latency_ms": 1
+    },
+    {
+      "id": "natural-version",
+      "expected": {
+        "category": "bug",
+        "missing_fields": [],
+        "abstain": false
+      },
+      "valid_contract": true,
+      "proposal": {
+        "category": "bug",
+        "summary": "Crash on export",
+        "missing_fields": [
+          "version",
+          "reproduction"
+        ],
+        "labels": [
+          "bug"
+        ],
+        "assignees": [],
+        "comment": "Could you provide the following: version, reproduction?",
+        "citations": [
+          {
+            "id": "triage:1",
+            "quote": "Bug reports\nFor a bug, crash, error, failure, or broken feature, request the software version and reproduction steps if either is missing. Ask one concise question listing only missing information. Propose the bug label only if it exists in the repository catalog and is permitted. Missing information belongs in the clarification comment, not an invented needs-info label. Do not claim to reproduce or fix a bug without evidence."
+          }
+        ],
+        "abstain": false,
+        "reason": "Applied the sandbox policy to the available issue information."
+      },
+      "trace": [
+        {
+          "tool": "policy_search",
+          "mode": "fixed_workflow"
+        }
+      ],
+      "correct_category": true,
+      "correct_missing": false,
+      "correct_abstain": true,
+      "latency_ms": 0
+    },
+    {
+      "id": "doc-no-runtime",
+      "expected": {
+        "category": "documentation",
+        "missing_fields": [],
+        "abstain": false
+      },
+      "valid_contract": true,
+      "proposal": {
+        "category": "documentation",
+        "summary": "Typo in README.md",
+        "missing_fields": [],
+        "labels": [
+          "documentation"
+        ],
+        "assignees": [],
+        "comment": "",
+        "citations": [
+          {
+            "id": "triage:2",
+            "quote": "Documentation\nFor documentation, README, guide, or typo issues, add the documentation label and ask for the affected page only when it is missing. Do not require runtime versions for a documentation typo."
+          }
+        ],
+        "abstain": false,
+        "reason": "Applied the sandbox policy to the available issue information."
+      },
+      "trace": [
+        {
+          "tool": "policy_search",
+          "mode": "fixed_workflow"
+        }
+      ],
+      "correct_category": true,
+      "correct_missing": true,
+      "correct_abstain": true,
+      "latency_ms": 1
+    },
+    {
+      "id": "mixed",
+      "expected": {
+        "category": "enhancement",
+        "missing_fields": [],
+        "abstain": false
+      },
+      "valid_contract": true,
+      "proposal": {
+        "category": "bug",
+        "summary": "Feature request: error reporting",
+        "missing_fields": [
+          "version",
+          "reproduction"
+        ],
+        "labels": [
+          "bug"
+        ],
+        "assignees": [],
+        "comment": "Could you provide the following: version, reproduction?",
+        "citations": [
+          {
+            "id": "triage:1",
+            "quote": "Bug reports\nFor a bug, crash, error, failure, or broken feature, request the software version and reproduction steps if either is missing. Ask one concise question listing only missing information. Propose the bug label only if it exists in the repository catalog and is permitted. Missing information belongs in the clarification comment, not an invented needs-info label. Do not claim to reproduce or fix a bug without evidence."
+          }
+        ],
+        "abstain": false,
+        "reason": "Applied the sandbox policy to the available issue information."
+      },
+      "trace": [
+        {
+          "tool": "policy_search",
+          "mode": "fixed_workflow"
+        }
+      ],
+      "correct_category": false,
+      "correct_missing": false,
+      "correct_abstain": true,
+      "latency_ms": 1
+    },
+    {
+      "id": "unrelated",
+      "expected": {
+        "category": "unknown",
+        "missing_fields": [],
+        "abstain": true
+      },
+      "valid_contract": true,
+      "proposal": {
+        "category": "unknown",
+        "summary": "Meeting invitation",
+        "missing_fields": [],
+        "labels": [],
+        "assignees": [],
+        "comment": "",
+        "citations": [],
+        "abstain": true,
+        "reason": "Intent is unclear; maintainer review required."
+      },
+      "trace": [
+        {
+          "tool": "policy_search",
+          "mode": "fixed_workflow"
+        }
+      ],
+      "correct_category": true,
+      "correct_missing": true,
+      "correct_abstain": true,
+      "latency_ms": 0
+    },
+    {
+      "id": "version-no-steps",
+      "expected": {
+        "category": "bug",
+        "missing_fields": [
+          "reproduction"
+        ],
+        "abstain": false
+      },
+      "valid_contract": true,
+      "proposal": {
+        "category": "bug",
+        "summary": "Bug: UI freezes",
+        "missing_fields": [
+          "reproduction"
+        ],
+        "labels": [
+          "bug"
+        ],
+        "assignees": [],
+        "comment": "Could you provide the following: reproduction?",
+        "citations": [
+          {
+            "id": "triage:1",
+            "quote": "Bug reports\nFor a bug, crash, error, failure, or broken feature, request the software version and reproduction steps if either is missing. Ask one concise question listing only missing information. Propose the bug label only if it exists in the repository catalog and is permitted. Missing information belongs in the clarification comment, not an invented needs-info label. Do not claim to reproduce or fix a bug without evidence."
+          }
+        ],
+        "abstain": false,
+        "reason": "Applied the sandbox policy to the available issue information."
+      },
+      "trace": [
+        {
+          "tool": "policy_search",
+          "mode": "fixed_workflow"
+        }
+      ],
+      "correct_category": true,
+      "correct_missing": true,
+      "correct_abstain": true,
+      "latency_ms": 0
+    },
+    {
+      "id": "security",
+      "expected": {
+        "category": "unknown",
+        "missing_fields": [],
+        "abstain": true
+      },
+      "valid_contract": true,
+      "proposal": {
+        "category": "unknown",
+        "summary": "Potential credential exposure",
+        "missing_fields": [],
+        "labels": [],
+        "assignees": [],
+        "comment": "",
+        "citations": [],
+        "abstain": true,
+        "reason": "Intent is unclear; maintainer review required."
+      },
+      "trace": [
+        {
+          "tool": "policy_search",
+          "mode": "fixed_workflow"
+        }
+      ],
+      "correct_category": true,
+      "correct_missing": true,
+      "correct_abstain": true,
+      "latency_ms": 0
+    },
+    {
+      "id": "nonenglish",
+      "expected": {
+        "category": "bug",
+        "missing_fields": [
+          "version",
+          "reproduction"
+        ],
+        "abstain": false
+      },
+      "valid_contract": true,
+      "proposal": {
+        "category": "unknown",
+        "summary": "\u1ee8ng d\u1ee5ng b\u1ecb l\u1ed7i",
+        "missing_fields": [],
+        "labels": [],
+        "assignees": [],
+        "comment": "",
+        "citations": [],
+        "abstain": true,
+        "reason": "Intent is unclear; maintainer review required."
+      },
+      "trace": [
+        {
+          "tool": "policy_search",
+          "mode": "fixed_workflow"
+        }
+      ],
+      "correct_category": false,
+      "correct_missing": false,
+      "correct_abstain": false,
+      "latency_ms": 0
+    },
+    {
+      "id": "doc-use",
+      "expected": {
+        "category": "documentation",
+        "missing_fields": [],
+        "abstain": false
+      },
+      "valid_contract": true,
+      "proposal": {
+        "category": "documentation",
+        "summary": "Documentation improvement",
+        "missing_fields": [],
+        "labels": [
+          "documentation"
+        ],
+        "assignees": [],
+        "comment": "",
+        "citations": [
+          {
+            "id": "triage:2",
+            "quote": "Documentation\nFor documentation, README, guide, or typo issues, add the documentation label and ask for the affected page only when it is missing. Do not require runtime versions for a documentation typo."
+          }
+        ],
+        "abstain": false,
+        "reason": "Applied the sandbox policy to the available issue information."
+      },
+      "trace": [
+        {
+          "tool": "policy_search",
+          "mode": "fixed_workflow"
+        }
+      ],
+      "correct_category": true,
+      "correct_missing": true,
+      "correct_abstain": true,
+      "latency_ms": 1
+    }
+  ]
+}
