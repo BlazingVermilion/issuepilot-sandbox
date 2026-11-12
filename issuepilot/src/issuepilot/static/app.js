@@ -11,9 +11,10 @@ let workspace = null,
   dirty = false,
   pendingApproval = null;
 const tabs = ["overview", "inbox", "review", "activity", "repository"];
-const attention = ["STALE", "FAILED", "UNCERTAIN"];
+const attention = ["STALE", "FAILED", "UNCERTAIN", "BLOCKED"];
 const processing = [
   "QUEUED",
+  "RESUME_QUEUED",
   "PROCESSING",
   "APPROVED",
   "EXECUTING",
@@ -21,6 +22,8 @@ const processing = [
 ];
 const names = {
   QUEUED: "Queued",
+  BLOCKED: "Write rejected",
+  RESUME_QUEUED: "Recovery queued",
   PROCESSING: "Investigating",
   REVIEW: "Awaiting review",
   APPROVED: "Approved",
@@ -143,6 +146,10 @@ async function api(path, method = "GET", body) {
   const data = await response.json();
   if (epoch !== session)
     throw new DOMException("Session changed", "AbortError");
+  if (response.status === 401) {
+    clearSession();
+    throw Error("Session credentials are no longer valid. Connect again.");
+  }
   if (!response.ok)
     throw Error(
       typeof data.detail === "string"
@@ -247,6 +254,9 @@ function renderSettings() {
   $("runtime").textContent = workspace.mode + " / " + workspace.engine;
   $("identity").textContent = workspace.reviewer;
   $("disconnect").hidden = false;
+  $("login-panel").hidden = true;
+  $("session-heading").hidden = false;
+  $("token").value = "";
   $("connection-summary").hidden = false;
   $("connection-summary").textContent =
     "Connected as " + workspace.reviewer + " · " + workspace.repo;
@@ -343,7 +353,10 @@ async function selectCase(id) {
 function renderCase() {
   if (!active) return;
   const c = active,
-    p = c.proposal.value;
+    p =
+      c.status === "REVIEW"
+        ? c.proposal.value
+        : c.decision.proposal || c.proposal.value;
   for (const id of ["review-empty", "activity-empty"]) $(id).hidden = true;
   for (const id of ["review-content", "activity-content"]) $(id).hidden = false;
   $("case-status").replaceWith(
@@ -367,6 +380,10 @@ function renderCase() {
     REVIEW: p?.abstain
       ? "The engine abstained. No executable actions are proposed. Reject and investigate manually."
       : "Inspect the source and cited policy. You may edit the comment and permitted labels before approval.",
+    BLOCKED:
+      "GitHub rejected a write. Fix permissions or configuration, then recover remaining work.",
+    RESUME_QUEUED:
+      "Recovery is queued. Completed actions will not be sent again.",
     QUEUED: "Queued for the worker. This page refreshes while processing.",
     PROCESSING: "The worker is investigating. No action has been approved.",
     APPROVED:
@@ -379,7 +396,7 @@ function renderCase() {
     STALE:
       "The source, policy or label catalog changed. Generate a fresh proposal and review it again.",
     FAILED:
-      "Processing failed. Check worker logs and configuration, then generate a fresh proposal.",
+      "Processing failed. Fix the cause, then use recovery if an action ledger exists; otherwise generate a fresh proposal.",
     UNCERTAIN:
       "An external write has an uncertain result. Check existing actions; reconciliation never blindly retries a write.",
     DECLINED:
@@ -485,12 +502,22 @@ function renderCase() {
   if (!c.proposal.trace?.length)
     $("tool-trace").append(node("p", "No tool calls recorded.", "hint"));
   $("technical").textContent = JSON.stringify(
-    { proposal: c.proposal, policy_hash: c.policy_hash },
+    {
+      original_proposal: c.proposal,
+      approved_decision: c.decision,
+      policy_hash: c.policy_hash,
+    },
     null,
     2,
   );
-  $("regenerate").hidden = !["STALE", "FAILED", "DECLINED"].includes(c.status);
-  $("reconcile").hidden = c.status !== "UNCERTAIN";
+  const hasLedger = c.actions.some((a) => a.version === c.version);
+  $("regenerate").hidden =
+    hasLedger || !["STALE", "FAILED", "DECLINED"].includes(c.status);
+  $("recover").hidden =
+    !hasLedger ||
+    !["STALE", "FAILED", "BLOCKED", "UNCERTAIN"].includes(c.status);
+  $("recover").disabled = busy;
+  $("reconcile").hidden = !["UNCERTAIN", "BLOCKED"].includes(c.status);
   renderActivity();
 }
 function renderActivity() {
@@ -500,6 +527,21 @@ function renderActivity() {
   $("decision-summary").textContent = c.decision.reviewer
     ? `${c.decision.approved ? "Approved" : "Rejected"} by ${c.decision.reviewer} · version ${c.decision.version}`
     : "No human decision recorded.";
+  $("approved-summary").replaceChildren();
+  if (c.decision.proposal) {
+    const p = c.decision.proposal;
+    $("approved-summary").append(
+      node("strong", "Approved payload"),
+      node("p", "Labels: " + (p.labels.join(", ") || "none")),
+      node("p", p.comment || "No comment approved."),
+    );
+    const details = node("details");
+    details.append(
+      node("summary", "Compare original model proposal"),
+      node("pre", JSON.stringify(c.proposal.value, null, 2)),
+    );
+    $("approved-summary").append(details);
+  }
   $("action-results").replaceChildren();
   for (const a of c.actions) {
     const card = node("div", undefined, "action-result"),
@@ -524,8 +566,9 @@ function renderActivity() {
     $("action-results").append(
       node("p", "No external actions recorded.", "hint"),
     );
+  const scrollTop = $("timeline-scroll").scrollTop;
   $("timeline").replaceChildren();
-  for (const e of c.events) {
+  for (const e of [...c.events].reverse()) {
     const li = node("li");
     li.append(
       node("strong", e.kind.toLowerCase().replaceAll("_", " ")),
@@ -549,41 +592,84 @@ function renderActivity() {
     li.append(details);
     $("timeline").append(li);
   }
+  $("timeline-scroll").scrollTop = scrollTop;
 }
 $("comment").oninput = () => {
   dirty = true;
 };
 $("search").oninput = renderInbox;
 $("filter").onchange = renderInbox;
+// sessionStorage survives a refresh but is scoped to this browser tab.
+// Never store the reviewer token in localStorage or include it in URLs.
+const sessionKey = "issuepilot.reviewer-session";
+function clearSession() {
+  recoveryTarget = null;
+  session++;
+  token = "";
+  workspace = null;
+  active = null;
+  cases = [];
+  currentCatalog = null;
+  dirty = false;
+  pendingApproval = null;
+  try {
+    sessionStorage.removeItem(sessionKey);
+  } catch {}
+  $("token").value = "";
+  $("login-panel").hidden = false;
+  $("session-heading").hidden = true;
+  $("connection-summary").hidden = true;
+  $("disconnect").hidden = true;
+  $("identity").textContent = "Not connected";
+  $("repo-name").textContent = "Connect your workspace";
+  $("review-content").hidden = true;
+  $("activity-content").hidden = true;
+  $("review-empty").hidden = false;
+  $("activity-empty").hidden = false;
+  $("demo-box").hidden = true;
+  $("new-github").hidden = true;
+  $("repo-settings").replaceChildren(
+    node("p", "Connect to inspect configuration."),
+  );
+  $("catalog-rows").replaceChildren();
+  $("confirm").close();
+  $("recovery-dialog").close();
+  renderInbox();
+  overview();
+  tab("overview");
+}
+async function connect(value, restoring = false) {
+  session++;
+  token = value;
+  workspace = await api("/workspace");
+  try {
+    sessionStorage.setItem(sessionKey, token);
+  } catch {
+    tell("Connected for this page only: tab storage is unavailable.");
+  }
+  renderSettings();
+  await loadCases();
+  if (!restoring)
+    tell("Connected. Your session survives refreshes in this tab.");
+}
 $("connect-form").onsubmit = async (e) => {
   e.preventDefault();
-  session++;
-  token = $("token").value.trim();
   try {
-    workspace = await api("/workspace");
-    renderSettings();
-    await loadCases();
-    tell("Connected. Open Inbox to select a case.");
+    await connect($("token").value.trim());
   } catch (e) {
-    workspace = null;
-    token = "";
+    clearSession();
     error(e);
   }
 };
 $("disconnect").onclick = () => {
-  session++;
-  token = "";
-  workspace = null;
-  cases = [];
-  active = null;
-  currentCatalog = null;
-  dirty = false;
-  $("token").value = "";
-  location.reload();
+  clearSession();
+  tell("Disconnected. Enter your reviewer token to start a new session.");
 };
 $("refresh").onclick = async () => {
   try {
-    if (!workspace) throw Error("Connect as a reviewer first.");
+    if (!token) throw Error("Connect as a reviewer first.");
+    workspace = await api("/workspace");
+    renderSettings();
     await loadCases();
     if (active && !dirty) {
       active = await api("/cases/" + active.id);
@@ -710,7 +796,8 @@ setInterval(async () => {
     dirty ||
     !active ||
     !processing.includes(active.status) ||
-    $("confirm").open
+    $("confirm").open ||
+    $("recovery-dialog").open
   )
     return;
   try {
@@ -732,3 +819,73 @@ fetch("/health")
   });
 tab(location.hash.slice(1));
 renderInbox();
+
+// Recover only the displayed version. A second click cannot enqueue it twice.
+let recoveryTarget = null;
+$("recover").onclick = () => {
+  if (!active || busy) return;
+  recoveryTarget = { id: active.id, version: active.version };
+  $("recovery-target").textContent =
+    workspace.repo + " · #" + active.number + " · v" + active.version;
+  $("recovery-actions").replaceChildren(
+    ...active.actions
+      .filter((a) => a.version === active.version)
+      .map((a) =>
+        node(
+          "p",
+          a.kind +
+            " — " +
+            a.status +
+            ": " +
+            (a.kind === "comment" ? a.payload.body : JSON.stringify(a.payload)),
+        ),
+      ),
+  );
+  $("ack-unknown").checked = false;
+  $("recovery-mode").value = "resume";
+  $("recovery-dialog").returnValue = "";
+  $("recovery-dialog").showModal();
+};
+$("recovery-dialog").addEventListener("close", async () => {
+  if ($("recovery-dialog").returnValue !== "recover" || !recoveryTarget || busy)
+    return;
+  const target = recoveryTarget;
+  recoveryTarget = null;
+  busy = true;
+  try {
+    const result = await api("/cases/" + target.id + "/recover", "POST", {
+      version: target.version,
+      mode: $("recovery-mode").value,
+      acknowledge_unknown: $("ack-unknown").checked,
+    });
+    active = await api("/cases/" + target.id);
+    dirty = false;
+    await loadCases();
+    tell(
+      "Recovery recorded: " + result.state + ". See Activity for the outcome.",
+    );
+  } catch (e) {
+    error(e);
+  } finally {
+    busy = false;
+    if (active) renderCase();
+  }
+});
+(async () => {
+  let saved = null;
+  try {
+    saved = sessionStorage.getItem(sessionKey);
+  } catch {}
+  if (!saved) return;
+  try {
+    await connect(saved, true);
+  } catch (e) {
+    // A transient server outage must not erase a valid tab session.
+    if (token)
+      tell(
+        "Session retained, but the server is unavailable. Use Refresh to reconnect.",
+        true,
+      );
+    else error(e);
+  }
+})();

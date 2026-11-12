@@ -25,7 +25,8 @@ reject either suggestion before it becomes a GitHub comment.
 - A synthetic demo that requires no GitHub credential or LLM to exercise the full flow.
 - A configurable Ollama/LangGraph agent with policy retrieval and durable interruption.
 - Signed GitHub intake directly or through an importable n8n workflow.
-- PostgreSQL cases/checkpoints and an action ledger that stops ambiguous retries.
+- PostgreSQL cases/checkpoints and a recoverable action ledger: preserve completed writes, reconcile unknown outcomes, then explicitly resume remaining actions.
+- Tab-scoped reviewer sessions, readable typography and a bounded, newest-first audit timeline.
 - Snowflake event export, repeatable sync/readback and maintainer-decision SQL.
 - Docker Compose, test CI, GHCR release and explicit digest-based server deployment.
 
@@ -53,7 +54,7 @@ open **Inbox** to create a demo issue, inspect **Review**, then verify **Activit
 
 | Area | Implemented | Verified in this delivery |
 |---|---|---|
-| FastAPI + review UI + restricted executor | Yes | API/worker tests with simulated GitHub; five-tab demo workflow and light/dark themes checked in Chrome. |
+| FastAPI + review UI + restricted executor | Yes | API/worker tests with simulated GitHub; current UI changes require browser acceptance. |
 | Duplicate events, approval, stale proposals, ambiguous writes | Yes | Local automated tests. |
 | LangGraph durable interrupt and resume | Yes | SQLite checkpoint closed/reopened in a test. |
 | Ollama tool calling + lexical RAG | Yes | Orchestration fake-model test; actual model-quality run pending. |
@@ -62,11 +63,12 @@ open **Inbox** to create a demo issue, inspect **Review**, then verify **Activit
 | Snowflake sync and readback | Yes | Sanitized event contract tested; actual account sync pending. |
 | Docker, CI, release and deploy workflows | Yes | Source supplied; container/host/GitHub Actions execution pending. |
 
-The 0.2.0 update passed 32 automated tests and a local browser walkthrough with
-SQLite and the rules engine. The walkthrough covered demo intake, review, approval,
-completed actions, label permissions and both themes. Live GitHub label reads/writes,
-Ollama, n8n, PostgreSQL, Snowflake and hosted deployment were not revalidated in this
-update. Use the runbook to verify those integrations in your environment.
+The 0.3.0 update passed 47 automated tests, including partial execution, rejected
+writes, lost responses, source changes, repository isolation and recovery of older
+UNKNOWN actions. Python lint/format and JavaScript syntax checks passed. Browser
+verification was attempted but the local preview was unreachable; session persistence
+and the new layout still need the runbook's browser acceptance check. No live GitHub,
+PostgreSQL, Ollama, n8n or Snowflake acceptance was rerun for this update.
 
 - [ ] Run PostgreSQL and container CI successfully in the new repository.
 - [ ] Import n8n; show ACCEPTED then DUPLICATE for the same signed delivery.

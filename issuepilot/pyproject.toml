@@ -1,6 +1,6 @@
 [project]
 name = "issuepilot"
-version = "0.2.0"
+version = "0.3.0"
 description = "Evidence-grounded GitHub issue triage with human approval"
 requires-python = ">=3.12,<3.14"
 dependencies = [

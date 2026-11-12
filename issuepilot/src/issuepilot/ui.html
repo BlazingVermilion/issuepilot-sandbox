@@ -82,7 +82,7 @@
           <span class="subtle">No approval, no GitHub write.</span>
         </div>
         <div class="sidebar-bottom">
-          <span id="version">v0.2.0</span
+          <span id="version">v0.3.0</span
           ><button id="theme" class="theme" aria-label="Switch to dark mode">
             ◐ <span>Dark mode</span>
           </button>
@@ -128,32 +128,36 @@
             </div>
             <div class="overview-grid">
               <article class="card connect-card">
-                <div class="card-heading">
-                  <span class="step-number">01</span>
-                  <h2>Connect as a reviewer</h2>
-                </div>
-                <p>
-                  Your token identifies who approves each action. Find it in
-                  <code>IP_REVIEWER_TOKENS</code> in your local
-                  <code>.env</code>.
-                </p>
-                <form id="connect-form">
-                  <label for="token">Reviewer token</label>
-                  <div class="input-action">
-                    <input
-                      id="token"
-                      type="password"
-                      autocomplete="off"
-                      placeholder="Paste your reviewer token"
-                      required
-                    /><button class="button primary" type="submit">
-                      Connect →
-                    </button>
+                <div id="login-panel">
+                  <div class="card-heading">
+                    <span class="step-number">01</span>
+                    <h2>Connect as a reviewer</h2>
                   </div>
-                </form>
-                <p class="hint">
-                  Kept in this tab's memory only. This is not your GitHub token.
-                </p>
+                  <p>
+                    Your token identifies who approves each action. Find it in
+                    <code>IP_REVIEWER_TOKENS</code> in your local
+                    <code>.env</code>.
+                  </p>
+                  <form id="connect-form">
+                    <label for="token">Reviewer token</label>
+                    <div class="input-action">
+                      <input
+                        id="token"
+                        type="password"
+                        autocomplete="off"
+                        placeholder="Paste your reviewer token"
+                        required
+                      /><button class="button primary" type="submit">
+                        Connect →
+                      </button>
+                    </div>
+                  </form>
+                  <p class="hint">
+                    Session stays in this tab across refreshes. Disconnect to
+                    sign out. This is not your GitHub token.
+                  </p>
+                </div>
+                <h2 id="session-heading" hidden>Connected workspace</h2>
                 <div
                   id="connection-summary"
                   class="inline-summary"
@@ -468,7 +472,9 @@ The API returns an error when I save a draft.</textarea
                     <h2>Execution trace</h2>
                     <div id="tool-trace"></div>
                     <div class="recovery-actions">
-                      <button id="regenerate" class="button quiet" hidden>
+                      <button id="recover" class="button primary" hidden>
+                        Recover interrupted work</button
+                      ><button id="regenerate" class="button quiet" hidden>
                         Generate a fresh proposal</button
                       ><button id="reconcile" class="button quiet" hidden>
                         Check uncertain writes</button
@@ -512,11 +518,23 @@ The API returns an error when I save a draft.</textarea
               <div class="card">
                 <h2 id="activity-title"></h2>
                 <p id="decision-summary"></p>
+                <div id="approved-summary" class="approved-summary"></div>
                 <div id="action-results" class="action-results"></div>
               </div>
-              <article class="card">
+              <article class="card timeline-card">
                 <h2>Audit timeline</h2>
-                <ol id="timeline" class="timeline"></ol>
+                <p class="hint">
+                  Newest first · scroll inside this panel for earlier events
+                </p>
+                <div
+                  id="timeline-scroll"
+                  class="timeline-scroll"
+                  tabindex="0"
+                  role="region"
+                  aria-label="Audit timeline"
+                >
+                  <ol id="timeline" class="timeline"></ol>
+                </div>
               </article>
             </div>
             <article class="card">
@@ -612,6 +630,46 @@ The API returns an error when I save a draft.</textarea
         </footer>
       </div>
     </div>
+    <dialog id="recovery-dialog">
+      <form method="dialog">
+        <h2>Recover interrupted work</h2>
+        <p id="recovery-target"></p>
+        <p>
+          Fix the connection or permissions first. Completed actions are
+          preserved. The backend checks GitHub again before queueing remaining
+          actions.
+        </p>
+        <div id="recovery-actions" class="recovery-preview"></div>
+        <label for="recovery-mode">Recovery option</label>
+        <select id="recovery-mode">
+          <option value="resume">Resume remaining approved actions</option>
+          <option value="regenerate">
+            Cancel remainder & generate a fresh proposal
+          </option>
+        </select>
+        <p class="hint">
+          Replanning preserves history and existing GitHub changes. Review the
+          new proposal carefully: it may suggest a similar comment.
+        </p>
+        <label class="acknowledgement"
+          ><input id="ack-unknown" type="checkbox" /> I inspected the GitHub
+          issue and accept the risk of a delayed or duplicate write when
+          retrying an unknown result. For replanning, I accept that an abandoned
+          request may still complete.</label
+        >
+        <p class="hint">
+          This acknowledgement is required only if an unknown result remains
+          after the backend checks GitHub. Cancellation never deletes an
+          existing GitHub comment.
+        </p>
+        <div class="decision-bar">
+          <button class="button quiet" value="cancel">Cancel</button
+          ><button class="button primary" value="recover">
+            Confirm recovery
+          </button>
+        </div>
+      </form>
+    </dialog>
     <dialog id="confirm">
       <form method="dialog">
         <span class="eyebrow">FINAL CHECK</span>

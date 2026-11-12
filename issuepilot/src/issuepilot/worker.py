@@ -60,7 +60,7 @@ class Worker:
                 select(Case)
                 .where(
                     Case.repo == self.settings.repo,
-                    Case.status.in_(["QUEUED", "APPROVED", "REJECTED"]),
+                    Case.status.in_(["QUEUED", "APPROVED", "REJECTED", "RESUME_QUEUED"]),
                 )
                 .order_by(Case.created_at)
                 .with_for_update(skip_locked=True)
@@ -78,6 +78,9 @@ class Worker:
             if state == "QUEUED":
                 case.status = "PROCESSING"
         try:
+            if state == "RESUME_QUEUED":
+                self.service.resume_actions(case_id)
+                return True
             policies = Policies(self.settings.policy_dir)
             graph = Analyst(self.settings, policies, self.recent).graph(self.checkpointer)
             if state == "QUEUED":
@@ -145,7 +148,7 @@ class Worker:
                 if case.version == version:
                     if case.status == "EXECUTING":
                         case.status = "UNCERTAIN"
-                    elif case.status not in {"UNCERTAIN", "STALE"}:
+                    elif case.status not in {"UNCERTAIN", "STALE", "BLOCKED"}:
                         case.status = "FAILED"
                     case.error = (
                         type(exc).__name__ + ": inspect worker diagnostics and configuration"

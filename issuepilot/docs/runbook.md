@@ -49,10 +49,9 @@ Edit the demo issue before approving the old proposal; reload the case. Old vers
 cannot be approved. The tests also cover an edit that arrives without a webhook and
 an edit after approval but before execution.
 
-A FAILED case can be regenerated after its read/model configuration is repaired.
-A STALE case requires a fresh proposal and review. An UNCERTAIN case must be reconciled
-using the console. Reconciliation only reads GitHub. If some actions remain unresolved,
-inspect the action ledger and GitHub manually; do not reset rows or blindly retry POSTs.
+A failed draft without an action ledger can be regenerated after repair. Cases with
+external actions use **Recover execution** instead. See the recovery instructions below;
+do not reset database rows or blindly retry POSTs.
 
 ## 3. Start n8n and import the workflow
 
@@ -160,7 +159,7 @@ resources or billing have been created by this package.
    `.venv`, runtime data and keys are not staged. Publish to the new repository.
 3. Check all CI jobs. PostgreSQL/checkpointer and Docker jobs must pass; a local unit
    test result alone does not establish that the containers work.
-4. Create a version tag after CI passes, e.g. `v0.2.0`. The release workflow runs CI
+4. Create a version tag after CI passes, e.g. `v0.3.0`. The release workflow runs CI
    again, then publishes a GHCR image with a source-commit label and provenance.
 5. Provision your chosen Linux host with Docker Compose. Place the source/configuration
    under `/opt/issuepilot`, generate its own `.env`, and create DNS names for app/webhook.
@@ -243,7 +242,7 @@ is configured, but actual Snowflake charges depend on your account and usage.
 - Complete the live acceptance checklist in README and attach sanitized evidence before
   calling the portfolio deployment finished.
 
-## Upgrading to 0.2.0 and using the new console
+## Upgrading to 0.3.0 and using the console
 
 Keep your existing `.env`, Compose project name, and PostgreSQL volume. Copy the
 updated source over the old checkout, including `src/issuepilot/static/` and
@@ -273,6 +272,55 @@ use **Generate a fresh proposal** and review again. Completed actions remain int
 5. **Activity**: inspect action results and the audit timeline. In live mode also
    inspect the real GitHub issue. External Snowflake/CI status is not inferred here.
 
-The bottom-left theme control switches light/dark. Only the theme preference is
-stored in the browser; the reviewer token stays in tab memory. Processing cases
+The bottom-left theme control switches light/dark. The theme uses localStorage; the reviewer token uses tab-scoped sessionStorage,
+so a page refresh retains the authenticated session. Disconnect clears it. Browser
+restore/duplicate-tab features may retain that storage: use Disconnect for explicit sign-out. Processing cases
 refresh automatically; review edits are preserved. Technical JSON is collapsed.
+
+## Recover an interrupted case
+
+1. Fix the cause first. For GitHub 403, confirm the fine-grained token includes this
+   repository and Issues read/write, and check expiry/organization approval. Preserve
+   existing credentials; do not paste them into logs or screenshots.
+2. After editing `.env`, apply it to both services:
+
+   ```powershell
+   docker compose up -d --build --force-recreate api worker
+   docker compose logs --tail 80 worker
+   ```
+
+3. Refresh the UI with Ctrl+Shift+R and reconnect if needed. Open **Inbox**, select the
+   affected issue, then **Review**. Open **Activity** to inspect the exact approved
+   payload and action results; compare with the actual GitHub issue.
+4. If no actions exist, use **Generate a fresh proposal** and review it again.
+   Otherwise use **Recover execution** and choose **Resume remaining actions**.
+5. Leave the uncertainty checkbox unchecked initially. Recovery reads GitHub before
+   retrying. Already observed actions are preserved; confirmed rejected actions can
+   resume after permission repair. Older v0.2 failures may have status UNKNOWN even
+   when their log showed 403. If recovery requires acknowledgement, inspect the issue
+   and logs, then explicitly acknowledge the potential delayed/duplicate write only
+   if you accept that risk. The system cannot prove absence from a lost response.
+6. Confirm recovery. Expect RESUME_QUEUED, then COMPLETED if remaining actions succeed.
+   No new LLM draft is needed for an unchanged approved proposal. If another error
+   occurs, repair it and use recovery again; prior DONE actions remain preserved.
+7. If the issue, catalog or policy changed, choose **Cancel remainder and regenerate**.
+   This keeps past actions, creates a new version and requires new approval. Inspect
+   the draft for redundant comments before approving. It does not undo GitHub writes.
+
+A proposal claiming no missing information can still be wrong. For the supplied bug
+example, the source has no software version. Recovery does not correct model reasoning;
+use a new reviewed proposal when its content needs changing.
+
+## Browser acceptance after upgrading
+
+- Connect once: Overview hides the token entry and shows the connected workspace.
+- Refresh the page: the same tab reconnects without entering the token again.
+- Disconnect, then refresh: token entry returns; the previous workspace is cleared.
+- Check light and dark themes, Review and Activity at your normal screen size.
+- Audit timeline is newest-first with a fixed-height internal scroll area; scrolling
+  within it should not force the entire page to grow with every new event.
+- A blocked case shows recovery choices and approved payload, with the original model
+  draft available separately. Confirm a resumed case does not duplicate a DONE comment.
+
+This release does not change the database schema. Keep `.env`, data, secrets, artifacts
+and Docker volumes. Do not run `docker compose down -v` during this upgrade.

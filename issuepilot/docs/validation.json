@@ -1,47 +1,24 @@
 {
-  "date": "2026-11-11",
-  "delivery_version": "0.2.0",
+  "date": "2026-11-12",
+  "delivery_version": "0.3.0",
   "python": "3.12.14",
   "executed": [
     {
-      "command": "uv run ruff check .",
+      "command": "ruff check .",
       "result": "PASSED"
     },
     {
-      "command": "uv run ruff format --check .",
+      "command": "ruff format --check .",
       "result": "PASSED"
     },
     {
-      "command": "uv run pytest -q --tb=short",
+      "command": "pytest -q --tb=short",
       "result": "PASSED",
-      "tests": 32
+      "tests": 47
     },
     {
-      "command": "uv run python scripts/evaluate.py --engine rules --out docs/baseline-results.json",
-      "result": "COMPLETED",
-      "cases": 20,
-      "metrics": {
-        "valid_contract": 1.0,
-        "correct_category": 0.9,
-        "correct_missing": 0.8,
-        "correct_abstain": 0.95
-      }
-    },
-    {
-      "command": "uv build --wheel",
+      "command": "node --check src/issuepilot/static/app.js",
       "result": "PASSED"
-    },
-    {
-      "command": "Chrome browser walkthrough: local SQLite + rules engine",
-      "result": "PASSED",
-      "checks": [
-        "Five workflow tabs",
-        "Light and dark themes",
-        "Synthetic intake to proposal",
-        "Human approval to completed comment and label actions",
-        "Repository catalog permissions",
-        "Explicit demo and rules evidence"
-      ]
     }
   ],
   "not_executed": [
@@ -53,11 +30,14 @@
     "Snowflake account sync and readback",
     "GitHub Actions release",
     "Remote HTTPS deployment",
-    "Mobile viewport acceptance"
+    "Mobile viewport acceptance",
+    "v0.3 browser acceptance: preview connection refused",
+    "v0.3 wheel build: offline build dependency hatchling unavailable"
   ],
   "constraints": [
-    "External integration credentials not configured for this update",
-    "Browser walkthrough uses synthetic demo data; no actual GitHub comment was sent"
+    "Recovery tests use simulated GitHub and SQLite; no actual GitHub writes were sent",
+    "Browser preview could not be reached; UI layout and session acceptance must be run locally",
+    "Prior rules evaluation results are retained, not rerun for this update"
   ],
   "packages": {
     "fastapi": "0.162.2",

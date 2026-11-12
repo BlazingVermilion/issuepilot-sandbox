@@ -2,6 +2,7 @@
 
 import base64
 import secrets
+from typing import Literal
 import httpx
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -22,6 +23,12 @@ class Review(BaseModel):
     version: int
     approved: bool
     edited: Proposal | None = None
+
+
+class Recovery(BaseModel):
+    version: int
+    mode: Literal["resume", "regenerate"] = "resume"
+    acknowledge_unknown: bool = False
 
 
 class Envelope(BaseModel):
@@ -50,7 +57,7 @@ def create_app(settings=None):
         github.close()
         engine.dispose()
 
-    app = FastAPI(title="IssuePilot", version="0.2.0", lifespan=lifespan)
+    app = FastAPI(title="IssuePilot", version="0.3.0", lifespan=lifespan)
     app.state.sessions, app.state.service = sessions, service
     app.mount("/static", StaticFiles(directory=Path(__file__).with_name("static")), name="static")
 
@@ -97,7 +104,7 @@ def create_app(settings=None):
             "status": "ok",
             "mode": settings.mode,
             "engine": settings.engine,
-            "version": "0.2.0",
+            "version": "0.3.0",
         }
 
     @app.get("/", response_class=HTMLResponse)
@@ -137,7 +144,7 @@ def create_app(settings=None):
             "engine": settings.engine,
             "model": settings.model if settings.engine == "ollama" else None,
             "writes_enabled": settings.writes_enabled,
-            "version": "0.2.0",
+            "version": "0.3.0",
             "database": engine.dialect.name,
             "repo_url": f"https://github.com/{settings.repo}" if settings.mode == "live" else None,
         }
@@ -194,7 +201,14 @@ def create_app(settings=None):
                 "policy_hash": case.policy_hash,
                 "events": [{"kind": e.kind, "data": e.data, "at": e.created_at} for e in events],
                 "actions": [
-                    {"kind": a.kind, "status": a.status, "payload": a.payload, "version": a.version}
+                    {
+                        "id": a.id,
+                        "kind": a.kind,
+                        "status": a.status,
+                        "payload": a.payload,
+                        "version": a.version,
+                        "result": a.result,
+                    }
                     for a in actions
                 ],
             }
@@ -213,6 +227,12 @@ def create_app(settings=None):
     def regenerate(case_id: str, who=Depends(reviewer)):
         service.requeue(case_id)
         return {"state": "QUEUED"}
+
+    @app.post("/cases/{case_id}/recover")
+    def recover(case_id: str, body: Recovery, who=Depends(reviewer)):
+        return service.recover_actions(
+            case_id, body.version, who, body.mode, body.acknowledge_unknown
+        )
 
     @app.post("/cases/{case_id}/reconcile")
     def reconcile(case_id: str, who=Depends(reviewer)):
@@ -244,7 +264,19 @@ def create_app(settings=None):
                 case = Case(repo=settings.repo, number=body.number)
                 session.add(case)
                 session.flush()
-            elif case.status not in {"APPROVED", "EXECUTING", "UNCERTAIN"}:
+            elif case.status not in {
+                "APPROVED",
+                "EXECUTING",
+                "UNCERTAIN",
+                "BLOCKED",
+                "RESUME_QUEUED",
+            } and not session.scalar(
+                select(Action.id).where(
+                    Action.case_id == case.id,
+                    Action.version == case.version,
+                    Action.status.in_(["PENDING", "SENDING", "UNKNOWN", "REJECTED"]),
+                )
+            ):
                 case.status, case.version = "QUEUED", case.version + 1
             event(session, case, "DEMO_EDIT", reviewer=who)
             return {"case_id": case.id}

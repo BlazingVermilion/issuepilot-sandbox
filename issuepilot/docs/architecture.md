@@ -1,6 +1,6 @@
 # IssuePilot architecture contract
 
-Status: implementation v0.2.0, accepted project direction on 2026-11-10.
+Status: implementation v0.3.0, accepted project direction on 2026-11-10.
 This document is the source of truth. Change it with code when scope changes.
 Do not silently remove n8n, LangGraph, RAG, Snowflake, deployment, or evaluation.
 
@@ -77,7 +77,7 @@ arrival order. A source edit during drafting invalidates that draft by version c
 Normal state progression: QUEUED -> PROCESSING -> REVIEW -> APPROVED -> EXECUTING
 -> COMPLETED. Rejection resumes the graph into DECLINED. Source or policy changes
 lead to STALE. Read/model failures lead to FAILED. Ambiguous external writes lead
-to UNCERTAIN and require read-only reconciliation or operator investigation.
+to UNCERTAIN. Definitively rejected writes become BLOCKED. Both expose explicit recovery after the cause is repaired.
 
 Every proposal has an issue fingerprint, policy hash, checkpoint thread ID,
 structured value, retrieved evidence and tool trace. Approval includes the exact
@@ -168,6 +168,38 @@ supported by the source. The rules baseline remains intentionally limited.
 The console separates Overview, Inbox, Review, Activity and Repository. It displays
 recorded engine evidence; a configured model name is not evidence of an LLM call.
 Review approval is bound to the displayed case/version. Theme preference can persist;
-bearer tokens cannot. Case reads, recovery and decisions are scoped to the configured
+reviewer tokens persist only in sessionStorage for the current tab session. Case reads, recovery and decisions are scoped to the configured
 repository. The console does not claim that n8n, Snowflake or deployment succeeded
 merely because a local case completed.
+
+## Recovery contract (0.3.0)
+
+Recovery is a separate authenticated operation bound to case ID and version. It never
+changes repository scope or bypasses approval. Existing databases need no migration.
+
+- Read/model failures without external actions: repair the cause, generate a fresh
+  proposal and approve it. Durable worker restart recovers interrupted drafting.
+- Rejected external actions (including HTTP 403): retain the decision and ledger;
+  repair access, then request recovery. Completed actions are preserved.
+- Unknown results (timeout, worker crash, server error or legacy UNKNOWN rows): read
+  GitHub comments by action marker and inspect labels/assignees. Observed effects
+  are marked DONE; this proves current state, not who performed a label change.
+- If a remaining UNKNOWN/SENDING action cannot be confirmed, require explicit
+  acknowledgement before reattempting. Absence during readback cannot rule out a
+  delayed request completing later. Exactly-once comment delivery is not promised.
+- Resume checks approved version, repository, live-write flag, current source,
+  catalog and policy. The worker rechecks before execution. It preserves action IDs
+  and markers, skips DONE actions, and retries only remaining PENDING actions.
+- Source/policy changes require cancelling the remainder and generating a fresh
+  proposal. DONE actions are not undone. Abandoned unknown actions remain in history;
+  a new proposal can repeat an earlier comment, so the reviewer must inspect it.
+- Webhooks and demo edits cannot overwrite a failed version with unresolved actions.
+- Database or transport outages require restoring that service first. Failed intake
+  can be redelivered; this is not an automatic repair of external infrastructure.
+
+Reviewer sessions use sessionStorage, not localStorage. Refresh retains the session;
+Disconnect clears it and the visible workspace. HTTP 401 also clears it. A transient
+network outage retains the session for reconnection. A normal closed-tab session ends,
+but browser restore/duplicate-tab features may preserve sessionStorage: use Disconnect
+for explicit sign-out. This clears the browser credential, not the server token itself.
+The UI shows the approved payload after review and keeps the original draft separately.
