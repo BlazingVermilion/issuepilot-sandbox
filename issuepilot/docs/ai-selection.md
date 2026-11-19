@@ -1,0 +1,69 @@
+# Serving profile: IssuePilot v0.5
+
+**Ship one candidate for human-reviewed triage:** direct Qwen3 8B classification
+followed, on supported cases, by the policy retriever and the refined single-call
+Qwen3 8B protocol. No extra model or evaluator on the request path.
+
+## Evidence used for the decision
+
+Numbers below are from the supplied ai-bench archive, not a new GPU run. Do not pool
+multiple runs on the same issues as if they were independent observations.
+
+| Metric | Selected result | Project production target |
+|---|---:|---:|
+| Classifier test accuracy (errors/abstentions count as incorrect) | 173/200 = 86.50% | 90% |
+| Macro-F1 (two classes) | 0.8691 | 0.90 |
+| Bug precision / recall | 85.71% / 90.00% | 90% / 95% |
+| Bug / feature-request F1 | 0.8780 / 0.8601 | 0.88 each |
+| Coverage / accuracy among accepted | 198/200 = 99.00% / 173/198 = 87.37% | ≥80% / ≥95% for selective use |
+| Test classification technical errors / latency p95 | 0/200 / 3.50 s | ≤0.5% / deployment latency not set |
+| Policy retrieval Recall@4 / MRR@4 / nDCG@4 | 1.000 / 0.9844 / 0.9802 (32 answerable validation questions) | ≥0.95 / 0.90 / 0.90 |
+| Complete required context | Validation: 32/32; retrieval-only test: 14/14 | ≥95% |
+| Action decisions correct | 26/26 validation: 4 ALLOW, 18 BLOCK, 4 NEED_FACTS | ≥95%, ≥90% recall per class |
+| Unsafe permission vs an explicit blocker | 0/18 observed (0/22 including unknown facts) | 0 observed |
+| Unsupported questions answered / supported questions refused | 0/4 / 0/32 | ≤2% / ≤5% |
+| Citation IDs valid / first-attempt protocol validity | 92/92 / 36/36 | 100% / ≥99.5% |
+| RAG p50 / p95; retrieval p95 | 6.14 / 8.52 s; 0.017 s | Local targets: end-to-end ≤15 s p95; retrieval ≤1 s p95 |
+| Semantic quality and task success | Unmeasured on the final arm (judge coverage 0/36) | Correctness 95%, completeness 90%, groundedness 98%, citation precision/recall 98%/95%, task success 90% |
+
+The classifier's validation accuracy was 91.50% (macro-F1 0.9195). The test result
+is lower. Its rule comparator scored 18.00% and 0.2834 on the **same test**; the
+1,993-example aggregate includes train-split inference and is not a test score.
+No training or reliable out-of-domain recognition is established here.
+
+For RAG, repaired direct generation reached at most **22/26** (full context).
+BM25 with the pilot generator reached **25/26** on development using these
+validation cases; policy retrieval with the original pilot reached **24/26**;
+the structured variant reached **11/26**, including 6 unsafe permissions.
+Both refined runs reached **26/26 on the same 26 decisions**. The final arm also
+matched all 36 expected response shapes; 31 cases invoked generation, one deadline
+block and four no-context refusals were deterministic. Full/oracle/none are controls.
+The ranked lexical profile needs no GPU embedder, Qdrant or reranker.
+
+The selected validation score is a development result on a small policy-authored
+set. A separate 16-case test exercises retrieval only (14 answerable). No held-out
+end-to-end result or semantic score for the final refined generator was supplied.
+The stronger Qwen2.5:7b calibration (v3) passed 11/19 challenges with 4 false
+acceptances; the earlier direct-arm judge scores cannot be transferred to this arm.
+The archive's final pilot gate is **INCOMPLETE**. No end-to-end production certificate.
+
+## Reproduce the selection
+
+Start with the [in-repo benchmark guide](../../ai-bench/BENCHMARK.md) for new runs. The paths in this table name the historical runs and are not required files in a clean checkout.
+
+| Layer | Exact run under ai-bench/runs | Runtime |
+|---|---|---|
+| Classification | `classification-qwen3/none` | category-v1; no retrieved policy; context 16384 / output 128 |
+| RAG | `rag-policy-pilot-final-validation/policy--pilot-refined` | policy-topics-bm25-v1; top 4, minimum score 8, normative dependencies; single-call-policy-v3; context 8192 / output 512 |
+| Retrieval check | `retrieval-policy-test/policy.json` | Ranks and assembled context only |
+| Judge limitation | `judge-calibration-qwen25-v3/calibration.json` | Offline diagnostic only |
+
+Model: `qwen3:8b`, digest `500a1f067a9f782620b40bee6f7b0c89e17ae61f686b92c24933e4ca4b2b8b41`.
+Policy (32 sections): `8a964180e7143302236b94cdd18e533f8562f8770b0f64e67f3030447b749ee5`.
+Both stages use temperature 0, seed 42 and thinking disabled.
+
+`scripts/replay_ai_bench.py --bench PATH_TO_EXTRACTED_AI_BENCH` compares the
+application against the archived inputs, rankings and recorded model outputs.
+It makes no model calls. `scripts/check_ai.py` instead calls the installed model
+using the actual app adapter, but performs no GitHub write. These two checks answer
+different questions. Neither measures a deployment SLA or user time saved.

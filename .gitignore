@@ -1,0 +1,24 @@
+.env
+.env.*
+!.env.example
+secrets/
+*.pem
+*.p8
+*.key
+*.zip
+.venv*/
+__pycache__/
+artifacts/
+data/
+# Benchmark references are reproducible inputs; local dataset downloads are ignored.
+!ai-bench/data/
+ai-bench/data/*
+!ai-bench/data/scenarios.jsonl
+!ai-bench/data/judge_challenges.jsonl
+ai-bench/runs/
+ai-bench/.models/
+ai-bench/.cache/
+ai-bench/.qdrant/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/

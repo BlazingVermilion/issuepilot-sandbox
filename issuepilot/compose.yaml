@@ -2,7 +2,7 @@ name: issuepilot
 x-app: &app
   image: ${ISSUEPILOT_IMAGE:-issuepilot:local}
   build: .
-  env_file: .env
+  env_file: ${IP_APP_ENV_FILE:-.env}
   environment:
     IP_DATABASE_URL: postgresql+psycopg://issuepilot:${POSTGRES_PASSWORD:?Run init_env.py}@postgres:5432/issuepilot
     IP_CHECKPOINT_URL: postgresql://issuepilot:${POSTGRES_PASSWORD}@postgres:5432/issuepilot
@@ -11,6 +11,8 @@ x-app: &app
     - host.docker.internal:host-gateway
   volumes:
     - ./policies:/app/policies:ro
+    - ./data/benchmarks:/app/data/benchmarks
+    - ./artifacts/benchmarks:/app/artifacts/benchmarks
   restart: unless-stopped
 services:
   postgres:
@@ -29,7 +31,7 @@ services:
     restart: unless-stopped
   api:
     <<: *app
-    ports: ['127.0.0.1:8000:8000']
+    ports: ['127.0.0.1:${IP_API_PORT:-8000}:8000']
     depends_on:
       postgres:
         condition: service_healthy
@@ -47,7 +49,7 @@ services:
   n8n:
     image: ${N8N_IMAGE:?Choose a tested n8n image}
     profiles: [automation]
-    ports: ['127.0.0.1:5678:5678']
+    ports: ['127.0.0.1:${IP_N8N_PORT:-5678}:5678']
     environment:
       N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY:?Run init_env.py}
       N8N_SECURE_COOKIE: 'false'

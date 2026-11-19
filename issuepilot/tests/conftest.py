@@ -15,10 +15,12 @@ from issuepilot.worker import Worker
 def runtime(tmp_path):
     settings = Settings(
         _env_file=None,
+        engine="rules",
         database_url=os.getenv("TEST_DATABASE_URL", f"sqlite:///{tmp_path}/app.db"),
         checkpoint_url=str(tmp_path / "graph.db"),
         webhook_secret="w" * 40,
         reviewer_tokens={"alice": "a" * 40, "bob": "b" * 40},
+        benchmark_dir=tmp_path / "benchmarks",
         policy_dir=Path(__file__).resolve().parents[1] / "policies",
     )
     app = create_app(settings)

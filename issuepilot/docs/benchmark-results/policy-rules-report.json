@@ -1,0 +1,479 @@
+{
+  "layer": "B1",
+  "arm": "bm25",
+  "model": null,
+  "model_digest": null,
+  "decoding": {
+    "temperature": 0,
+    "num_predict": 1600,
+    "num_ctx": 32768
+  },
+  "retrieval": {
+    "method": "BM25Okapi",
+    "top_k": 4,
+    "classification_query_characters": 5000
+  },
+  "policy_hash": "f4ea57ec96c2f345398dbefe215c5938e65718e0073e3ce8082b0e9a746cf15e",
+  "code_hash": "a152119cdc473b8bd66f331de31ac7de625c6a6f1eb7163c02f8f7175c8fa94a",
+  "fixture_hash": "27a60edf86724f27296623f963785e74944877dae8fe965f3ffb7b35d880aa53",
+  "created_at": "2026-11-12T18:06:22.123478+00:00",
+  "temperature": 0,
+  "max_input_chars": 60000,
+  "semantic_faithfulness": "UNMEASURED",
+  "external_writes": false,
+  "metrics": {
+    "controlled.recall_at_1": {
+      "value": 0.5714285714285714,
+      "count": 7
+    },
+    "controlled.hit_at_1": {
+      "value": 0.5714285714285714,
+      "count": 7
+    },
+    "controlled.recall_at_4": {
+      "value": 0.8571428571428571,
+      "count": 7
+    },
+    "controlled.hit_at_4": {
+      "value": 0.8571428571428571,
+      "count": 7
+    },
+    "controlled.recall_at_8": {
+      "value": 1.0,
+      "count": 7
+    },
+    "controlled.hit_at_8": {
+      "value": 1.0,
+      "count": 7
+    },
+    "controlled.mrr": {
+      "value": 0.7428571428571429,
+      "count": 7
+    },
+    "application_cases": 7,
+    "next_step_accuracy": 1.0,
+    "controlled_feature_area_accuracy": 1.0,
+    "raw_citation_provenance_validity": 1.0,
+    "raw_citation_count": 6,
+    "denominators": {
+      "requested_fields": 3,
+      "citations": 6,
+      "actionable_proposals": 6,
+      "unsupported_cases": 1,
+      "missing_tp": 3,
+      "missing_fp": 0,
+      "missing_fn": 0
+    },
+    "application_contract_rate": 1.0,
+    "missing_field_micro_f1": 1.0,
+    "missing_field_exact_set_accuracy": 1.0,
+    "already_known_request_rate": 0.0,
+    "citation_provenance_validity": 1.0,
+    "citation_coverage": 1.0,
+    "no_evidence_violation_rate": 0.0,
+    "effective_k_max": 8,
+    "linked_subset_count": 0
+  },
+  "results": [
+    {
+      "id": "crash",
+      "evidence": "controlled",
+      "retrieved": [
+        "triage:feature-requests",
+        "triage:bug-reports",
+        "triage:reporter-follow-up",
+        "triage:extension-investigation",
+        "triage:feature-areas",
+        "triage:vs-code-public-workflow-adaptation",
+        "triage:local-permissions-and-uncertainty",
+        "triage:questions-and-documentation"
+      ],
+      "references": [
+        "triage:bug-reports"
+      ],
+      "scores": {
+        "recall_at_1": 0.0,
+        "hit_at_1": 0,
+        "recall_at_4": 1.0,
+        "hit_at_4": 1,
+        "recall_at_8": 1.0,
+        "hit_at_8": 1,
+        "mrr": 0.5
+      },
+      "latency_ms": 0.39962200003174075,
+      "unreachable_references": []
+    },
+    {
+      "id": "feature",
+      "evidence": "controlled",
+      "retrieved": [
+        "triage:reporter-follow-up",
+        "triage:feature-requests",
+        "triage:questions-and-documentation",
+        "triage:bug-reports",
+        "triage:vs-code-public-workflow-adaptation",
+        "triage:feature-areas",
+        "triage:extension-investigation"
+      ],
+      "references": [
+        "triage:feature-requests"
+      ],
+      "scores": {
+        "recall_at_1": 0.0,
+        "hit_at_1": 0,
+        "recall_at_4": 1.0,
+        "hit_at_4": 1,
+        "recall_at_8": 1.0,
+        "hit_at_8": 1,
+        "mrr": 0.5
+      },
+      "latency_ms": 0.11377900000297814,
+      "unreachable_references": []
+    },
+    {
+      "id": "extension",
+      "evidence": "controlled",
+      "retrieved": [
+        "triage:local-permissions-and-uncertainty",
+        "triage:reporter-follow-up",
+        "triage:feature-requests",
+        "triage:questions-and-documentation",
+        "triage:extension-investigation",
+        "triage:bug-reports",
+        "triage:vs-code-public-workflow-adaptation",
+        "triage:feature-areas"
+      ],
+      "references": [
+        "triage:extension-investigation"
+      ],
+      "scores": {
+        "recall_at_1": 0.0,
+        "hit_at_1": 0,
+        "recall_at_4": 0.0,
+        "hit_at_4": 0,
+        "recall_at_8": 1.0,
+        "hit_at_8": 1,
+        "mrr": 0.2
+      },
+      "latency_ms": 0.12070899992977502,
+      "unreachable_references": []
+    },
+    {
+      "id": "area",
+      "evidence": "controlled",
+      "retrieved": [
+        "triage:feature-areas",
+        "triage:feature-requests",
+        "triage:local-permissions-and-uncertainty",
+        "triage:questions-and-documentation",
+        "triage:bug-reports",
+        "triage:extension-investigation",
+        "triage:reporter-follow-up",
+        "triage:vs-code-public-workflow-adaptation"
+      ],
+      "references": [
+        "triage:feature-areas"
+      ],
+      "scores": {
+        "recall_at_1": 1.0,
+        "hit_at_1": 1,
+        "recall_at_4": 1.0,
+        "hit_at_4": 1,
+        "recall_at_8": 1.0,
+        "hit_at_8": 1,
+        "mrr": 1.0
+      },
+      "latency_ms": 0.08120999996208411,
+      "unreachable_references": []
+    },
+    {
+      "id": "reply",
+      "evidence": "controlled",
+      "retrieved": [
+        "triage:reporter-follow-up",
+        "triage:bug-reports",
+        "triage:extension-investigation",
+        "triage:feature-requests",
+        "triage:feature-areas",
+        "triage:vs-code-public-workflow-adaptation",
+        "triage:local-permissions-and-uncertainty",
+        "triage:questions-and-documentation"
+      ],
+      "references": [
+        "triage:reporter-follow-up"
+      ],
+      "scores": {
+        "recall_at_1": 1.0,
+        "hit_at_1": 1,
+        "recall_at_4": 1.0,
+        "hit_at_4": 1,
+        "recall_at_8": 1.0,
+        "hit_at_8": 1,
+        "mrr": 1.0
+      },
+      "latency_ms": 0.13991800005896948,
+      "unreachable_references": []
+    },
+    {
+      "id": "permissions",
+      "evidence": "controlled",
+      "retrieved": [
+        "triage:local-permissions-and-uncertainty",
+        "triage:reporter-follow-up",
+        "triage:feature-requests",
+        "triage:feature-areas",
+        "triage:questions-and-documentation",
+        "triage:bug-reports",
+        "triage:extension-investigation",
+        "triage:vs-code-public-workflow-adaptation"
+      ],
+      "references": [
+        "triage:local-permissions-and-uncertainty"
+      ],
+      "scores": {
+        "recall_at_1": 1.0,
+        "hit_at_1": 1,
+        "recall_at_4": 1.0,
+        "hit_at_4": 1,
+        "recall_at_8": 1.0,
+        "hit_at_8": 1,
+        "mrr": 1.0
+      },
+      "latency_ms": 0.07962799986671598,
+      "unreachable_references": []
+    },
+    {
+      "id": "question",
+      "evidence": "controlled",
+      "retrieved": [
+        "triage:questions-and-documentation",
+        "triage:local-permissions-and-uncertainty",
+        "triage:extension-investigation",
+        "triage:feature-requests",
+        "triage:feature-areas",
+        "triage:reporter-follow-up",
+        "triage:vs-code-public-workflow-adaptation",
+        "triage:bug-reports"
+      ],
+      "references": [
+        "triage:questions-and-documentation"
+      ],
+      "scores": {
+        "recall_at_1": 1.0,
+        "hit_at_1": 1,
+        "recall_at_4": 1.0,
+        "hit_at_4": 1,
+        "recall_at_8": 1.0,
+        "hit_at_8": 1,
+        "mrr": 1.0
+      },
+      "latency_ms": 0.18302100011169387,
+      "unreachable_references": []
+    },
+    {
+      "id": "bug-fields-0",
+      "evidence": "controlled-policy-application",
+      "proposal": {
+        "category": "bug",
+        "feature_area": "editor",
+        "next_step": "clarify",
+        "summary": "Editor crashes saving draft",
+        "missing_fields": [
+          "version",
+          "reproduction"
+        ],
+        "labels": [
+          "bug"
+        ],
+        "assignees": [],
+        "comment": "Could you provide the following: version, reproduction?",
+        "citations": [
+          {
+            "id": "triage:1",
+            "quote": "Bug reports\nSource: https://github.com/microsoft/vscode/wiki/Issues-Triaging#requesting-information\nA bug describes incorrect existing behavior. Request information needed to understand\nthe report. Local sandbox contract: ask for version and reproduction if missing;\nrecognize equivalent details in prose and previous reporter replies. Ask only for\nstill-missing facts. Never claim reproduction or a fix without evidence. Use bug."
+          }
+        ],
+        "abstain": false,
+        "reason": "Applied the local VS Code workflow adaptation."
+      },
+      "expected_missing": [
+        "version",
+        "reproduction"
+      ],
+      "exact_fields": true,
+      "usage": {},
+      "latency_ms": 1.3705290000416426
+    },
+    {
+      "id": "bug-fields-1",
+      "evidence": "controlled-policy-application",
+      "proposal": {
+        "category": "bug",
+        "feature_area": "editor",
+        "next_step": "clarify",
+        "summary": "Editor crashes saving draft",
+        "missing_fields": [
+          "reproduction"
+        ],
+        "labels": [
+          "bug"
+        ],
+        "assignees": [],
+        "comment": "Could you provide the following: reproduction?",
+        "citations": [
+          {
+            "id": "triage:1",
+            "quote": "Bug reports\nSource: https://github.com/microsoft/vscode/wiki/Issues-Triaging#requesting-information\nA bug describes incorrect existing behavior. Request information needed to understand\nthe report. Local sandbox contract: ask for version and reproduction if missing;\nrecognize equivalent details in prose and previous reporter replies. Ask only for\nstill-missing facts. Never claim reproduction or a fix without evidence. Use bug."
+          }
+        ],
+        "abstain": false,
+        "reason": "Applied the local VS Code workflow adaptation."
+      },
+      "expected_missing": [
+        "reproduction"
+      ],
+      "exact_fields": true,
+      "usage": {},
+      "latency_ms": 0.3662029998849903
+    },
+    {
+      "id": "bug-fields-2",
+      "evidence": "controlled-policy-application",
+      "proposal": {
+        "category": "bug",
+        "feature_area": "editor",
+        "next_step": "route",
+        "summary": "Editor crashes saving draft",
+        "missing_fields": [],
+        "labels": [
+          "bug"
+        ],
+        "assignees": [],
+        "comment": "",
+        "citations": [
+          {
+            "id": "triage:1",
+            "quote": "Bug reports\nSource: https://github.com/microsoft/vscode/wiki/Issues-Triaging#requesting-information\nA bug describes incorrect existing behavior. Request information needed to understand\nthe report. Local sandbox contract: ask for version and reproduction if missing;\nrecognize equivalent details in prose and previous reporter replies. Ask only for\nstill-missing facts. Never claim reproduction or a fix without evidence. Use bug."
+          }
+        ],
+        "abstain": false,
+        "reason": "Applied the local VS Code workflow adaptation."
+      },
+      "expected_missing": [],
+      "exact_fields": true,
+      "usage": {},
+      "latency_ms": 0.21733200014750764
+    },
+    {
+      "id": "unsupported",
+      "evidence": "controlled-policy-application",
+      "proposal": {
+        "category": "unknown",
+        "feature_area": "unknown",
+        "next_step": "escalate",
+        "summary": "What is the weather tomorrow?",
+        "missing_fields": [],
+        "labels": [],
+        "assignees": [],
+        "comment": "",
+        "citations": [],
+        "abstain": true,
+        "reason": "Outside the binary profile or unclear intent."
+      },
+      "expected_missing": [],
+      "exact_fields": true,
+      "usage": {},
+      "latency_ms": 0.33622699993429706
+    },
+    {
+      "id": "feature",
+      "evidence": "controlled-policy-application",
+      "proposal": {
+        "category": "feature-request",
+        "feature_area": "unknown",
+        "next_step": "route",
+        "summary": "Feature request: add split preview",
+        "missing_fields": [],
+        "labels": [
+          "feature-request"
+        ],
+        "assignees": [],
+        "comment": "",
+        "citations": [
+          {
+            "id": "triage:2",
+            "quote": "Feature requests\nSource: https://github.com/microsoft/vscode/wiki/Issues-Triaging#categorizing-issues\nA request for new behavior is feature-request. Clarify the intended use case when\nmissing. Do not promise implementation, milestones or dates. Dataset classification\nhas exactly bug and feature-request; unrelated reports may abstain in the application."
+          }
+        ],
+        "abstain": false,
+        "reason": "Applied the local VS Code workflow adaptation."
+      },
+      "expected_missing": [],
+      "exact_fields": true,
+      "usage": {},
+      "latency_ms": 0.36483999997471983
+    },
+    {
+      "id": "extension",
+      "evidence": "controlled-policy-application",
+      "proposal": {
+        "category": "bug",
+        "feature_area": "extensions",
+        "next_step": "route",
+        "summary": "Extension causes crash",
+        "missing_fields": [],
+        "labels": [
+          "bug"
+        ],
+        "assignees": [],
+        "comment": "",
+        "citations": [
+          {
+            "id": "triage:3",
+            "quote": "Extension investigation\nSource: https://github.com/microsoft/vscode/wiki/Community-Issue-Tracking\nCheck whether the problem persists with extensions disabled when extension involvement\nis plausible. Do not ask again if the reporter already supplied the result. Distinguish\nthird-party extensions from built-in functionality; uncertain causation is not proof.\nLocal contract: extensions_disabled is a structured missing-information field."
+          }
+        ],
+        "abstain": false,
+        "reason": "Applied the local VS Code workflow adaptation."
+      },
+      "expected_missing": [],
+      "exact_fields": true,
+      "usage": {},
+      "latency_ms": 0.45117800004845776
+    },
+    {
+      "id": "terminal",
+      "evidence": "controlled-policy-application",
+      "proposal": {
+        "category": "bug",
+        "feature_area": "integrated-terminal",
+        "next_step": "route",
+        "summary": "Integrated terminal crashes",
+        "missing_fields": [],
+        "labels": [
+          "bug"
+        ],
+        "assignees": [],
+        "comment": "",
+        "citations": [
+          {
+            "id": "triage:1",
+            "quote": "Bug reports\nSource: https://github.com/microsoft/vscode/wiki/Issues-Triaging#requesting-information\nA bug describes incorrect existing behavior. Request information needed to understand\nthe report. Local sandbox contract: ask for version and reproduction if missing;\nrecognize equivalent details in prose and previous reporter replies. Ask only for\nstill-missing facts. Never claim reproduction or a fix without evidence. Use bug."
+          }
+        ],
+        "abstain": false,
+        "reason": "Applied the local VS Code workflow adaptation."
+      },
+      "expected_missing": [],
+      "exact_fields": true,
+      "usage": {},
+      "latency_ms": 0.1997150000079273
+    }
+  ],
+  "limits": [
+    "Controlled probes are not real-issue relevance gold",
+    "Linked-source data is optional; zero cases means not evaluated",
+    "Citation validity is not semantic entailment",
+    "Failed application cases retained in contract/exact-field rates"
+  ]
+}

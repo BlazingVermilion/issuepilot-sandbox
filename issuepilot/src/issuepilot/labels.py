@@ -1,51 +1,73 @@
-"""Repository vocabulary and maintainer permissions are separate, versioned inputs."""
+"""The normative policy owns the vocabulary. GitHub reports provisioned names only."""
 
 import json
+import re
+from .ai.index import sections
 from .contracts import digest
 
-# Offline fixture only. Live mode must fetch GitHub and must never fall back here.
-DEMO_LABELS = [
-    {"name": name, "description": description, "color": color}
-    for name, description, color in [
-        ("accessibility", "Barrier affecting people with disabilities", "7057ff"),
-        ("bug", "Something isn't working", "d73a4a"),
-        ("documentation", "Improvements or additions to documentation", "0075ca"),
-        ("duplicate", "This issue or pull request already exists", "cfd3d7"),
-        ("enhancement", "New feature or request", "a2eeef"),
-        ("good first issue", "Good for newcomers", "7057ff"),
-        ("help wanted", "Extra attention is needed", "008672"),
-        ("invalid", "This doesn't seem right", "e4e669"),
-        ("question", "Further information is requested", "d876e3"),
-        ("wontfix", "This will not be worked on", "ffffff"),
+
+def policy_labels(settings):
+    path = settings.policy_dir / "runtime" / "issuepilot_policy.md"
+    docs = {d["id"]: d["text"] for d in sections(path)[1]}
+    primary = re.search(r"^Canonical primary labels are ([^.]+)\.", docs["IP-LABEL-001"], re.M)
+    if not primary:
+        raise ValueError("IP-LABEL-001 must declare the canonical primary labels")
+    names = re.split(r",\s*|\s+and\s+", primary[1])
+    info = dict(table_rows(docs["IP-INFO-001"], 2))
+    if set(names) != set(info):
+        raise ValueError("Primary labels and IP-INFO-001 category rows must agree")
+    entries = [
+        dict(
+            name=n,
+            group="Primary",
+            section="IP-LABEL-001",
+            description="Required information: " + info[n],
+            color="3972ad",
+        )
+        for n in names
     ]
-]
+    for name, add, remove in table_rows(docs["IP-LABEL-002"], 3):
+        entries.append(
+            dict(
+                name=name,
+                group="Workflow / resolution",
+                section="IP-LABEL-002",
+                description=add,
+                remove_when=remove,
+                color="617788",
+            )
+        )
+    if len({e["name"] for e in entries}) != len(entries):
+        raise ValueError("Duplicate canonical policy label")
+    return entries
+
+
+def table_rows(text, columns):
+    lines = [
+        line.strip().strip("|").split("|") for line in text.splitlines() if line.startswith("|")
+    ]
+    if len(lines) < 3 or not all(len(row) == columns for row in lines):
+        raise ValueError("Malformed normative label table")
+    return [tuple(cell.strip() for cell in row) for row in lines[2:]]
 
 
 def catalog(settings, labels):
     rules = json.loads((settings.policy_dir / "label_rules.json").read_text(encoding="utf-8"))
-    permitted = set(rules["agent_labels"]) - set(rules["maintainer_only"])
+    entries = policy_labels(settings)
+    permitted = set(rules["agent_labels"])
+    if not permitted <= {e["name"] for e in entries if e["group"] == "Primary"}:
+        raise ValueError("Intake permissions must name canonical primary labels")
     if settings.allowed_labels is not None:
         permitted &= set(settings.allowed_labels)
-    entries = sorted(
-        [
-            {
-                "name": x["name"],
-                "description": x.get("description") or "",
-                "color": x.get("color", "808080"),
-                "agent_allowed": x["name"] in permitted and not x.get("archived_at"),
-            }
-            for x in labels
-        ],
-        key=lambda x: x["name"],
-    )
-    # Color-only changes do not change the meaning of an approved proposal.
-    fingerprint = digest(
-        {"labels": [{k: v for k, v in x.items() if k != "color"} for x in entries], "rules": rules}
-    )
+    provisioned = {e["name"] for e in labels if not e.get("archived_at")}
+    for e in entries:
+        e["available"] = e["name"] in provisioned
+        e["agent_allowed"] = e["available"] and e["name"] in permitted
     return {
-        "source": "github" if settings.mode == "live" else "demo_fixture",
+        "source": "issuepilot_policy",
+        "availability_source": "github" if settings.mode == "live" else "local_policy",
         "labels": entries,
-        "hash": fingerprint,
-        "allowed": [x["name"] for x in entries if x["agent_allowed"]],
+        "hash": digest({"labels": entries, "rules": rules}),
+        "allowed": [e["name"] for e in entries if e["agent_allowed"]],
         "legacy_filter_active": settings.allowed_labels is not None,
     }

@@ -1,0 +1,15 @@
+{
+  "type": "object",
+  "properties": {
+    "reason": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500,
+      "pattern": "^[^\\r\\n]*[^ \\t\\r\\n][^\\r\\n]*$"
+    }
+  },
+  "required": [
+    "reason"
+  ],
+  "additionalProperties": false
+}

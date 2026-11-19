@@ -10,17 +10,21 @@ let workspace = null,
   busy = false,
   dirty = false,
   pendingApproval = null;
-const tabs = ["overview", "inbox", "review", "activity", "repository"];
-const attention = ["STALE", "FAILED", "UNCERTAIN", "BLOCKED"];
+const tabs = ["overview", "inbox", "review", "repository"];
+const attention = ["STALE", "FAILED", "REPLY_FAILED", "UNCERTAIN", "BLOCKED"];
 const processing = [
   "QUEUED",
   "RESUME_QUEUED",
+  "REPLY_QUEUED",
   "PROCESSING",
   "APPROVED",
   "EXECUTING",
   "REJECTED",
 ];
 const names = {
+  REPLY_FAILED: "Reporter processing failed",
+  WAITING_REPORTER: "Awaiting reporter",
+  REPLY_QUEUED: "Reporter update queued",
   QUEUED: "Queued",
   BLOCKED: "Write rejected",
   RESUME_QUEUED: "Recovery queued",
@@ -71,6 +75,7 @@ function chip(text) {
   return node("span", text, "chip");
 }
 function tab(name, focus = false) {
+  if (name === "activity") name = "inbox";
   if (!tabs.includes(name)) name = "overview";
   for (const t of tabs) {
     const on = t === name;
@@ -81,6 +86,7 @@ function tab(name, focus = false) {
   $("notice").hidden = true;
   history.replaceState(null, "", "#" + name);
   if (focus) $("tab-" + name).focus();
+  if (name === "repository" && workspace) loadLabels().catch(error);
 }
 for (const b of document.querySelectorAll("[data-tab]"))
   b.onclick = () => tab(b.dataset.tab);
@@ -170,6 +176,8 @@ function counts() {
     (c) => c.status === "REVIEW",
   ).length;
 }
+let inboxPage = 0;
+const pageSize = 25;
 function renderInbox() {
   const q = $("search").value.toLowerCase();
   const filter = $("filter").value;
@@ -193,7 +201,15 @@ function renderInbox() {
       ? "Create an issue on GitHub after configuring its webhook. Then refresh here."
       : "Create a sample using the demo form below."
     : "Connect your reviewer account to begin.";
-  for (const c of filtered) {
+  const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize));
+  inboxPage = Math.max(0, Math.min(inboxPage, pageCount - 1));
+  const from = inboxPage * pageSize;
+  $("inbox-pages").hidden = !filtered.length;
+  $("page-range").textContent = filtered.length ? `${from + 1}–${Math.min(from + pageSize, filtered.length)} of ${filtered.length} matching cases` : "";
+  $("page-prev").disabled = inboxPage === 0;
+  $("page-next").disabled = inboxPage + 1 >= pageCount;
+  if (workspace?.dataset) empty.querySelector("p").textContent = "Replay the pinned VS Code dataset or change the filters.";
+  for (const c of filtered.slice(from, from + pageSize)) {
     const tr = node("tr");
     const title = node("td");
     title.append(
@@ -209,7 +225,13 @@ function renderInbox() {
     );
     button.onclick = () => selectCase(c.id).catch(error);
     const action = node("td");
-    action.append(button);
+    const history = node("button", "Open audit history", "button quiet");
+    history.setAttribute("aria-label", "Open audit history for issue #" + c.number);
+    history.setAttribute("aria-haspopup", "dialog");
+    history.onclick = () => openAudit(c.id, history);
+    const controls = node("div", undefined, "row-actions");
+    if (!["COMPLETED", "CLOSED", "DECLINED"].includes(c.status)) controls.append(button);
+    controls.append(history); action.append(controls);
     tr.append(title, state, node("td", date(c.updated_at), "subtle"), action);
     $("case-rows").append(tr);
   }
@@ -229,6 +251,7 @@ function overview() {
     : workspace.mode === "live"
       ? "Create an issue on the configured GitHub repository. Its signed webhook must reach n8n and the backend."
       : "Use the local sample form in Inbox. Demo actions stay in the database.";
+  if (workspace.dataset && !waiting) $("next-copy").textContent = "Open Inbox to inspect historical VS Code reports received in this sandbox.";
   $("next-action").textContent = waiting
     ? "Review issue #" + waiting.number + " →"
     : "Open inbox →";
@@ -239,19 +262,20 @@ function overview() {
       ? "DEMO · Actions are simulated in the database. " +
         (workspace.engine === "rules"
           ? "The rules engine does not call an LLM."
-          : "Ollama processes proposals; GitHub writes remain simulated.")
+          : "Model: " + workspace.model + ". GitHub writes remain simulated.")
       : "LIVE · " +
         (workspace.engine === "rules"
           ? "Rules baseline; no LLM calls. "
-          : "Ollama configured; verify actual calls in each case. ") +
+          : "Model: " + workspace.model + ". ") +
         (workspace.writes_enabled
           ? "Approved actions can write to GitHub."
           : "GitHub writes are disabled.");
+  if (workspace.dataset) $("mode-note").textContent = `VS Code dataset replay · ${cases.length} / ${workspace.dataset.total} issues received · ${workspace.model} · actions stay in this sandbox.`;
 }
 function renderSettings() {
   if (!workspace) return;
   $("repo-name").textContent = workspace.repo;
-  $("runtime").textContent = workspace.mode + " / " + workspace.engine;
+  $("runtime").textContent = workspace.mode + " / " + (workspace.model || "Rules demo");
   $("identity").textContent = workspace.reviewer;
   $("disconnect").hidden = false;
   $("login-panel").hidden = true;
@@ -260,7 +284,7 @@ function renderSettings() {
   $("connection-summary").hidden = false;
   $("connection-summary").textContent =
     "Connected as " + workspace.reviewer + " · " + workspace.repo;
-  $("demo-box").hidden = workspace.mode !== "demo";
+  $("demo-box").hidden = workspace.mode !== "demo" || Boolean(workspace.dataset);
   $("new-github").hidden = workspace.mode !== "live";
   if (workspace.repo_url)
     $("new-github").href = workspace.repo_url + "/issues/new";
@@ -268,12 +292,14 @@ function renderSettings() {
     workspace.mode === "live"
       ? "Live intake: create an issue on GitHub → n8n receives its webhook → the worker drafts a proposal. This page does not create GitHub issues."
       : "Demo intake: use the sample form below. This path bypasses GitHub webhooks and n8n.";
+  if (workspace.dataset) $("intake-note").textContent = "Historical VS Code reports · signed dataset replay · original issue numbers · no writes to GitHub.";
   const grid = node("div", undefined, "settings-grid");
   for (const [label, value] of [
     ["Repository", workspace.repo],
     ["Mode", workspace.mode],
     ["Engine", workspace.engine],
-    ["Configured model", workspace.model || "None — rules baseline"],
+    ["AI model", workspace.model || "None — rules baseline"],
+    ["Inference profile", workspace.ai_profile || "Rules baseline"],
     ["Database", workspace.database],
     [
       "GitHub writes",
@@ -295,9 +321,9 @@ async function loadLabels() {
   if (!workspace) throw Error("Connect as a reviewer first.");
   currentCatalog = await api("/repository/labels");
   $("catalog-source").textContent =
-    currentCatalog.source === "github"
-      ? "Fetched from GitHub"
-      : "Offline demo fixture";
+    currentCatalog.availability_source === "github"
+      ? "IssuePilot policy · GitHub availability"
+      : "IssuePilot policy · sandbox";
   $("catalog-rows").replaceChildren();
   for (const label of currentCatalog.labels) {
     const tr = node("tr"),
@@ -307,14 +333,14 @@ async function loadLabels() {
     if (/^[a-fA-F0-9]{6}$/.test(label.color))
       swatch.style.backgroundColor = "#" + label.color;
     badge.prepend(swatch);
-    name.append(badge);
+    name.append(badge, node("small", label.group, "label-group"));
     const permission = node("td");
     permission.append(
       node(
         "span",
         label.agent_allowed
           ? "May propose · approval required"
-          : "Not permitted for agent",
+          : !label.available ? "Not provisioned on GitHub" : "Policy only · not an intake suggestion",
         "badge " + (label.agent_allowed ? "" : "neutral"),
       ),
     );
@@ -329,7 +355,7 @@ async function loadLabels() {
     new Date().toLocaleTimeString();
   $("label-warning").hidden = !currentCatalog.legacy_filter_active;
   $("label-warning").textContent =
-    "IP_ALLOWED_LABELS is applying an additional legacy filter. Remove that variable from .env and recreate api/worker to use the repository catalog intersected with label_rules.json.";
+    "IP_ALLOWED_LABELS is applying an additional legacy filter. Remove that variable from .env and recreate api/worker to use the policy permissions and available labels.";
 }
 async function loadCases() {
   cases = await api("/cases");
@@ -337,6 +363,7 @@ async function loadCases() {
   overview();
   $("last-refresh").textContent = "Updated " + new Date().toLocaleTimeString();
 }
+let reviewRequest = 0;
 async function selectCase(id) {
   if (
     dirty &&
@@ -345,7 +372,10 @@ async function selectCase(id) {
     )
   )
     return;
-  active = await api("/cases/" + id);
+  const seq = ++reviewRequest;
+  const result = await api("/cases/" + encodeURIComponent(id));
+  if (seq !== reviewRequest) return;
+  active = result;
   dirty = false;
   renderCase();
   tab("review");
@@ -357,14 +387,25 @@ function renderCase() {
       c.status === "REVIEW"
         ? c.proposal.value
         : c.decision.proposal || c.proposal.value;
-  for (const id of ["review-empty", "activity-empty"]) $(id).hidden = true;
-  for (const id of ["review-content", "activity-content"]) $(id).hidden = false;
+  $("review-empty").hidden = true;
+  $("review-content").hidden = false;
   $("case-status").replaceWith(
     Object.assign(statusBadge(c.status), { id: "case-status" }),
   );
-  $("case-meta").textContent = "#" + c.number + " · version " + c.version;
+  $("case-meta").textContent = (workspace?.dataset ? "VS Code snapshot · " : "") + "#" + c.number + " · version " + c.version;
+  $("issue-link").textContent = workspace?.dataset ? "Original VS Code issue ↗" : "Open on GitHub ↗";
   $("issue-title").textContent = c.source.title || "Waiting for source read";
-  $("issue-body").textContent = c.source.body || "No source snapshot yet.";
+  const src = c.source || {};
+  const hasBody = Object.hasOwn(src,"body");
+  const raw = src.body ?? "";
+  $("source-repo").textContent = "Source issue · " + (workspace.dataset ? "microsoft / vscode" : workspace.repo);
+  $("source-number").textContent = "#" + c.number;
+  $("source-state").textContent = src.state === "closed" ? "Closed" : src.state === "open" ? "Open" : "State not recorded";
+  $("source-state").className = "badge ticket-state " + (src.state || "unknown");
+  $("source-byline").textContent = [src.author ? "@" + src.author : "", src.created_at ? date(src.created_at) : ""].filter(Boolean).join(" · ");
+  $("issue-body").replaceChildren(raw ? issueDocument.render(raw,{base:c.issue_url}) : node("p",hasBody ? "No description provided." : "No source snapshot yet.","hint"));
+  $("raw-body").textContent = raw;
+  $("raw-body").parentElement.hidden = !raw;
   $("source-labels").replaceChildren(...(c.source.labels || []).map(chip));
   $("issue-link").hidden = !c.issue_url;
   if (c.issue_url) $("issue-link").href = c.issue_url;
@@ -377,6 +418,9 @@ function renderCase() {
       : "Ollama · " + proposed.data.model
     : "No proposal for this version";
   const guidance = {
+    REPLY_FAILED: "Repair the read/model error, then Check reporter replies. The saved clarification and completed writes are retained.",
+    WAITING_REPORTER: workspace.dataset ? "Clarification recorded in the sandbox. The dataset has no subsequent reporter reply." : "Clarification sent. Await the issue author’s reply; new evidence requires a fresh maintainer approval.",
+    REPLY_QUEUED: "Reading the reporter’s latest evidence and resuming the saved graph.",
     REVIEW: p?.abstain
       ? "The engine abstained. No executable actions are proposed. Reject and investigate manually."
       : "Inspect the source and cited policy. You may edit the comment and permitted labels before approval.",
@@ -409,6 +453,11 @@ function renderCase() {
   $("proposal-category").textContent = p?.category || "Pending";
   $("proposal-summary").textContent =
     p?.summary || "A proposal will appear after investigation.";
+  $("proposal-routing").textContent = `Area: ${p?.feature_area || "unknown"} · Next: ${p?.next_step || "pending"} · Clarification rounds: ${c.proposal.rounds || 0}`;
+  const replies = c.source.reporter_replies || [];
+  $("reporter-evidence").replaceChildren(...(replies.length ? replies.map(r => {
+    const item=node("article"); item.append(issueDocument.render(r.body,{base:c.issue_url})); return item;
+  }) : [node("p","No reporter replies in this snapshot.","hint")]));
   $("proposal-reason").textContent = p?.reason || "Not available yet.";
   $("missing").replaceChildren(
     ...(p?.missing_fields?.length
@@ -424,14 +473,15 @@ function renderCase() {
   );
   $("label-options").replaceChildren();
   const captured = c.proposal.label_catalog;
-  const allowed = captured?.allowed || [];
+  const legacyCatalog = Boolean(captured && captured.source !== "issuepilot_policy");
+  const allowed = legacyCatalog ? [] : captured?.allowed || [];
   for (const label of [...new Set([...allowed, ...(p?.labels || [])])]) {
     const wrapper = node("label", undefined, "chip");
     const check = node("input");
     check.type = "checkbox";
     check.value = label;
     check.checked = (p?.labels || []).includes(label);
-    check.disabled = c.status !== "REVIEW" || !allowed.includes(label) || busy;
+    check.disabled = c.status !== "REVIEW" || !allowed.includes(label) || label !== p?.category || busy;
     check.onchange = () => {
       dirty = true;
     };
@@ -439,6 +489,7 @@ function renderCase() {
       check,
       node("span", label + (allowed.includes(label) ? "" : " · unavailable")),
     );
+    if(c.status !== "REVIEW" && !(p?.labels || []).includes(label)) continue;
     $("label-options").append(wrapper);
   }
   if (!allowed.length)
@@ -450,41 +501,19 @@ function renderCase() {
     c.status !== "REVIEW" ||
     !p ||
     p.abstain ||
-    !captured ||
+    (!captured || legacyCatalog) ||
     (workspace.mode === "live" && !workspace.writes_enabled);
   $("reject").disabled = busy || c.status !== "REVIEW";
   $("approval-note").textContent =
-    !captured && p
-      ? "This older proposal has no repository label snapshot. Reject/regenerate or submit a fresh issue edit."
+    (!captured || legacyCatalog) && p && c.status === "REVIEW"
+      ? "This proposal predates the current label policy. Generate a fresh proposal before approval."
       : workspace.mode === "live" && !workspace.writes_enabled
         ? "Live writes are disabled in server configuration."
         : workspace.mode === "demo"
           ? "Approval executes simulated actions only."
           : "Approval applies to this exact proposal version and may publish to GitHub.";
-  $("evidence").replaceChildren();
-  const docs = c.proposal.documents || [];
-  $("evidence-count").textContent = (p?.citations?.length || 0) + " citations";
-  for (const citation of p?.citations || []) {
-    const d = docs.find((d) => d.id === citation.id);
-    const item = node("div", undefined, "evidence-item");
-    item.append(
-      node("strong", citation.id + (d ? " · " + d.file : "")),
-      node("blockquote", citation.quote),
-    );
-    if (d) {
-      const details = node("details");
-      details.append(
-        node("summary", "Source fingerprint"),
-        node("code", d.sha256),
-      );
-      item.append(details);
-    }
-    $("evidence").append(item);
-  }
-  if (!p?.citations?.length)
-    $("evidence").append(
-      node("p", "No policy citations in this proposal.", "hint"),
-    );
+  $("evidence-count").textContent = "(" + (p?.citations?.length || 0) + ")";
+  $("open-evidence").onclick = () => openEvidence(c,p);
   $("tool-trace").replaceChildren();
   for (const t of c.proposal.trace || []) {
     const item = node("div", undefined, "tool-item");
@@ -494,6 +523,9 @@ function renderCase() {
         "span",
         t.mode === "fixed_workflow"
           ? "Fixed workflow step — not LLM-selected"
+          : t.tool === "classify_issue" ? t.category
+          : t.tool === "search_policy" && t.context_ids ? t.decision + " · " + (t.context_ids.join(", ") || "No supporting sections")
+          : t.tool === "label_permission" ? t.label + " · " + t.source
           : JSON.stringify(t.args || {}),
       ),
     );
@@ -512,16 +544,79 @@ function renderCase() {
   );
   const hasLedger = c.actions.some((a) => a.version === c.version);
   $("regenerate").hidden =
-    hasLedger || !["STALE", "FAILED", "DECLINED"].includes(c.status);
+    hasLedger || !["STALE", "FAILED", "DECLINED", "REVIEW"].includes(c.status);
   $("recover").hidden =
     !hasLedger ||
     !["STALE", "FAILED", "BLOCKED", "UNCERTAIN"].includes(c.status);
   $("recover").disabled = busy;
   $("reconcile").hidden = !["UNCERTAIN", "BLOCKED"].includes(c.status);
-  renderActivity();
+  $("refresh-replies").hidden = Boolean(workspace.dataset) || !["WAITING_REPORTER", "REPLY_FAILED"].includes(c.status);
+  $("demo-reply").hidden = c.status !== "WAITING_REPORTER" || workspace.mode !== "demo" || Boolean(workspace.dataset);
 }
-function renderActivity() {
-  const c = active;
+const dialogs = new Map();
+
+function showReader(id, invoker) {
+  const d=$(id);
+  if (!d.open) { dialogs.set(id,invoker); d.showModal(); }
+}
+for(const id of ["audit-dialog","evidence-dialog"]) {
+  const d=$(id);
+  d.querySelector("[data-close]").onclick=()=>d.close();
+  d.addEventListener("close",()=>{
+    if(d.open) return;
+    if(id==="audit-dialog"){auditReader.close();$("activity-content").hidden=true;}
+    const button=dialogs.get(id); dialogs.delete(id);
+    if(button?.isConnected && button.getClientRects().length) button.focus({preventScroll:true});
+  });
+}
+function openEvidence(c,p) {
+  const container=$("evidence");container.replaceChildren();
+  $("evidence-case").textContent="#" + c.number+" · version "+c.version+" · Evidence saved with this proposal";
+  for(const citation of p?.citations || []) {
+    const d=(c.proposal.documents || []).find(x=>x.id===citation.id);
+    const matched=Boolean(d?.text && citation.quote && d.text.includes(citation.quote));
+    const item=node("article",undefined,"evidence-item");
+    item.append(node("h3",citation.id + (d?.file ? " · "+d.file : "")));
+    const body=node("div",undefined,"md-body");
+    body.append(issueDocument.render(matched ? d.text : citation.quote,{category:p.category}));
+    item.append(node("p",matched ? "Full section from the saved source." : "Saved excerpt only; a matching full section is unavailable.","hint"),body);
+    if(matched && citation.quote!==d.text){
+      const original=node("details");original.append(node("summary","Exact excerpt recorded with the proposal"),node("pre",citation.quote));item.append(original);
+    }
+    if(d?.sha256) {
+      const details=node("details");details.append(node("summary","Source fingerprint"),node("code",d.sha256));item.append(details);
+    }
+    container.append(item);
+  }
+  if(!container.children.length) container.append(node("p","No policy citations in this proposal.","hint"));
+  showReader("evidence-dialog",$("open-evidence")); $("evidence-dialog").scrollTop=0;
+}
+const auditReader = createCaseReader({
+  read: id=>api("/cases/"+encodeURIComponent(id)),
+  loading: (_id,invoker,refresh)=>{
+    $("activity-content").hidden=true; $("audit-source").disabled=true;
+    $("audit-message").textContent="Loading this issue’s history…";
+    showReader("audit-dialog",invoker); if(!refresh) $("audit-dialog").scrollTop=0;
+  },
+  render: (c,refresh)=>{
+    if(!$("audit-dialog").open) return;
+    renderActivity(c);$("activity-content").hidden=false;
+    if(!refresh) $("timeline-scroll").scrollTop=0;
+    $("audit-source").disabled=false;$("audit-message").textContent="";
+  },
+  failure: e=>{$("audit-message").textContent="Could not load this history: "+e.message;}
+});
+const openAudit = (id,invoker)=>auditReader.open(id,invoker);
+$("audit-refresh").onclick=()=>auditReader.refresh();
+$("audit-source").onclick=()=>{
+  const id=auditReader.id();
+  if(id) {
+    $("audit-dialog").close();
+    if(id===active?.id) tab("review"); else selectCase(id).catch(error);
+  }
+};
+$("trace-audit").onclick=()=>{if(active) openAudit(active.id,$("trace-audit"));};
+function renderActivity(c) {
   $("activity-title").textContent =
     "#" + c.number + " · " + (c.source.title || "Pending issue");
   $("decision-summary").textContent = c.decision.reviewer
@@ -531,7 +626,7 @@ function renderActivity() {
   if (c.decision.proposal) {
     const p = c.decision.proposal;
     $("approved-summary").append(
-      node("strong", "Approved payload"),
+      node("strong", c.decision.approved ? "Approved payload" : "Reviewed payload"),
       node("p", "Labels: " + (p.labels.join(", ") || "none")),
       node("p", p.comment || "No comment approved."),
     );
@@ -550,16 +645,10 @@ function renderActivity() {
       node("strong", a.kind + " · v" + a.version),
       node("span", a.status, "badge " + (a.status === "DONE" ? "" : "warn")),
     );
-    card.append(
-      head,
-      node(
-        "pre",
-        a.kind === "comment"
-          ? a.payload.body
-          : JSON.stringify(a.payload, null, 2),
-        "prose",
-      ),
-    );
+    const body=node(a.kind === "comment" ? "div" : "pre",undefined,"md-body");
+    if(a.kind === "comment") body.append(issueDocument.render(a.payload.body,{base:c.issue_url}));
+    else body.textContent=JSON.stringify(a.payload,null,2);
+    card.append(head,body);
     $("action-results").append(card);
   }
   if (!c.actions.length)
@@ -580,7 +669,7 @@ function renderActivity() {
       REJECTION: `${e.data.reviewer} rejected the proposal.`,
       COMPLETED: "Recorded actions finished.",
       STALE: "The approval context changed. A new review is required.",
-      RECEIVED: "A signed GitHub delivery was accepted.",
+      RECEIVED: e.data.source_kind === "dataset_replay" ? "A signed VS Code snapshot replay was accepted. External writes are simulated." : "A signed GitHub delivery was accepted.",
       DEMO_EDIT: "A local demo issue was created or edited.",
     };
     if (copy[e.kind]) li.append(node("p", copy[e.kind]));
@@ -597,12 +686,14 @@ function renderActivity() {
 $("comment").oninput = () => {
   dirty = true;
 };
-$("search").oninput = renderInbox;
-$("filter").onchange = renderInbox;
+$("search").oninput = $("filter").onchange = () => { inboxPage = 0; renderInbox(); };
+$("page-prev").onclick = () => { inboxPage--; renderInbox(); };
+$("page-next").onclick = () => { inboxPage++; renderInbox(); };
 // sessionStorage survives a refresh but is scoped to this browser tab.
 // Never store the reviewer token in localStorage or include it in URLs.
 const sessionKey = "issuepilot.reviewer-session";
 function clearSession() {
+  inboxPage = 0;
   recoveryTarget = null;
   session++;
   token = "";
@@ -625,7 +716,9 @@ function clearSession() {
   $("review-content").hidden = true;
   $("activity-content").hidden = true;
   $("review-empty").hidden = false;
-  $("activity-empty").hidden = false;
+  ++reviewRequest; auditReader.close();
+  for(const id of ["audit-dialog","evidence-dialog"]) if($(id).open) $(id).close();
+  for(const id of ["evidence","timeline","action-results","approved-summary","activity-title","issue-body","technical","raw-body"]) $(id).replaceChildren();
   $("demo-box").hidden = true;
   $("new-github").hidden = true;
   $("repo-settings").replaceChildren(
@@ -649,6 +742,7 @@ async function connect(value, restoring = false) {
   }
   renderSettings();
   await loadCases();
+  if (location.hash === "#repository") await loadLabels();
   if (!restoring)
     tell("Connected. Your session survives refreshes in this tab.");
 }
@@ -742,7 +836,7 @@ $("confirm").addEventListener("close", async () => {
     tell(
       result.state === "STALE"
         ? "The proposal is stale. Generate a fresh proposal before approving."
-        : "Approval recorded. Execution will appear in Activity.",
+        : "Approval recorded. Open this issue’s audit history to see execution.",
     );
   } catch (e) {
     error(e);
@@ -772,6 +866,7 @@ $("reject").onclick = async () => {
 for (const [id, path] of [
   ["regenerate", "regenerate"],
   ["reconcile", "reconcile"],
+  ["refresh-replies", "refresh-replies"],
 ])
   $(id).onclick = async () => {
     if (!active || busy) return;
@@ -797,11 +892,14 @@ setInterval(async () => {
     !active ||
     !processing.includes(active.status) ||
     $("confirm").open ||
-    $("recovery-dialog").open
+    $("recovery-dialog").open || $("audit-dialog").open || $("evidence-dialog").open
   )
     return;
   try {
-    active = await api("/cases/" + active.id);
+    const selected = active.id, seq=reviewRequest;
+    const result = await api("/cases/" + selected);
+    if (active?.id!==selected || seq!==reviewRequest || dirty || busy || $("audit-dialog").open || $("evidence-dialog").open) return;
+    active=result;
     renderCase();
     await loadCases();
   } catch (e) {
@@ -811,7 +909,7 @@ setInterval(async () => {
 fetch("/health")
   .then((r) => r.json())
   .then((d) => {
-    $("runtime").textContent = d.mode + " / " + d.engine;
+    $("runtime").textContent = d.mode + " / " + (d.model || "Rules demo");
     $("version").textContent = "v" + d.version;
   })
   .catch(() => {
@@ -862,7 +960,7 @@ $("recovery-dialog").addEventListener("close", async () => {
     dirty = false;
     await loadCases();
     tell(
-      "Recovery recorded: " + result.state + ". See Activity for the outcome.",
+      "Recovery recorded: " + result.state + ". Open this issue’s audit history for the outcome.",
     );
   } catch (e) {
     error(e);
@@ -889,3 +987,10 @@ $("recovery-dialog").addEventListener("close", async () => {
     else error(e);
   }
 })();
+
+$("demo-reply").onclick = async () => {
+  if (!active) return;
+  const body = window.prompt("Synthetic reporter reply (for example Version: 1.95 and Reproduction: save draft)");
+  if (!body) return;
+  try { await api(`/cases/${active.id}/demo-reply`, "POST", {body}); active = await api(`/cases/${active.id}`); renderCase(); await loadCases(); } catch (e) { error(e); }
+};

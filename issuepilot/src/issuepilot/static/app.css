@@ -1197,3 +1197,36 @@ fieldset {
     height: 360px;
   }
 }
+
+/* Long reporter evidence scrolls inside the review card. */
+.source-scroll { max-height: 420px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; }
+
+/* Document readers share typography and never change the saved Markdown. */
+.row-actions,.ticket-meta,.reader-actions,.reader-head { display:flex;align-items:center;gap:.6rem;flex-wrap:wrap; }
+.row-actions .button {white-space:nowrap;}
+.ticket,.review-grid>div {min-width:0;}
+.ticket-heading {display:block;margin-bottom:1rem;}
+.ticket-heading h2 {font-size:clamp(1.3rem,2.1vw,1.85rem);line-height:1.25;margin:.45rem 0 .65rem;overflow-wrap:anywhere;}
+.issue-id,.label-group {font-weight:400;color:var(--muted);}
+.label-group {display:block;margin-top:.2rem;}
+.ticket-comment {border:1px solid var(--line);border-radius:.55rem;overflow:hidden;}
+.ticket-comment>header {display:flex;justify-content:space-between;gap:.5rem;flex-wrap:wrap;background:var(--surface-2);padding:.6rem 1rem;border-bottom:1px solid var(--line);}
+.ticket-comment>header span {color:var(--muted);}
+.ticket-comment>.md-body {padding:1rem;max-height:min(65vh,45rem);overflow:auto;}
+.md-body {font:inherit;color:var(--ink);line-height:1.6;overflow-wrap:anywhere;white-space:normal;}
+.md-body>:first-child {margin-top:0;}.md-body>:last-child {margin-bottom:0;}
+.md-body :is(p,ul,ol,blockquote,pre,.md-table){margin:.65rem 0;}
+.md-body :is(ul,ol){padding-inline-start:1.5rem;}
+.md-body pre,.raw-source pre {max-height:22rem;overflow:auto;white-space:pre;overflow-wrap:normal;}
+.md-body :not(pre)>code {padding:.08rem .3rem;border-radius:.25rem;background:var(--surface-2);font-size:.94em;}
+.md-body blockquote {border-left:3px solid var(--line);padding-left:.8rem;color:var(--muted);}
+.md-table {overflow:auto;}.md-table table{width:100%;min-width:0;border-collapse:collapse;}
+.md-table :is(th,td){white-space:normal;padding:.5rem .65rem;border:1px solid var(--line);text-align:left;vertical-align:top;}
+.md-table th{background:var(--surface-2);}.policy-current td{background:var(--accent-soft);}
+.raw-source{margin-top:.75rem;}
+.reader-dialog {width:min(54rem,95vw);max-height:86vh;max-height:86dvh;overflow:auto;overscroll-behavior:contain;padding:0 1.25rem 1.1rem;}
+.reader-head{justify-content:space-between;position:sticky;top:0;z-index:1;background:var(--surface);border-bottom:1px solid var(--line);padding:.8rem 0;margin-bottom:.8rem;}
+.reader-head h2{margin:0;}.reader-dialog .evidence-item{padding:.8rem 0 1rem;border-top:1px solid var(--line);}
+.reader-dialog .evidence-item h3{overflow-wrap:anywhere;}.reader-dialog .timeline-scroll {height:clamp(12rem,34vh,22rem);overflow:auto;overscroll-behavior:contain;}
+.reader-actions{margin:.6rem 0 0;}.ticket-state.closed {background:var(--surface-2);color:var(--ink);}
+@media(max-width:48rem){.reader-dialog{width:96vw;padding-inline:.75rem;}.ticket-comment>.md-body{padding:.65rem;}.row-actions{gap:.4rem;}}

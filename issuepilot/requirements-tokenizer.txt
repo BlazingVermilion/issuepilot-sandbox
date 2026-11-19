@@ -1,0 +1,3 @@
+# CPU tokenizer only. The model itself runs on the configured Ollama server.
+tokenizers==0.22.2
+huggingface-hub==0.36.2

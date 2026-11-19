@@ -1,0 +1,65 @@
+name: Release image
+on:
+  push:
+    tags: ['v*']
+permissions:
+  contents: read
+jobs:
+  checks:
+    uses: ./.github/workflows/ci.yml
+  publish:
+    needs: checks
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image: ${{ steps.meta.outputs.image }}
+      digest: ${{ steps.build.outputs.digest }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - id: meta
+        run: echo "image=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+      - uses: docker/build-push-action@v6
+        id: build
+        with:
+          context: ./issuepilot
+          push: true
+          tags: ${{ steps.meta.outputs.image }}:${{ github.ref_name }}
+          labels: org.opencontainers.image.revision=${{ github.sha }}
+          provenance: true
+  verify-release:
+    needs: publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    env:
+      ISSUEPILOT_IMAGE: ${{ needs.publish.outputs.image }}@${{ needs.publish.outputs.digest }}
+    defaults:
+      run:
+        working-directory: issuepilot
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run the released digest in a disposable staging stack
+        run: |
+          python scripts/init_env.py
+          docker compose pull api worker
+          test "$(docker image inspect -f '{{index .Config.Labels "org.opencontainers.image.revision"}}' "$ISSUEPILOT_IMAGE")" = "$GITHUB_SHA"
+          docker compose up -d --no-build --wait postgres api worker
+          curl -fsS http://localhost:8000/health --output release-health.json
+          python -c "import json; assert json.load(open('release-health.json'))['status']=='ok'"
+          printf '### Staging smoke passed\nCommit: `%s`\n\nImage: `%s`\n\nEphemeral runner; no GPU inference or persistent deployment.\n' "$GITHUB_SHA" "$ISSUEPILOT_IMAGE" >> "$GITHUB_STEP_SUMMARY"
+      - if: always()
+        run: docker compose down --remove-orphans

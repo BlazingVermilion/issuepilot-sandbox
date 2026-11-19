@@ -1,0 +1,16 @@
+{
+  "classification": {
+    "splits": {
+      "validation": "validation.jsonl",
+      "test": "test.jsonl"
+    },
+    "fields": {
+      "id": "ticket",
+      "text": "description",
+      "label": "kind"
+    }
+  },
+  "rag": {
+    "scenarios": "scenarios.jsonl"
+  }
+}

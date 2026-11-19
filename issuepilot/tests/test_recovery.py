@@ -52,7 +52,7 @@ def test_permission_fix_resumes_only_remaining_actions(runtime, auth, monkeypatc
     assert recover(client, cid, auth).json()["state"] == "RESUME_QUEUED"
     assert recover(client, cid, auth).status_code == 409
     worker.tick()
-    assert client.get(f"/cases/{cid}", headers=auth).json()["status"] == "COMPLETED"
+    assert client.get(f"/cases/{cid}", headers=auth).json()["status"] == "WAITING_REPORTER"
     with service.sessions() as s:
         assert len(s.get(DemoIssue, 1).comments) == 1
         assert s.get(DemoIssue, 1).data["labels"] == ["bug"]
@@ -84,7 +84,7 @@ def test_unknown_comment_requires_readback_and_explicit_risk_ack(
     worker.tick()
     with service.sessions() as s:
         assert len(s.get(DemoIssue, 1).comments) == 1
-    assert client.get(f"/cases/{cid}", headers=auth).json()["status"] == "COMPLETED"
+    assert client.get(f"/cases/{cid}", headers=auth).json()["status"] == "WAITING_REPORTER"
 
 
 def test_recovery_checks_freshness_again_in_worker(runtime, auth, monkeypatch):
@@ -140,7 +140,7 @@ def test_legacy_unknown_ledger_recoverable_and_version_protected(runtime, auth, 
     assert recover(client, cid, auth).status_code == 409
     assert recover(client, cid, auth, acknowledge_unknown=True).status_code == 200
     worker.tick()
-    assert client.get(f"/cases/{cid}", headers=auth).json()["status"] == "COMPLETED"
+    assert client.get(f"/cases/{cid}", headers=auth).json()["status"] == "WAITING_REPORTER"
 
 
 def test_failed_planning_can_regenerate_after_model_repair(runtime, auth, monkeypatch):

@@ -16,3 +16,5 @@ artifacts/
 .vscode/
 dist/
 secrets/
+
+models/

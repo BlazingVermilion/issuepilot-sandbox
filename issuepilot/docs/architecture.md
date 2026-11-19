@@ -1,10 +1,16 @@
 # IssuePilot architecture contract
 
-Status: implementation v0.3.0, accepted project direction on 2026-11-10.
+Status: v0.5.3 (Git checkout and dataset replay). The v0.5.0 AI profile is unchanged.
 This document is the source of truth. Change it with code when scope changes.
 Do not silently remove n8n, LangGraph, RAG, Snowflake, deployment, or evaluation.
 
 ## Business problem
+
+The portfolio replay uses the same verified intake, PostgreSQL case ledger, worker, graph and
+reviewer as the operational workflow. Its adapter serves the pinned VS Code issue snapshots
+and records approved actions locally. Source labels and historical assistant messages are not
+available to inference. The replay has separate credentials, ports and Docker volumes; its
+Snowflake cohort is selected by a persisted run ID. See [the demo](portfolio-demo.md).
 
 An open-source maintainer receives issues with uneven detail. Before fixing a bug,
 they must establish intent, identify missing information, consult contributor policy,
@@ -22,8 +28,8 @@ assignees. It does not fix code, execute attachments, close issues, or make prom
 |---|---|---|
 | n8n + webhook | Receive GitHub deliveries, preserve exact raw bytes, forward to the trusted verification boundary. The backend validates HMAC before parsing and persists the delivery ID. | Replay the same signed delivery twice through n8n; one case and one accepted delivery. |
 | FastAPI + PostgreSQL | Authoritative cases, proposal versions, reviewer identity, decisions, action ledger, immutable analytic events. | No unauthenticated approval, no write without recorded approval, retained audit history. |
-| LangGraph + tool calling | Bounded read-only investigation, structured draft, durable human interrupt, resume the correct thread. | Tool trace, persisted checkpoint, restart and resume, stale-source protection. |
-| RAG | BM25 retrieval over reviewed local policy chunks. LLM generation cites retrieved IDs and exact quotations. | Evidence visible in review UI; missing/invalid citations rejected; insufficient policy permits abstention. |
+| LangGraph | Fixed read-only classification and policy tools, structured draft, durable human interrupt, resume the correct thread. | Tool trace, persisted checkpoint, restart and resume, stale-source protection. |
+| RAG | Topic-weighted BM25 over normative section IDs, with dependency expansion. Qwen cites retrieved IDs; the adapter displays exact excerpts. | Evidence visible in review UI; missing/invalid citations rejected; insufficient policy permits abstention. |
 | Snowflake | Asynchronous, metadata-only mirror of triage events and operational SQL. | Idempotent sync, full content readback, edit/rejection rates and latency by engine/policy. |
 | Docker + CI/CD | Reproducible local services, test jobs, release image, explicit digest-based host deployment. | CI reports, release-to-commit label, health endpoint and sandbox acceptance run. |
 
@@ -55,17 +61,22 @@ flowchart TD
 
 ## Agent design
 
-- `read_issue`: read the immutable snapshot being proposed for approval.
-- `search_policy(query)`: return at most four chunks from the trusted local corpus.
-- `recent_cases`: up to ten locally ingested cases; related context, not authoritative duplicates.
-- At most four tool rounds and four calls per round. The model has no write tool,
-  shell, arbitrary HTTP tool, credentials, or ability to change repository scope.
-- The Ollama model is configurable. `qwen2.5:7b` is a starting configuration, not a
-  benchmark winner. `rules` is a deterministic baseline and is clearly labeled in UI.
-- BM25 is a deliberate small-corpus retrieval choice. This is lexical RAG, not
-  vector search. Add embeddings only if measured retrieval failures justify them.
-- Output validation proves schema/allowlists/citation provenance. It does **not**
-  prove semantic correctness. Maintainer review and labeled evaluations remain necessary.
+The LangGraph draft node calls two fixed read-only stages. The model cannot pick
+alternate tools, read URLs, access credentials or call GitHub mutations.
+
+| Stage | Input | Output and boundary |
+|---|---|---|
+| Classify | Canonical issue title and description only; 16,384 context / 128 output tokens | One of bug, feature-request or ABSTAIN. ABSTAIN goes to manual review without RAG. |
+| Retrieve | Current intake question, category and verified reporter evidence | Topic patterns and BM25 rank whole IP sections. Keep top 4 with score ≥8; append all mandatory dependencies. No embeddings or vector service. |
+| Apply policy | Question and those sections, 8,192 context / 512 output tokens | One structured read-only model call when evidence exists. NO_POLICY on empty context. A deterministically premature explicit deadline can block without inference. |
+| Adapt and review | Validated decision, cited claims, current label catalog | ALLOW can propose a permitted category; NEED_FACTS can propose a bounded clarification. BLOCK, NO_POLICY or ambiguous clarification goes to manual review. Gated proposals retain the original decision and citation trace. |
+| Execute | Current approved version; fresh source, policy and permissions | Existing comment/label/assignment ledger only. No close or reopen executor. |
+
+Both calls use the same pinned qwen3:8b digest with thinking off, temperature 0
+and seed 42. No judge runs online. The application supplies the intake question;
+this adapter and real reporter traffic were **not** scored by the offline validation.
+The live corpus is `policies/runtime/issuepilot_policy.md`. The legacy `triage.md`
+is confined to the explicit rules demo and its historical CLI controls.
 
 ## Persistence and state
 
@@ -75,7 +86,9 @@ is a notification; the worker fetches the current source rather than trusting ev
 arrival order. A source edit during drafting invalidates that draft by version check.
 
 Normal state progression: QUEUED -> PROCESSING -> REVIEW -> APPROVED -> EXECUTING
--> COMPLETED. Rejection resumes the graph into DECLINED. Source or policy changes
+-> COMPLETED (routing) or WAITING_REPORTER (clarification). Reporter evidence resumes
+the same graph through REPLY_QUEUED, creates a fresh review version, and clears the
+previous approval. Unchanged/reordered notifications do not consume a clarification round. Rejection resumes the graph into DECLINED. Source or policy changes
 lead to STALE. Read/model failures lead to FAILED. Ambiguous external writes lead
 to UNCERTAIN. Definitively rejected writes become BLOCKED. Both expose explicit recovery after the cause is repaired.
 
@@ -150,22 +163,11 @@ missing evidence with a green badge or an invented accuracy number.
 
 ## Repository label governance and reviewer console
 
-Live proposals use a fresh paginated GitHub label catalog, including descriptions.
-`policies/label_rules.json` grants a subset of that vocabulary to the agent. An
-optional `IP_ALLOWED_LABELS` setting only narrows the subset. Demo uses an explicitly
-identified fixture; a failed GitHub read never silently falls back to that fixture.
-The model receives label descriptions and permission flags alongside the issue.
-Proposal validation rejects missing or disallowed labels. Catalog and permission
-hashes accompany the proposal and are rechecked on approval and before execution;
-a mismatch requires a fresh review. The adapter rechecks labels immediately before
-its additive labels write. There is no automatic label-creation tool.
+The normative policy defines the vocabulary: IP-LABEL-001 names five primary categories and IP-LABEL-002 defines eleven workflow/resolution labels and their conditions. The intake layer may propose only the supported categories authorized in label_rules.json (currently bug and feature-request). In live mode GitHub reports which exact names are provisioned; unrelated GitHub defaults do not become suggestions, and missing names are not created or silently remapped. A failed GitHub read does not fall back to the demo catalog. The sandbox has the complete local policy vocabulary. The original issue can display its historical source labels; these do not become classifier input or write permissions. Workflow labels are not unrestricted intake suggestions.
 
-`question` describes a usage/support question, not every incomplete bug report.
-`duplicate`, `good first issue`, `help wanted`, `invalid`, and `wontfix` remain
-maintainer-only under the default policy. Accessibility may accompany bug when
-supported by the source. The rules baseline remains intentionally limited.
+The policy/catalog snapshot is rechecked at approval and before execution. Existing historical proposals retain their original evidence. New proposals store complete cited sections. The viewer can expand an older excerpt only from a matching source document saved with that proposal; otherwise it displays the excerpt as recorded. No UI reads current policy to fill a hole in an older decision. Raw source text remains independently inspectable.
 
-The console separates Overview, Inbox, Review, Activity and Repository. It displays
+The console separates Overview, Inbox, Review and Repository. History is a per-case dialog opened directly from the inbox or execution trace. It displays
 recorded engine evidence; a configured model name is not evidence of an LLM call.
 Review approval is bound to the displayed case/version. Theme preference can persist;
 reviewer tokens persist only in sessionStorage for the current tab session. Case reads, recovery and decisions are scoped to the configured
@@ -203,3 +205,46 @@ network outage retains the session for reconnection. A normal closed-tab session
 but browser restore/duplicate-tab features may preserve sessionStorage: use Disconnect
 for explicit sign-out. This clears the browser credential, not the server token itself.
 The UI shows the approved payload after review and keeps the original draft separately.
+
+
+## VS Code multi-turn graph (v0.4)
+
+```mermaid
+flowchart TD
+    A["Read issue and author replies"] --> B["Classify and retrieve policy"]
+    B --> C{"Missing evidence?"}
+    C -->|Yes| D["Draft clarification"]
+    C -->|No| E["Propose category and area"]
+    D --> F["Maintainer interrupt"]
+    E --> F
+    F -->|Regenerate new version| A
+    F -->|Reject| R["Declined"]
+    F -->|Approve| G["Freshness check and action ledger"]
+    G -->|Confirmed clarification| H["Reporter interrupt"]
+    H -->|New verified snapshot| B
+    G -->|Confirmed routing| I["Completed"]
+    G -->|Rejected or unknown write| J["Repair and reconcile"]
+    J -->|Still current approval| G
+```
+
+Three clarification rounds by default; exhausted rounds produce a non-executable
+abstention for maintainer investigation. Human regeneration creates a new graph thread
+for the same case and carries its round count forward. Reporter replies resume the
+existing thread. Only author comments are reporter evidence; maintainer approval is
+always a separate authenticated API action. Own marked bot comments are excluded.
+Subscribe GitHub webhooks to **Issues and Issue comments**. Manual Check reporter
+replies fetches canonical GitHub state if a delivery was missed.
+
+The `execution_wait` interrupt receives a receipt only after the ledger confirms
+execution. HTTP 403 cannot advance to reporter waiting. Post-write worker restart
+finishes that handoff from the persisted approval/ledger. Legacy completed v0.3 cases
+remain completed; start a new proposal to use the new multi-turn behavior. Policy
+hash changes make old unexecuted proposals stale; completed actions remain preserved.
+
+Benchmarks are offline. There is no evaluation tab, HTTP job runner or access to
+a judge in the operational application. Historical rules CLI controls remain
+separate. Snowflake mirrors operational events independently.
+
+A read/model error during reporter processing becomes REPLY_FAILED, not an uncertain
+external write. Authenticated refresh resumes the stored draft checkpoint after repair;
+regression tests verify that no already-sent clarification is republished.

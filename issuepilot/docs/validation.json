@@ -1,54 +1,80 @@
 {
-  "date": "2026-11-12",
-  "delivery_version": "0.3.0",
-  "python": "3.12.14",
-  "executed": [
-    {
-      "command": "ruff check .",
-      "result": "PASSED"
-    },
-    {
-      "command": "ruff format --check .",
-      "result": "PASSED"
-    },
-    {
-      "command": "pytest -q --tb=short",
-      "result": "PASSED",
-      "tests": 47
-    },
-    {
-      "command": "node --check src/issuepilot/static/app.js",
-      "result": "PASSED"
-    }
-  ],
-  "not_executed": [
-    "Docker image build and service boot",
-    "PostgreSQL integration suite and checkpointer",
-    "n8n imported workflow replay",
-    "Ollama model-quality evaluation",
-    "Live GitHub sandbox writes",
-    "Snowflake account sync and readback",
-    "GitHub Actions release",
-    "Remote HTTPS deployment",
-    "Mobile viewport acceptance",
-    "v0.3 browser acceptance: preview connection refused",
-    "v0.3 wheel build: offline build dependency hatchling unavailable"
-  ],
-  "constraints": [
-    "Recovery tests use simulated GitHub and SQLite; no actual GitHub writes were sent",
-    "Browser preview could not be reached; UI layout and session acceptance must be run locally",
-    "Prior rules evaluation results are retained, not rerun for this update"
-  ],
-  "packages": {
-    "fastapi": "0.162.2",
-    "langgraph": "1.2.20",
-    "langchain-ollama": "1.1.0",
-    "sqlalchemy": "2.1.8",
-    "pytest": "9.2.0"
+  "delivery_version": "0.5.0",
+  "date": "2026-11-18",
+  "application_base": "0.4.0",
+  "selection": "docs/ai-selection.md",
+  "benchmark_archive_sha256": "33e33bc08d4520b98e28c22e9ef61253ec034366cad43cb3ce1f0edd7c0c89b2",
+  "source_file_sha256": {
+    "classification-qwen3/none/manifest.json": "943b65572e8f979efb4d1571c37b075e23a501b89588a09ea0ca0859c0514188",
+    "classification-qwen3/none/predictions.jsonl": "032e90ba134ba5e519f2b8e33b0e0944027b5cb4a65d5bcb26b3fc37b8596279",
+    "classification-qwen3/rules/predictions.jsonl": "428f2a9977b51bfb5a5374387171e1dc5c23f214e69b87bd1ac4e1b5214c4227",
+    "rag-policy-pilot-final-validation/policy--pilot-refined/manifest.json": "7acdbe0d92bded48a2d531e48cf551053488f1607f4faef227893144d288b3ae",
+    "rag-policy-pilot-final-validation/policy--pilot-refined/predictions.jsonl": "d89fa69c824105ff4c1045943855287612310e2592976a472f8ab255fff878eb",
+    "rag-policy-pilot-final-validation/pilot.json": "9256083bf5957956764c60a3191eb09e19928ea9e6d5493bc9518584cccbb190",
+    "retrieval-policy-test/policy.json": "00001a156744eb026856a12276bb23659e8430b204cc06f9b819f85209cddb88",
+    "retrieval-policy-validation/policy.json": "db78aea839f10e8e3f7db57847c44166e84714bb214353fd49d9945811eed360",
+    "judge-calibration-qwen25-v3/calibration.json": "e5a56f53e4b867c3afb5c4011f6ef6fc27d51db815606dd3ec52197971a2655b"
   },
-  "source_inspection": {
-    "n8n": "2.47.3",
-    "n8n_nodes_base": "2.47.2",
-    "finding": "Webhook rawBody exposes original bytes in binary.data; source inspected, runtime not executed."
+  "verified_here": {
+    "pytest": "70 passed (SQLite; model and external writes simulated)",
+    "lint_and_format": "passed",
+    "javascript_syntax": "passed",
+    "uv_lock_check": "passed",
+    "case_workflow": "Draft → approval → simulated clarification → reporter reply → new review; abstentions, model failures, invalid citations, changed policy cannot create an unreviewed write.",
+    "source_replay": {
+      "classifier_prompt_and_output": 1993,
+      "retrieval_validation": 36,
+      "retrieval_test": 16,
+      "rag_validation_outputs": 36,
+      "fresh_model_calls": 0
+    },
+    "ui": "HTTP and markup contract tests verified five tabs, their panel targets, the model field, removal of benchmark routes and no dangling static element references.",
+    "legacy_rules_controls": {
+      "B1": 7,
+      "B2": 18
+    }
+  },
+  "not_run_here": [
+    "Live Ollama GPU smoke on target hardware",
+    "Docker build and PostgreSQL deployment",
+    "Live GitHub, n8n, Snowflake",
+    "Visual browser acceptance: local Chromium could not start under the session socket restrictions"
+  ],
+  "release_gate": "Human-reviewed pilot candidate; the archive's final policy pilot gate is INCOMPLETE. Classification production accuracy and calibrated semantic and held-out end-to-end RAG evidence remain open.",
+  "release_0_5_2": {
+    "base": "0.5.1 dataset replay",
+    "verification": "local, no new Ollama predictions, external writes or release",
+    "app_tests_sqlite": 83,
+    "bench_offline_tests": 103,
+    "node_ui_checks_with_optional_pinned_corpus": 6,
+    "issue_descriptions_rendered": 1993,
+    "markdown_fallbacks": 0,
+    "issues_with_rendered_disclosures": 212,
+    "issues_with_linked_attachments": 525,
+    "reference_policy_sections_checked": 32,
+    "frozen_output_replay": {
+      "classification": 1993,
+      "rag": 36,
+      "retrieval_validation": 36,
+      "retrieval_test": 16
+    },
+    "retrieval_only_test": {
+      "answerable": 14,
+      "complete_context": 14
+    },
+    "untested_here": [
+      "Full Chromium GUI: local process singleton socket unavailable; Playwright acceptance added to GitHub Actions.",
+      "Fresh Ollama GPU inference, live GitHub/Snowflake, Docker and hosted Actions runs."
+    ]
+  },
+  "release_0_5_3": {
+    "scope": "Git checkout replay bootstrap; inference profile unchanged",
+    "app_sqlite_tests": 87,
+    "benchmark_offline_tests": 103,
+    "node_ui_tests_with_pinned_corpus": 6,
+    "verified_public_issue_count": 1993,
+    "replay_projection_sha256": "5cb5cd2ec3ebc3a127c34944041a4c7bcc10f1558d1eee01a833f1dd7cb1b706",
+    "merged_scoring_input_sha256": "24ed4140fa24a88d066b3b6affe63997548d2c81a6ddf6d1cd915f86514b5a91",
+    "limits": "No new GPU predictions, live Snowflake sync or production deployment measured for this change. See Actions for the container/PostgreSQL and full-browser checks of the pushed commit."
   }
 }

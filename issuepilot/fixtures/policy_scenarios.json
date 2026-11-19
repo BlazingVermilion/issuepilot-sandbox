@@ -1,0 +1,99 @@
+[
+  {
+    "id": "bug-fields-0",
+    "issue": {
+      "title": "Editor crashes saving draft",
+      "body": ""
+    },
+    "missing": [
+      "version",
+      "reproduction"
+    ],
+    "known": [],
+    "next_step": "clarify",
+    "area": "editor"
+  },
+  {
+    "id": "bug-fields-1",
+    "issue": {
+      "title": "Editor crashes saving draft",
+      "body": "Version: 1.95"
+    },
+    "missing": [
+      "reproduction"
+    ],
+    "known": [
+      "version"
+    ],
+    "next_step": "clarify",
+    "area": "editor"
+  },
+  {
+    "id": "bug-fields-2",
+    "issue": {
+      "title": "Editor crashes saving draft",
+      "body": "Version: 1.95\nReproduction: save a draft"
+    },
+    "missing": [],
+    "known": [
+      "version",
+      "reproduction"
+    ],
+    "next_step": "route",
+    "area": "editor"
+  },
+  {
+    "id": "unsupported",
+    "issue": {
+      "title": "What is the weather tomorrow?",
+      "body": ""
+    },
+    "missing": [],
+    "known": [],
+    "unsupported": true,
+    "next_step": "escalate",
+    "area": "unknown"
+  },
+  {
+    "id": "feature",
+    "issue": {
+      "title": "Feature request: add split preview",
+      "body": "Use case: compare two documents"
+    },
+    "missing": [],
+    "known": [
+      "use case"
+    ],
+    "next_step": "route",
+    "area": "unknown"
+  },
+  {
+    "id": "extension",
+    "issue": {
+      "title": "Extension causes crash",
+      "body": "Version: 1.95\nReproduction: open editor\nExtensions disabled: yes"
+    },
+    "missing": [],
+    "known": [
+      "version",
+      "reproduction",
+      "extensions_disabled"
+    ],
+    "next_step": "route",
+    "area": "extensions"
+  },
+  {
+    "id": "terminal",
+    "issue": {
+      "title": "Integrated terminal crashes",
+      "body": "Version: 1.95\nReproduction: open terminal"
+    },
+    "missing": [],
+    "known": [
+      "version",
+      "reproduction"
+    ],
+    "area": "integrated-terminal",
+    "next_step": "route"
+  }
+]

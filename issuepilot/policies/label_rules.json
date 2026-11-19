@@ -1,4 +1,1 @@
-{
-  "agent_labels": ["bug", "documentation", "enhancement", "question", "accessibility"],
-  "maintainer_only": ["duplicate", "good first issue", "help wanted", "invalid", "wontfix"]
-}
+{"profile":"policy-intake-v2","agent_labels":["bug","feature-request"]}

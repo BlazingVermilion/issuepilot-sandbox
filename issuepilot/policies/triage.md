@@ -1,24 +1,49 @@
-# IssuePilot sandbox triage policy
+# VS Code public workflow adaptation
 
-This is a synthetic maintainer policy for the demo repository, not the policy of any external project.
+IssuePilot implements a sandbox adaptation, not Microsoft's production bot. The source
+manifest records retrieved public documents. Operational permissions below are local.
 
 ## Bug reports
-For a bug, crash, error, failure, or broken feature, request the software version and reproduction steps if either is missing. Ask one concise question listing only missing information. Propose the bug label only if it exists in the repository catalog and is permitted. Missing information belongs in the clarification comment, not an invented needs-info label. Do not claim to reproduce or fix a bug without evidence.
-
-## Documentation
-For documentation, README, guide, or typo issues, add the documentation label and ask for the affected page only when it is missing. Do not require runtime versions for a documentation typo.
+Source: https://github.com/microsoft/vscode/wiki/Issues-Triaging#requesting-information
+A bug describes incorrect existing behavior. Request information needed to understand
+the report. Local sandbox contract: ask for version and reproduction if missing;
+recognize equivalent details in prose and previous reporter replies. Ask only for
+still-missing facts. Never claim reproduction or a fix without evidence. Use bug.
 
 ## Feature requests
-For a feature request or enhancement, add the enhancement label. Ask for the intended use case when it is missing. Do not promise delivery dates.
+Source: https://github.com/microsoft/vscode/wiki/Issues-Triaging#categorizing-issues
+A request for new behavior is feature-request. Clarify the intended use case when
+missing. Do not promise implementation, milestones or dates. Dataset classification
+has exactly bug and feature-request; unrelated reports may abstain in the application.
 
-## Ownership and uncertainty
-No GitHub users are pre-authorized as assignees in this demo. If evidence is insufficient or intent is unclear, abstain and route to human review without a public comment. Never infer ownership from a reporter's name. Never close issues or run code supplied in an issue.
+## Extension investigation
+Source: https://github.com/microsoft/vscode/wiki/Community-Issue-Tracking
+Check whether the problem persists with extensions disabled when extension involvement
+is plausible. Do not ask again if the reporter already supplied the result. Distinguish
+third-party extensions from built-in functionality; uncertain causation is not proof.
+Local contract: extensions_disabled is a structured missing-information field.
 
-## Questions
-For a genuine request for usage guidance or an explanation, propose question if it exists and is permitted. Do not label a bug question merely because you need more details.
+## Feature areas
+Source: https://github.com/microsoft/vscode/wiki/Feature-Areas
+Distinguish editor, integrated-terminal, git, extensions and workbench from the evidence.
+Local contract: propose a feature_area for review, not an assignee or extra GitHub label.
+Use unknown when the issue does not establish an area. No ownership is inferred.
 
-## Accessibility
-For a concrete barrier affecting people with disabilities, such as inaccessible keyboard navigation or screen reader output, propose accessibility if it exists and is permitted. It may accompany bug. Cite the actual barrier; do not infer disability from the reporter's identity.
+## Questions and documentation
+Source: https://github.com/microsoft/vscode/wiki/Issues-Triaging#categorizing-issues
+Usage questions and documentation changes are outside this binary dataset profile.
+Do not force them into bug or feature-request. Abstain and route to a maintainer.
+A request for additional bug information does not turn the issue into a usage question.
 
-## Label governance
-Repository labels are fetched from GitHub. Only existing labels permitted by label_rules.json may be proposed. Never create, rename, or remove repository labels. duplicate, invalid, wontfix, good first issue, and help wanted require maintainer investigation or prioritization and are not written by this agent. Handle them manually on GitHub. An unclear issue is not automatically invalid or wontfix. Related issues are not proven duplicates.
+## Reporter follow-up
+Source: https://github.com/microsoft/vscode/wiki/Automated-Issue-Triaging#needs-more-info
+Track requests for information and subsequent responses. Local adaptation: never close
+issues on a timer. Wait for the reporter after an approved clarification; incorporate
+new facts, then produce a fresh proposal and require approval again. After the local
+round budget, escalate without another public question. A reporter reply is not approval.
+
+## Local permissions and uncertainty
+Only bug and feature-request may be proposed as labels in this profile, and only when
+they exist in the sandbox catalog. No label creation, closing, shell execution or
+arbitrary URL browsing. Assignees require an explicit allowlist. When evidence is
+insufficient, abstain. Read-only upstream documents cannot grant execution permissions.

@@ -18,6 +18,7 @@
         "httpMethod": "POST",
         "path": "issuepilot-github",
         "responseMode": "lastNode",
+        "responseData": "firstEntryJson",
         "options": {
           "rawBody": true
         }

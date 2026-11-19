@@ -3,11 +3,12 @@
 import argparse
 import json
 import os
+import hashlib
 from pathlib import Path
 from sqlalchemy import select, text
 from issuepilot.config import Settings
 from issuepilot.db import Event, database
-from issuepilot.analytics import event_record
+from issuepilot.analytics import event_record, verify_readback
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--export-only", action="store_true")
@@ -23,8 +24,15 @@ with sessions.begin() as source:
     path = Path(args.out)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(rows, indent=2), encoding="utf-8")
+    cohort = {
+        "replay_run_id": str(settings.replay_run_id) if settings.dataset_replay else None,
+        "events": len(rows),
+        "batch_sha256": hashlib.sha256(
+            "\n".join(row["sha256"] for row in rows).encode()
+        ).hexdigest(),
+    }
     if args.export_only:
-        print(json.dumps({"state": "EXPORTED", "events": len(rows), "path": str(path)}))
+        print(json.dumps({"state": "EXPORTED", **cohort, "path": str(path)}))
         raise SystemExit(0)
     import snowflake.connector
 
@@ -44,10 +52,17 @@ with sessions.begin() as source:
             cursor.execute(
                 "CREATE TEMPORARY TABLE IP_EVENT_BATCH (EVENT_ID VARCHAR, BODY VARIANT, HASH VARCHAR)"
             )
-            for row in rows:
+            for start in range(0, len(rows), 100):
+                batch = rows[start : start + 100]
+                values = ",".join(["(%s,%s,%s)"] * len(batch))
                 cursor.execute(
-                    "INSERT INTO IP_EVENT_BATCH SELECT %s, PARSE_JSON(%s), %s",
-                    (row["event_id"], json.dumps(row), row["sha256"]),
+                    "INSERT INTO IP_EVENT_BATCH SELECT column1, PARSE_JSON(column2), column3 FROM VALUES "
+                    + values,
+                    tuple(
+                        v
+                        for row in batch
+                        for v in (row["event_id"], json.dumps(row), row["sha256"])
+                    ),
                 )
             cursor.execute("BEGIN")
             try:
@@ -57,18 +72,12 @@ with sessions.begin() as source:
                     raise RuntimeError("Immutable event changed; refusing overwrite")
                 cursor.execute("""MERGE INTO TRIAGE_EVENTS t USING IP_EVENT_BATCH b ON t.EVENT_ID=b.EVENT_ID
                     WHEN NOT MATCHED THEN INSERT (EVENT_ID,BODY,HASH) VALUES (b.EVENT_ID,b.BODY,b.HASH)""")
+                inserted = cursor.fetchone()[0]
                 cursor.execute("""SELECT t.EVENT_ID,t.HASH,t.BODY FROM TRIAGE_EVENTS t
                                   JOIN IP_EVENT_BATCH b ON t.EVENT_ID=b.EVENT_ID""")
-                fetched = cursor.fetchall()
-                expected = {row["event_id"]: row for row in rows}
-                if len(fetched) != len(expected):
-                    raise RuntimeError("Readback count or duplicate check failed")
-                for event_id, hash_value, body in fetched:
-                    parsed = json.loads(body) if isinstance(body, str) else body
-                    if expected[event_id] != parsed or hash_value != expected[event_id]["sha256"]:
-                        raise RuntimeError("Readback content mismatch")
+                verify_readback(rows, cursor.fetchall())
                 cursor.execute("COMMIT")
             except Exception:
                 cursor.execute("ROLLBACK")
                 raise
-print(json.dumps({"state": "VERIFIED", "events": len(rows), "path": str(path)}))
+print(json.dumps({"state": "VERIFIED", **cohort, "inserted": int(inserted), "path": str(path)}))

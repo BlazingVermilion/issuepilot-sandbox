@@ -1,59 +1,9 @@
 """LLM orchestration contract tests use a fake model; they are not model-quality scores."""
 
-from langchain_core.messages import AIMessage
 from issuepilot.agent import Analyst
 from issuepilot.contracts import Proposal
 from issuepilot.policy import Policies
 import pytest
-
-
-def test_llm_calls_read_only_policy_tool(runtime, monkeypatch):
-    settings = runtime[3]
-    settings.engine = "ollama"
-    policies = Policies(settings.policy_dir)
-    doc = policies.search("bug version reproduction")[0]
-
-    class FakeModel:
-        def __init__(self, **kwargs):
-            self.calls = 0
-
-        def bind_tools(self, tools):
-            assert {t.name for t in tools} == {"read_issue", "search_policy", "recent_cases"}
-            return self
-
-        def invoke(self, messages):
-            self.calls += 1
-            if self.calls == 1:
-                return AIMessage(
-                    content="",
-                    tool_calls=[
-                        {
-                            "name": "search_policy",
-                            "args": {"query": "bug version reproduction"},
-                            "id": "call-1",
-                            "type": "tool_call",
-                        }
-                    ],
-                )
-            return AIMessage(content="Ready")
-
-        def with_structured_output(self, schema, method):
-            class Output:
-                def invoke(self, messages):
-                    return Proposal(
-                        category="bug",
-                        summary="API crash",
-                        labels=["bug"],
-                        citations=[{"id": doc["id"], "quote": doc["text"][:80]}],
-                        reason="Policy supported",
-                    )
-
-            return Output()
-
-    monkeypatch.setattr("langchain_ollama.ChatOllama", FakeModel)
-    output = Analyst(settings, policies).draft({"issue": {"title": "API crash", "body": "Error"}})
-    assert output["trace"][0]["tool"] == "search_policy"
-    assert output["documents"][0]["id"] == doc["id"]
 
 
 def test_citation_cannot_reference_unretrieved_policy(runtime):

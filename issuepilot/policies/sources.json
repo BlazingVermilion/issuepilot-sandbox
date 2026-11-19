@@ -1,0 +1,37 @@
+[
+  {
+    "file": "data/policy_sources/Issues-Triaging.md",
+    "url": "https://github.com/microsoft/vscode/wiki/Issues-Triaging",
+    "sha256": "44af93cdad5e55e0a38122cc35046d1bc84120538964274fbe436ac3fd92f236",
+    "retrieved_at": "2026-11-12",
+    "kind": "upstream_snapshot"
+  },
+  {
+    "file": "data/policy_sources/Issue-Tracking.md",
+    "url": "https://github.com/microsoft/vscode/wiki/Issue-Tracking",
+    "sha256": "d0d0f9743b7dba1a7357e46780ad15388a8b4aded7df93be4fa0792222cb7d4a",
+    "retrieved_at": "2026-11-12",
+    "kind": "upstream_snapshot"
+  },
+  {
+    "file": "data/policy_sources/Community-Issue-Tracking.md",
+    "url": "https://github.com/microsoft/vscode/wiki/Community-Issue-Tracking",
+    "sha256": "1e6ba67ac27658e97a83303b4ee48e6a5a5392219780cabb1647c53693fcdc1f",
+    "retrieved_at": "2026-11-12",
+    "kind": "upstream_snapshot"
+  },
+  {
+    "file": "data/policy_sources/Feature-Areas.md",
+    "url": "https://github.com/microsoft/vscode/wiki/Feature-Areas",
+    "sha256": "ffc4a858637571f97120d43c0932d8811f48130e3c09f2bc70f023375c1f2518",
+    "retrieved_at": "2026-11-12",
+    "kind": "upstream_snapshot"
+  },
+  {
+    "file": "data/policy_sources/Automated-Issue-Triaging.md",
+    "url": "https://github.com/microsoft/vscode/wiki/Automated-Issue-Triaging",
+    "sha256": "58e8b11986c67a0cede16d88d7869c827e005d4b11650b8502ea9052cc5c6345",
+    "retrieved_at": "2026-11-12",
+    "kind": "upstream_snapshot"
+  }
+]

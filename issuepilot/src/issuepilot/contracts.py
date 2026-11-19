@@ -9,12 +9,25 @@ from pydantic import BaseModel, ConfigDict, Field
 class Citation(BaseModel):
     model_config = ConfigDict(extra="forbid")
     id: str
-    quote: str = Field(min_length=15, max_length=1200)
+    quote: str = Field(min_length=15, max_length=32768)
 
 
 class Proposal(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    category: Literal["bug", "documentation", "enhancement", "question", "accessibility", "unknown"]
+    category: Literal[
+        "bug",
+        "documentation",
+        "enhancement",
+        "feature-request",
+        "question",
+        "other",
+        "accessibility",
+        "unknown",
+    ]
+    feature_area: Literal[
+        "editor", "integrated-terminal", "git", "extensions", "workbench", "unknown"
+    ] = "unknown"
+    next_step: Literal["clarify", "route", "escalate"] = "route"
     summary: str = Field(min_length=1, max_length=1000)
     missing_fields: list[str] = Field(default_factory=list, max_length=8)
     labels: list[str] = Field(default_factory=list, max_length=4)
@@ -34,7 +47,18 @@ def digest(value):
 def revision(issue):
     # Labels/assignees are included because a maintainer may have already routed the issue.
     return digest(
-        {k: issue.get(k) for k in ("title", "body", "state", "updated_at", "labels", "assignees")}
+        {
+            k: issue.get(k)
+            for k in (
+                "title",
+                "body",
+                "state",
+                "updated_at",
+                "labels",
+                "assignees",
+                "reporter_replies",
+            )
+        }
     )
 
 
@@ -42,9 +66,11 @@ def validate_proposal(proposal, documents, settings, label_catalog=None):
     if label_catalog is None:
         if settings.mode != "demo":
             raise ValueError("Live validation requires a freshly fetched repository label catalog")
-        from .labels import catalog, DEMO_LABELS
+        from .labels import catalog, policy_labels
 
-        label_catalog = catalog(settings, DEMO_LABELS)
+        label_catalog = catalog(settings, policy_labels(settings))
+    if proposal.labels and proposal.labels != [proposal.category]:
+        raise ValueError("Intake can add at most the single reviewed primary category label")
     if not set(proposal.labels) <= set(label_catalog["allowed"]):
         raise ValueError("Label is absent from the repository or not permitted by its policy")
     if not set(proposal.assignees) <= set(settings.allowed_assignees):

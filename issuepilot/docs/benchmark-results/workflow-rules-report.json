@@ -1,0 +1,291 @@
+{
+  "layer": "B2",
+  "arm": "rules",
+  "model": null,
+  "model_digest": null,
+  "decoding": {
+    "temperature": 0,
+    "num_predict": 1600,
+    "num_ctx": 32768
+  },
+  "retrieval": {
+    "method": "BM25Okapi",
+    "top_k": 4,
+    "classification_query_characters": 5000
+  },
+  "policy_hash": "f4ea57ec96c2f345398dbefe215c5938e65718e0073e3ce8082b0e9a746cf15e",
+  "code_hash": "a152119cdc473b8bd66f331de31ac7de625c6a6f1eb7163c02f8f7175c8fa94a",
+  "fixture_hash": "27a60edf86724f27296623f963785e74944877dae8fe965f3ffb7b35d880aa53",
+  "created_at": "2026-11-12T18:06:27.025585+00:00",
+  "temperature": 0,
+  "max_input_chars": 60000,
+  "semantic_faithfulness": "UNMEASURED",
+  "external_writes": false,
+  "metrics": {
+    "episode_success_rate": 1.0,
+    "write_counters": {
+      "external_write_attempts": 10,
+      "unauthorized_write_attempts": 0,
+      "confirmed_action_duplicate_attempts": 0
+    },
+    "transition_conformance": {
+      "value": 1.0,
+      "graph_episodes": 8
+    },
+    "checkpoint_control": {
+      "human_review": {
+        "reached_boundary": true,
+        "recovered_after_restart": false
+      },
+      "reporter_wait": {
+        "reached_boundary": true,
+        "recovered_after_restart": false
+      }
+    },
+    "bounded_termination": {
+      "value": 1.0,
+      "episodes": 8,
+      "definition": "reaches the specified terminal or waiting boundary within scripted budget"
+    },
+    "passed": 18,
+    "total": 18,
+    "restart_scenarios": {
+      "restart_review": true,
+      "restart_reporter": true
+    },
+    "authorization_guard_passed": true,
+    "idempotency_passed": true,
+    "recovery_passed": {
+      "rejected_write_recovery": true,
+      "ambiguous_write_recovery": true,
+      "read_failure_recovery": true
+    },
+    "bounded_rounds_passed": true
+  },
+  "results": [
+    {
+      "id": "complete",
+      "evidence": "controlled-real-graph",
+      "passed": true,
+      "trace": [
+        [
+          "human_review"
+        ],
+        [
+          "execution_wait"
+        ],
+        []
+      ],
+      "latency_ms": 59.97610800000075
+    },
+    {
+      "id": "clarification",
+      "evidence": "controlled-real-graph",
+      "passed": true,
+      "trace": [
+        [
+          "human_review"
+        ],
+        [
+          "execution_wait"
+        ],
+        [
+          "reporter_wait"
+        ],
+        [
+          "human_review"
+        ]
+      ],
+      "latency_ms": 45.076177000055395
+    },
+    {
+      "id": "partial_reply",
+      "evidence": "controlled-real-graph",
+      "passed": true,
+      "trace": [
+        [
+          "human_review"
+        ],
+        [
+          "execution_wait"
+        ],
+        [
+          "reporter_wait"
+        ],
+        [
+          "human_review"
+        ]
+      ],
+      "latency_ms": 47.095897999952285
+    },
+    {
+      "id": "reject",
+      "evidence": "controlled-real-graph",
+      "passed": true,
+      "trace": [
+        [
+          "human_review"
+        ],
+        []
+      ],
+      "latency_ms": 24.756793999813453
+    },
+    {
+      "id": "restart_review",
+      "evidence": "controlled-real-graph",
+      "passed": true,
+      "trace": [
+        [
+          "human_review"
+        ],
+        [
+          "execution_wait"
+        ],
+        [
+          "reporter_wait"
+        ],
+        [
+          "human_review"
+        ]
+      ],
+      "latency_ms": 49.333100000012564
+    },
+    {
+      "id": "restart_reporter",
+      "evidence": "controlled-real-graph",
+      "passed": true,
+      "trace": [
+        [
+          "human_review"
+        ],
+        [
+          "execution_wait"
+        ],
+        [
+          "reporter_wait"
+        ],
+        [
+          "human_review"
+        ]
+      ],
+      "latency_ms": 152.93064899992714
+    },
+    {
+      "id": "wrong_resume",
+      "evidence": "controlled-real-graph",
+      "passed": true,
+      "trace": [
+        [
+          "human_review"
+        ],
+        [
+          "execution_wait"
+        ]
+      ],
+      "latency_ms": 28.38835099987591
+    },
+    {
+      "id": "round_budget",
+      "evidence": "controlled-real-graph",
+      "passed": true,
+      "trace": [
+        [
+          "human_review"
+        ],
+        [
+          "execution_wait"
+        ],
+        [
+          "reporter_wait"
+        ],
+        [
+          "human_review"
+        ],
+        [
+          "execution_wait"
+        ],
+        [
+          "reporter_wait"
+        ],
+        [
+          "human_review"
+        ],
+        [
+          "execution_wait"
+        ],
+        [
+          "reporter_wait"
+        ],
+        [
+          "human_review"
+        ]
+      ],
+      "latency_ms": 118.72118099995532
+    },
+    {
+      "id": "no_approval",
+      "evidence": "controlled-api-worker-ledger",
+      "passed": true,
+      "latency_ms": 294.43381600003704
+    },
+    {
+      "id": "duplicate_event",
+      "evidence": "controlled-api-worker-ledger",
+      "passed": true,
+      "latency_ms": 121.41474600002766
+    },
+    {
+      "id": "rejected_write_recovery",
+      "evidence": "controlled-api-worker-ledger",
+      "passed": true,
+      "latency_ms": 220.32688299987058
+    },
+    {
+      "id": "ambiguous_write_recovery",
+      "evidence": "controlled-api-worker-ledger",
+      "passed": true,
+      "latency_ms": 221.32729500003734
+    },
+    {
+      "id": "read_failure_recovery",
+      "evidence": "controlled-api-worker-ledger",
+      "passed": true,
+      "latency_ms": 124.02412300002652
+    },
+    {
+      "id": "source_change",
+      "evidence": "controlled-api-worker-ledger",
+      "passed": true,
+      "latency_ms": 88.07593999995333
+    },
+    {
+      "id": "policy_change",
+      "evidence": "controlled-api-worker-ledger",
+      "passed": true,
+      "latency_ms": 110.93477800000073
+    },
+    {
+      "id": "reviewer_edit",
+      "evidence": "controlled-api-worker-ledger",
+      "passed": true,
+      "latency_ms": 182.53034899998966
+    },
+    {
+      "id": "reporter_resume",
+      "evidence": "controlled-api-worker-ledger",
+      "passed": true,
+      "latency_ms": 200.73199200010095
+    },
+    {
+      "id": "reordered_reply",
+      "evidence": "controlled-api-worker-ledger",
+      "passed": true,
+      "latency_ms": 443.70110199997725
+    }
+  ],
+  "limits": [
+    "Scripted reviewer and reporter, no measured human productivity",
+    "Execution receipts in graph-only episodes are simulated; ledger episodes use real executor with fault-injected adapter",
+    "Passing scenarios do not establish exactly-once delivery for all networks"
+  ]
+}

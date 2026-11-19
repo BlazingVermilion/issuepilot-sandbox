@@ -8,8 +8,9 @@ import httpx
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from .contracts import Proposal, revision, validate_proposal
-from .db import Case, Delivery, Action, event, uid
-from .policy import Policies
+from .db import Case, Delivery, Action, DemoIssue, event, uid
+from . import replay
+from .policy import runtime_policies
 from .labels import catalog
 
 
@@ -40,12 +41,21 @@ class Service:
         body_hash = hashlib.sha256(raw).hexdigest()
         if event_name == "ping":
             return {"state": "PING"}
-        if event_name != "issues" or payload.get("action") not in {
-            "opened",
+        reporter_event = event_name == "issue_comment" and payload.get("action") in {
+            "created",
             "edited",
-            "reopened",
-            "closed",
-        }:
+            "deleted",
+        }
+        if not reporter_event and (
+            event_name != "issues"
+            or payload.get("action")
+            not in {
+                "opened",
+                "edited",
+                "reopened",
+                "closed",
+            }
+        ):
             return {"state": "IGNORED"}
         if payload.get("repository", {}).get("full_name", "").lower() != self.settings.repo.lower():
             raise PermissionError("Repository is outside the sandbox allowlist")
@@ -56,8 +66,29 @@ class Service:
             or issue["number"] < 1
         ):
             raise ValueError("A positive issue number is required")
+        if reporter_event and (
+            not payload.get("comment", {}).get("user", {}).get("login")
+            or payload["comment"]["user"]["login"] != issue.get("user", {}).get("login")
+        ):
+            return {"state": "IGNORED"}
         if "pull_request" in issue:
             return {"state": "IGNORED"}
+        row = None
+        if self.settings.dataset_replay:
+            if (event_name, payload.get("action"), payload.get("issuepilot_dataset"), delivery) != (
+                "issues",
+                "opened",
+                replay.REVISION,
+                replay.delivery_id(issue["number"]),
+            ):
+                raise PermissionError(
+                    "This workspace accepts only stable dataset snapshot deliveries"
+                )
+            row = replay.snapshots(self.settings.replay_path).get(issue["number"])
+            if not row:
+                raise ValueError("Issue number is absent from the pinned corpus")
+        elif "issuepilot_dataset" in payload:
+            raise PermissionError("Dataset events require the isolated replay workspace")
         try:
             with self.sessions.begin() as session:
                 prior = session.get(Delivery, delivery)
@@ -72,8 +103,21 @@ class Service:
                 ).scalar_one_or_none()
                 if not case:
                     case = Case(repo=self.settings.repo, number=int(issue["number"]))
+                    if row:
+                        if session.get(DemoIssue, row["number"]):
+                            raise Conflict("An unrelated source already uses this issue number")
+                        case.source = replay.issue_source(row)
+                        session.add(DemoIssue(number=row["number"], data=dict(case.source)))
                     session.add(case)
                     session.flush()
+                elif row:
+                    raise Conflict(
+                        "Existing case without its matching stable delivery; inspect the replay database"
+                    )
+                elif case.status in {"WAITING_REPORTER", "REPLY_FAILED"}:
+                    case.status = "REPLY_QUEUED"
+                elif case.status == "REPLY_QUEUED":
+                    pass
                 elif session.scalar(
                     select(Action.id).where(
                         Action.case_id == case.id,
@@ -94,7 +138,25 @@ class Service:
                     case.status = "QUEUED"
                     case.decision = {}
                 session.add(Delivery(id=delivery, payload_hash=body_hash, case_id=case.id))
-                event(session, case, "RECEIVED", delivery_id=delivery, action=payload["action"])
+                meta = (
+                    {}
+                    if not row
+                    else {
+                        "source_kind": "dataset_replay",
+                        "dataset_revision": replay.REVISION,
+                        "replay_run_id": str(self.settings.replay_run_id),
+                        "source_number": row["number"],
+                        "split": row["split"],
+                    }
+                )
+                event(
+                    session,
+                    case,
+                    "RECEIVED",
+                    delivery_id=delivery,
+                    action=payload["action"],
+                    **meta,
+                )
                 return {"state": "ACCEPTED", "case_id": case.id}
         except IntegrityError:
             # A concurrent first delivery may have won either unique constraint.
@@ -116,7 +178,7 @@ class Service:
             if case.repo != self.settings.repo:
                 raise PermissionError("Case belongs to a different repository")
             current = self.github.read(case.number)
-            policies = Policies(self.settings.policy_dir)
+            policies = runtime_policies(self.settings)
             label_catalog = catalog(self.settings, self.github.list_labels())
             if (
                 revision(current) != case.source_hash
@@ -128,7 +190,7 @@ class Service:
                 return {"state": "STALE"}
             proposed = Proposal.model_validate(edited or case.proposal["value"])
             validate_proposal(proposed, case.proposal["documents"], self.settings, label_catalog)
-            if approved and proposed.abstain:
+            if approved and (proposed.abstain or case.proposal["value"]["abstain"]):
                 raise ValueError("An abstention cannot be approved for execution")
             case.decision = {
                 "approved": approved,
@@ -156,8 +218,10 @@ class Service:
             ).scalar_one()
             if case.repo != self.settings.repo:
                 raise PermissionError("Case belongs to a different repository")
-            if case.status not in {"STALE", "FAILED", "DECLINED"}:
-                raise Conflict("Only stale, failed or rejected proposals may be regenerated")
+            if case.status not in {"STALE", "FAILED", "DECLINED", "REVIEW"}:
+                raise Conflict(
+                    "Only review, stale, failed or rejected proposals may be regenerated"
+                )
             if session.scalar(
                 select(Action.id).where(Action.case_id == case.id, Action.version == case.version)
             ):
@@ -181,7 +245,7 @@ class Service:
             if (
                 label_catalog["hash"] != case.proposal.get("label_catalog", {}).get("hash")
                 or revision(self.github.read(case.number)) != case.source_hash
-                or Policies(self.settings.policy_dir).hash != case.policy_hash
+                or runtime_policies(self.settings).hash != case.policy_hash
             ):
                 case.status = "STALE"
                 event(session, case, "STALE", at="execution")
@@ -403,8 +467,12 @@ class Service:
                     for value in a.payload[kind]
                 }
             )
-        if any(current.get(k) != expected.get(k) for k in ("title", "body", "state")) or any(
-            set(current.get(k, [])) != set(expected.get(k, [])) for k in ("labels", "assignees")
+        if (
+            current.get("reporter_replies", []) != expected.get("reporter_replies", [])
+            or any(current.get(k) != expected.get(k) for k in ("title", "body", "state"))
+            or any(
+                set(current.get(k, [])) != set(expected.get(k, [])) for k in ("labels", "assignees")
+            )
         ):
             raise Conflict(
                 "Source changed. Cancel remaining actions and generate a fresh proposal for review."
@@ -412,7 +480,7 @@ class Service:
         labels = catalog(self.settings, self.github.list_labels())
         if (
             labels["hash"] != case.proposal.get("label_catalog", {}).get("hash")
-            or Policies(self.settings.policy_dir).hash != case.policy_hash
+            or runtime_policies(self.settings).hash != case.policy_hash
         ):
             raise Conflict(
                 "Policy or label catalog changed. Cancel remaining actions and generate a fresh proposal."

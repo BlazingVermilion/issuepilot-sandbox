@@ -11,3 +11,5 @@ artifacts
 *.key
 *.p8
 secrets
+
+models/

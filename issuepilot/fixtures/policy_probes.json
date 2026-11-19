@@ -1,0 +1,58 @@
+[
+  {
+    "id": "crash",
+    "query": "The application fails when saving. Which details should the reporter supply?",
+    "relevant_sections": [
+      "triage:bug-reports"
+    ],
+    "evidence": "controlled"
+  },
+  {
+    "id": "feature",
+    "query": "Please add a new option; what purpose should I explain?",
+    "relevant_sections": [
+      "triage:feature-requests"
+    ],
+    "evidence": "controlled"
+  },
+  {
+    "id": "extension",
+    "query": "A marketplace add-on may be responsible. How do I isolate it?",
+    "relevant_sections": [
+      "triage:extension-investigation"
+    ],
+    "evidence": "controlled"
+  },
+  {
+    "id": "area",
+    "query": "Which component owns the integrated terminal or editor?",
+    "relevant_sections": [
+      "triage:feature-areas"
+    ],
+    "evidence": "controlled"
+  },
+  {
+    "id": "reply",
+    "query": "After requesting information, the reporter responded. What happens next?",
+    "relevant_sections": [
+      "triage:reporter-follow-up"
+    ],
+    "evidence": "controlled"
+  },
+  {
+    "id": "permissions",
+    "query": "May the assistant close issues or create labels?",
+    "relevant_sections": [
+      "triage:local-permissions-and-uncertainty"
+    ],
+    "evidence": "controlled"
+  },
+  {
+    "id": "question",
+    "query": "How should usage questions outside the binary task be handled?",
+    "relevant_sections": [
+      "triage:questions-and-documentation"
+    ],
+    "evidence": "controlled"
+  }
+]

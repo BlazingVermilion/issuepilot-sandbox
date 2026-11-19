@@ -10,6 +10,7 @@ from fastapi import FastAPI, Depends, Header, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from .labels import catalog
+from . import replay
 from pydantic import BaseModel, Field
 from sqlalchemy import select, text
 from .config import Settings
@@ -38,6 +39,10 @@ class Envelope(BaseModel):
     event: str = Field(max_length=100)
 
 
+class ReplyInput(BaseModel):
+    body: str = Field(min_length=1, max_length=20000)
+
+
 class DemoInput(BaseModel):
     number: int = Field(ge=1)
     title: str = Field(min_length=1, max_length=500)
@@ -52,12 +57,14 @@ def create_app(settings=None):
 
     @asynccontextmanager
     async def lifespan(app):
+        if settings.dataset_replay:
+            replay.snapshots(settings.replay_path)
         Base.metadata.create_all(engine)
         yield
         github.close()
         engine.dispose()
 
-    app = FastAPI(title="IssuePilot", version="0.3.0", lifespan=lifespan)
+    app = FastAPI(title="IssuePilot", version="0.5.3", lifespan=lifespan)
     app.state.sessions, app.state.service = sessions, service
     app.mount("/static", StaticFiles(directory=Path(__file__).with_name("static")), name="static")
 
@@ -104,7 +111,9 @@ def create_app(settings=None):
             "status": "ok",
             "mode": settings.mode,
             "engine": settings.engine,
-            "version": "0.3.0",
+            "ai_profile": settings.ai_profile if settings.engine == "ollama" else None,
+            "version": "0.5.3",
+            "model": settings.model if settings.engine == "ollama" else None,
         }
 
     @app.get("/", response_class=HTMLResponse)
@@ -142,10 +151,14 @@ def create_app(settings=None):
             "reviewer": who,
             "mode": settings.mode,
             "engine": settings.engine,
+            "ai_profile": settings.ai_profile if settings.engine == "ollama" else None,
             "model": settings.model if settings.engine == "ollama" else None,
             "writes_enabled": settings.writes_enabled,
-            "version": "0.3.0",
+            "version": "0.5.3",
             "database": engine.dialect.name,
+            "dataset": {"name": replay.DATASET, "revision": replay.REVISION, "total": replay.TOTAL}
+            if settings.dataset_replay
+            else None,
             "repo_url": f"https://github.com/{settings.repo}" if settings.mode == "live" else None,
         }
 
@@ -162,14 +175,21 @@ def create_app(settings=None):
                     "number": c.number,
                     "status": c.status,
                     "version": c.version,
-                    "title": c.source.get("title", "Waiting for source read"),
+                    "title": c.title or "Waiting for source read",
                     "updated_at": c.updated_at,
                 }
-                for c in session.scalars(
-                    select(Case)
+                for c in session.execute(
+                    select(
+                        Case.id,
+                        Case.number,
+                        Case.status,
+                        Case.version,
+                        Case.updated_at,
+                        Case.source["title"].as_string().label("title"),
+                    )
                     .where(Case.repo == settings.repo)
                     .order_by(Case.updated_at.desc())
-                    .limit(100)
+                    .limit(replay.TOTAL if settings.dataset_replay else 100)
                 )
             ]
 
@@ -191,6 +211,8 @@ def create_app(settings=None):
                 "repo": case.repo,
                 "issue_url": f"https://github.com/{case.repo}/issues/{case.number}"
                 if settings.mode == "live"
+                else f"https://github.com/microsoft/vscode/issues/{case.number}"
+                if settings.dataset_replay
                 else None,
                 "status": case.status,
                 "version": case.version,
@@ -238,9 +260,43 @@ def create_app(settings=None):
     def reconcile(case_id: str, who=Depends(reviewer)):
         return service.reconcile(case_id, who)
 
+    @app.post("/cases/{case_id}/refresh-replies")
+    def refresh_replies(case_id: str, who=Depends(reviewer)):
+        if settings.dataset_replay:
+            raise Conflict("The frozen dataset has no subsequent reporter replies")
+        with sessions.begin() as session:
+            case = session.get(Case, case_id, with_for_update=True)
+            if not case or case.repo != settings.repo:
+                raise HTTPException(404)
+            if case.status not in {"WAITING_REPORTER", "REPLY_FAILED"}:
+                raise Conflict("This case is not waiting for reporter input")
+            # Worker fetches the canonical snapshot, never a browser-supplied live reply.
+            case.status = "REPLY_QUEUED"
+            event(session, case, "REPORTER_REFRESH_REQUESTED", reviewer=who)
+            return {"state": case.status}
+
+    @app.post("/cases/{case_id}/demo-reply")
+    def demo_reply(case_id: str, body: ReplyInput, who=Depends(reviewer)):
+        if settings.mode != "demo" or settings.dataset_replay:
+            raise HTTPException(404)
+        with sessions.begin() as session:
+            case = session.get(Case, case_id, with_for_update=True)
+            if not case or case.repo != settings.repo:
+                raise HTTPException(404)
+            if case.status != "WAITING_REPORTER":
+                raise Conflict("This case is not waiting for reporter input")
+            row = session.get(DemoIssue, case.number)
+            replies = row.data.get("reporter_replies", []) + [
+                {"id": secrets.token_hex(12), "body": body.body, "created_at": now().isoformat()}
+            ]
+            row.data = {**row.data, "reporter_replies": replies, "updated_at": now().isoformat()}
+            case.status = "REPLY_QUEUED"
+            event(session, case, "DEMO_REPORTER_REPLY", reviewer=who)
+            return {"state": case.status}
+
     @app.post("/demo/issues")
     def demo(body: DemoInput, who=Depends(reviewer)):
-        if settings.mode != "demo":
+        if settings.mode != "demo" or settings.dataset_replay:
             raise HTTPException(404)
         with sessions.begin() as session:
             row = session.get(DemoIssue, body.number)
@@ -250,6 +306,7 @@ def create_app(settings=None):
                 "updated_at": now().isoformat(),
                 "labels": row.data.get("labels", []) if row else [],
                 "assignees": [],
+                "reporter_replies": row.data.get("reporter_replies", []) if row else [],
             }
             if row:
                 row.data = data

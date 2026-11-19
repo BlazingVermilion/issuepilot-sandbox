@@ -1,0 +1,19 @@
+evidence,id,latency_ms,passed,trace
+controlled-real-graph,complete,59.97610800000075,True,"[[""human_review""], [""execution_wait""], []]"
+controlled-real-graph,clarification,45.076177000055395,True,"[[""human_review""], [""execution_wait""], [""reporter_wait""], [""human_review""]]"
+controlled-real-graph,partial_reply,47.095897999952285,True,"[[""human_review""], [""execution_wait""], [""reporter_wait""], [""human_review""]]"
+controlled-real-graph,reject,24.756793999813453,True,"[[""human_review""], []]"
+controlled-real-graph,restart_review,49.333100000012564,True,"[[""human_review""], [""execution_wait""], [""reporter_wait""], [""human_review""]]"
+controlled-real-graph,restart_reporter,152.93064899992714,True,"[[""human_review""], [""execution_wait""], [""reporter_wait""], [""human_review""]]"
+controlled-real-graph,wrong_resume,28.38835099987591,True,"[[""human_review""], [""execution_wait""]]"
+controlled-real-graph,round_budget,118.72118099995532,True,"[[""human_review""], [""execution_wait""], [""reporter_wait""], [""human_review""], [""execution_wait""], [""reporter_wait""], [""human_review""], [""execution_wait""], [""reporter_wait""], [""human_review""]]"
+controlled-api-worker-ledger,no_approval,294.43381600003704,True,
+controlled-api-worker-ledger,duplicate_event,121.41474600002766,True,
+controlled-api-worker-ledger,rejected_write_recovery,220.32688299987058,True,
+controlled-api-worker-ledger,ambiguous_write_recovery,221.32729500003734,True,
+controlled-api-worker-ledger,read_failure_recovery,124.02412300002652,True,
+controlled-api-worker-ledger,source_change,88.07593999995333,True,
+controlled-api-worker-ledger,policy_change,110.93477800000073,True,
+controlled-api-worker-ledger,reviewer_edit,182.53034899998966,True,
+controlled-api-worker-ledger,reporter_resume,200.73199200010095,True,
+controlled-api-worker-ledger,reordered_reply,443.70110199997725,True,

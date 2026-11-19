@@ -1,0 +1,21 @@
+{
+  "kind": "offline intake integration check",
+  "transport": "n8n envelope simulated locally; FastAPI HMAC and DB path real",
+  "database": "temporary SQLite",
+  "inference_executed": false,
+  "external_github_writes": 0,
+  "actual_n8n": false,
+  "actual_snowflake": false,
+  "actual_github_actions": false,
+  "counts": {
+    "cases": 1993,
+    "immutable_sources": 1993,
+    "deliveries": 1993,
+    "audit_events": 1993
+  },
+  "authenticated_inbox_rows": 1993,
+  "resumed_without_new_deliveries": 1993,
+  "status": {
+    "QUEUED": 1993
+  }
+}

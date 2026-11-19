@@ -23,9 +23,9 @@ class GitHub:
 
     def list_labels(self):
         if self.settings.mode == "demo":
-            from .labels import DEMO_LABELS
+            from .labels import policy_labels
 
-            return [dict(x) for x in DEMO_LABELS]
+            return policy_labels(self.settings)
         labels = []
         for page in range(1, 101):
             response = self.client.get(
@@ -50,12 +50,33 @@ class GitHub:
         issue = response.json()
         if "pull_request" in issue:
             raise ValueError("Pull requests are out of scope")
+        replies = []
+        for page in range(1, 101):
+            response = self.client.get(
+                f"/repos/{self.settings.repo}/issues/{number}/comments",
+                params={"per_page": 100, "page": page},
+            )
+            response.raise_for_status()
+            batch = response.json()
+            replies.extend(
+                {"id": c["id"], "body": c.get("body") or "", "created_at": c["created_at"]}
+                for c in batch
+                if c.get("user", {}).get("login") == issue["user"]["login"]
+                and "<!-- issuepilot:" not in (c.get("body") or "")
+            )
+            if len(batch) < 100:
+                break
+        else:
+            raise ValueError("Reporter history exceeds pagination budget")
         return {
+            "reporter_replies": replies,
             "number": number,
             "title": issue["title"],
             "body": issue["body"] or "",
             "state": issue["state"],
             "updated_at": issue["updated_at"],
+            "created_at": issue.get("created_at"),
+            "author": (issue.get("user") or {}).get("login"),
             "labels": sorted(x["name"] for x in issue["labels"]),
             "assignees": sorted(x["login"] for x in issue["assignees"]),
         }

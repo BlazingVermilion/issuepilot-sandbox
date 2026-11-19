@@ -86,7 +86,7 @@ def test_approval_executes_once(runtime, auth):
         == "APPROVED"
     )
     assert worker.tick()
-    assert client.get(f"/cases/{cid}", headers=auth).json()["status"] == "COMPLETED"
+    assert client.get(f"/cases/{cid}", headers=auth).json()["status"] == "WAITING_REPORTER"
     assert client.post(f"/cases/{cid}/decision", headers=auth, json=decision).status_code == 409
     assert not worker.tick()
     with service.sessions() as s:
@@ -225,6 +225,9 @@ def test_policy_change_invalidates_approval(runtime, auth, tmp_path):
     (tmp_path / "label_rules.json").write_text(
         (settings.policy_dir / "label_rules.json").read_text()
     )
+    import shutil
+
+    shutil.copytree(settings.policy_dir / "runtime", tmp_path / "runtime", dirs_exist_ok=True)
     settings.policy_dir = tmp_path
     response = client.post(
         f"/cases/{cid}/decision", headers=auth, json={"version": data["version"], "approved": True}
@@ -249,7 +252,7 @@ def test_restart_recovers_checkpoint(runtime, auth):
         f"/cases/{cid}/decision", headers=auth, json={"version": data["version"], "approved": True}
     )
     new_worker.tick()
-    assert client.get(f"/cases/{cid}", headers=auth).json()["status"] == "COMPLETED"
+    assert client.get(f"/cases/{cid}", headers=auth).json()["status"] == "WAITING_REPORTER"
 
 
 def test_bounded_payload(runtime):

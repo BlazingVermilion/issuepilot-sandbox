@@ -1,0 +1,55 @@
+{
+  "near_duplicate_candidates": [],
+  "near_duplicate_method": "word 5-shingles; 12 minimum SHA256 signatures; candidate Jaccard >=0.85; heuristic, not semantic deduplication",
+  "source": {
+    "repo": "Tilakoid/vscode-bug-feature-triage",
+    "revision": "15c7d77e083d0cd30ae84cc5de6add1dce6cf950",
+    "splits": {
+      "train": 1593,
+      "validation": 200,
+      "test": 200
+    },
+    "sha256": {
+      "train": "3d58b700bb165187462986d719edc6b705e612af9aba2bd23ea1e1410f26202b",
+      "validation": "7423f47f80368404aa0d21e9bb9c19719b624a67519146c8c9d720f42e517348",
+      "test": "9fc58e7070c327adaa7b522cf1cd530b90c077dbd54513d00ea31dead5712025"
+    }
+  },
+  "splits": {
+    "train": {
+      "rows": 1593,
+      "classes": {
+        "bug": 796,
+        "feature-request": 797
+      },
+      "sha256": "3d58b700bb165187462986d719edc6b705e612af9aba2bd23ea1e1410f26202b",
+      "max_characters": 27009
+    },
+    "validation": {
+      "rows": 200,
+      "classes": {
+        "bug": 100,
+        "feature-request": 100
+      },
+      "sha256": "7423f47f80368404aa0d21e9bb9c19719b624a67519146c8c9d720f42e517348",
+      "max_characters": 10017
+    },
+    "test": {
+      "rows": 200,
+      "classes": {
+        "bug": 100,
+        "feature-request": 100
+      },
+      "sha256": "9fc58e7070c327adaa7b522cf1cd530b90c077dbd54513d00ea31dead5712025",
+      "max_characters": 14196
+    }
+  },
+  "duplicates": [],
+  "status": "PASSED",
+  "limits": [
+    "No semantic label audit",
+    "Near-duplicate candidates are heuristic; semantic duplicates may remain",
+    "Creation timestamps do not prove opening-time text",
+    "No RAG reference labels supplied"
+  ]
+}

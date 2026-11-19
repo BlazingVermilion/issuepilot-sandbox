@@ -1,0 +1,17 @@
+{
+  "type": "object",
+  "properties": {
+    "category": {
+      "type": "string",
+      "enum": [
+        "bug",
+        "feature-request",
+        "ABSTAIN"
+      ]
+    }
+  },
+  "required": [
+    "category"
+  ],
+  "additionalProperties": false
+}

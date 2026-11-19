@@ -1,0 +1,201 @@
+expected,id,latency_ms,predicted,retrieved_ids,usage,valid_contract
+feature-request,333149,0.096,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,332673,0.378,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333250,0.991,bug,"[""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,330706,0.102,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,332361,0.036,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333491,0.077,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,331367,0.936,feature-request,"[""triage:2"", ""triage:6"", ""triage:4"", ""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,332741,0.66,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,330671,0.462,bug,"[""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,332991,0.037,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333817,0.132,bug,"[""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,330524,1.71,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,331718,0.276,bug,"[""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,332752,0.122,bug,"[""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333487,0.365,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,331240,0.027,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,331864,0.676,feature-request,"[""triage:2"", ""triage:6"", ""triage:4"", ""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333482,0.031,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,334467,0.03,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,332959,0.031,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,330944,0.041,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,331521,0.273,bug,"[""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333547,0.489,bug,"[""triage:3"", ""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333884,0.038,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,331466,0.042,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,334441,0.276,bug,"[""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333875,0.727,bug,"[""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333550,0.222,bug,"[""triage:3"", ""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,331469,0.038,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,331293,0.046,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,331541,0.152,feature-request,"[""triage:2"", ""triage:6"", ""triage:4"", ""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333605,0.152,bug,"[""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333772,0.191,bug,"[""triage:3"", ""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333366,0.046,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,330192,0.311,bug,"[""triage:3"", ""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,334162,0.035,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333671,0.031,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333292,0.154,bug,"[""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,334455,0.034,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,332662,0.028,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,331021,0.036,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333967,0.125,bug,"[""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,332277,0.028,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,332642,0.037,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333516,0.029,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,332204,0.042,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,330374,0.119,bug,"[""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333686,0.034,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,332597,0.513,bug,"[""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333747,0.162,bug,"[""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333538,0.51,bug,"[""triage:3"", ""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,332493,0.204,bug,"[""triage:3"", ""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333486,0.03,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333268,0.127,bug,"[""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,330064,0.289,bug,"[""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333924,0.035,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333548,0.196,bug,"[""triage:3"", ""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,330366,0.045,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,332292,0.087,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333510,0.105,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333770,0.363,bug,"[""triage:3"", ""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333877,0.035,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333759,0.336,bug,"[""triage:3"", ""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333484,0.03,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333935,0.057,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,330773,0.03,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,329841,0.126,bug,"[""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,330927,0.188,bug,"[""triage:3"", ""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,331423,0.229,bug,"[""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,331621,0.033,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333521,0.294,bug,"[""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,331309,0.494,bug,"[""triage:3"", ""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,331567,0.041,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333933,0.36,bug,"[""triage:3"", ""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,332313,0.16,feature-request,"[""triage:2"", ""triage:6"", ""triage:4"", ""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,332009,0.033,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,331125,0.041,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,334059,0.03,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,334099,0.034,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333474,0.134,bug,"[""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,334256,0.265,bug,"[""triage:3"", ""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333564,0.034,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333682,0.344,bug,"[""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,334326,0.366,bug,"[""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,332302,0.044,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,331926,0.185,bug,"[""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,330579,0.143,feature-request,"[""triage:2"", ""triage:6"", ""triage:4"", ""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333587,0.03,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,330738,0.164,bug,"[""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333832,0.192,bug,"[""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333656,0.213,bug,"[""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333375,0.173,bug,"[""triage:3"", ""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,334019,0.219,bug,"[""triage:3"", ""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,332868,0.036,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333586,0.029,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,331393,0.037,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,334585,0.038,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,332515,0.411,bug,"[""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333413,0.546,bug,"[""triage:3"", ""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,331311,0.214,feature-request,"[""triage:2"", ""triage:6"", ""triage:4"", ""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,330909,0.118,feature-request,"[""triage:2"", ""triage:6"", ""triage:4"", ""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333588,0.393,bug,"[""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,330679,0.053,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333600,0.165,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,331360,0.073,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,334144,0.436,bug,"[""triage:3"", ""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,334148,0.141,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,330437,0.181,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,334210,0.422,bug,"[""triage:3"", ""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333785,0.055,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,331717,0.404,bug,"[""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,330783,0.3,bug,"[""triage:3"", ""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333944,0.206,bug,"[""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,334473,0.698,bug,"[""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333792,0.615,bug,"[""triage:3"", ""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333830,0.086,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,332046,0.035,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,334561,0.034,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,330934,0.479,feature-request,"[""triage:2"", ""triage:6"", ""triage:4"", ""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333417,0.757,bug,"[""triage:3"", ""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,331554,0.157,bug,"[""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,330904,0.124,feature-request,"[""triage:2"", ""triage:6"", ""triage:4"", ""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,332578,0.164,feature-request,"[""triage:2"", ""triage:6"", ""triage:4"", ""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,331291,0.032,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,332973,0.18,bug,"[""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,333156,0.039,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333522,0.124,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,332845,0.19,bug,"[""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,331072,0.144,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333523,0.122,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333794,0.221,bug,"[""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333576,0.028,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,331163,0.528,bug,"[""triage:3"", ""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,334273,0.25,bug,"[""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333729,0.631,bug,"[""triage:3"", ""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,331272,0.036,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,331203,0.042,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,331678,0.235,bug,"[""triage:3"", ""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,331071,0.038,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,332069,0.135,bug,"[""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,331553,0.263,feature-request,"[""triage:2"", ""triage:6"", ""triage:4"", ""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,334167,0.049,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333783,0.256,bug,"[""triage:3"", ""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,334199,0.037,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,334114,0.028,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,332238,0.126,feature-request,"[""triage:2"", ""triage:6"", ""triage:4"", ""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333505,0.419,bug,"[""triage:3"", ""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,331189,0.149,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,329990,0.029,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,331494,0.041,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333819,0.03,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333537,0.212,bug,"[""triage:3"", ""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,332191,0.026,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333512,0.134,feature-request,"[""triage:2"", ""triage:6"", ""triage:4"", ""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,334391,0.394,bug,"[""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,332105,0.041,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333624,0.028,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,332770,0.038,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333351,0.713,bug,"[""triage:3"", ""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,331845,0.035,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333542,0.151,bug,"[""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,332805,0.039,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,330288,0.48,bug,"[""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,331842,0.2,bug,"[""triage:3"", ""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,330048,0.029,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,331368,0.124,bug,"[""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,330397,0.04,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,331374,0.153,bug,"[""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,334119,0.026,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333503,0.206,bug,"[""triage:3"", ""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,330681,0.186,bug,"[""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333301,0.307,bug,"[""triage:3"", ""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,330412,0.038,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333458,0.286,bug,"[""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,329887,0.03,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333496,0.033,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,334274,0.044,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,332186,0.046,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,331350,0.161,bug,"[""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,330976,0.035,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333788,0.286,bug,"[""triage:3"", ""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,332468,0.026,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,331207,0.219,bug,"[""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,334517,0.102,bug,"[""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333549,0.428,bug,"[""triage:3"", ""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333639,0.027,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,330403,0.037,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,330948,0.062,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,333001,0.277,feature-request,"[""triage:2"", ""triage:6"", ""triage:4"", ""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333543,0.038,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,334159,0.931,bug,"[""triage:3"", ""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,334016,0.032,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333848,0.539,bug,"[""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333555,0.435,bug,"[""triage:3"", ""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333771,0.165,bug,"[""triage:3"", ""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,334077,0.24,bug,"[""triage:3"", ""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333761,0.029,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333259,0.349,bug,"[""triage:3"", ""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+bug,333485,0.028,ABSTAIN,[],"{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True
+feature-request,331513,0.112,bug,"[""triage:1""]","{""calls"": 0, ""input_tokens"": 0, ""output_tokens"": 0}",True

@@ -1,8 +1,12 @@
 # Runbook: from local demo to verified sandbox deployment
 
-Run commands from the extracted repository root. Do not paste credentials into chat,
+Run the commands below from the `issuepilot/` application directory. Do not paste credentials into chat,
 screenshots, commits or issue comments. Instructions below assume Windows PowerShell
 and Docker Desktop running Linux containers. The repo does not need your old RDI venv.
+
+From v0.5.2 the Git root contains `.github/`, `ai-bench/` and the `issuepilot/` app folder.
+Run application commands below inside `issuepilot/`. For the 1,993-issue demonstration,
+follow [the dataset walkthrough](portfolio-demo.md) instead of creating a manual demo issue.
 
 ## 1. Create configuration
 
@@ -12,7 +16,8 @@ py -3.12 scripts/init_env.py
 ```
 
 This creates `.env` once. Open it locally: `IP_REVIEWER_TOKENS` contains your named
-reviewer token. Keep `IP_MODE=demo`, `IP_ENGINE=rules`, and `IP_WRITES_ENABLED=false`
+reviewer token. Start Ollama, run `ollama pull qwen3:8b`, and keep
+`IP_MODE=demo`, `IP_ENGINE=ollama`, and `IP_WRITES_ENABLED=false`
 for the first run. Demo mode never calls GitHub writes.
 
 ```powershell
@@ -24,7 +29,7 @@ docker compose ps
 Open <http://localhost:8000>. Paste the maintainer token from `.env` into Reviewer
 access. Create demo issue #1 with the default crash report. The backend queues it;
 the worker drafts a proposal. Refresh until status is REVIEW. Read the policy quotes,
-approve, then refresh until COMPLETED. Audit history shows your identity and actions.
+approve, then refresh until COMPLETED or WAITING_REPORTER (clarification). Audit history shows your identity and actions.
 Demo writes are stored in PostgreSQL `demo_issues`, not sent to a real repository.
 
 ```powershell
@@ -33,7 +38,7 @@ docker compose logs --tail 80 api
 ```
 
 The rules mode is a runnable comparison baseline, not an LLM demonstration.
-If a container cannot connect to Ollama, keep rules mode while you finish infrastructure.
+For a separate infrastructure-only demo, explicitly choose `IP_MODE=demo` and `IP_ENGINE=rules`.
 
 ## 2. Verify replay and stale proposals
 
@@ -78,47 +83,38 @@ The workflow export is version-pinned but still requires this runtime acceptance
 Backend acceptance is durable before the HTTP response. n8n retries are bounded and
 safe for intake; they do not retry GitHub action POSTs.
 
-## 4. Enable the local LLM
+## 4. Check the local model
 
-Install/open Ollama on the host, then:
-
-```powershell
-ollama pull qwen2.5:7b
-```
-
-Change `.env` to `IP_ENGINE=ollama` and `IP_MODEL=qwen2.5:7b`. In Docker, the supplied
-URL is `http://host.docker.internal:11434`. Ollama must listen on an interface reachable
-from the container; check host firewall and Ollama host settings. Keep access local,
-not exposed to the public Internet. A 7B model may be slow depending on RAM/GPU; choose
-another tool-calling-capable model only after rerunning the evaluation.
+With Ollama running on the Windows host, the Compose worker reaches it at
+`http://host.docker.internal:11434`. Both services must use `IP_ENGINE=ollama`
+and `IP_MODEL=qwen3:8b`. The initial Docker build requires access to PyPI and the
+pinned public tokenizer on Hugging Face. It verifies the tokenizer checksum; it does
+not fetch Qwen weights. For a GPU check after the smoke test, use `ollama ps` on the host.
 
 ```powershell
-docker compose up -d --force-recreate api worker
+ollama pull qwen3:8b
+docker compose up -d --build --force-recreate --wait api worker
+docker compose exec -T worker python scripts/check_ai.py
 ```
 
-Create a new demo issue. Inspect actual tool calls and retrieved evidence in the UI.
-The model can abstain or fail contract validation. Do not substitute rules output while
-labeling it an LLM success. A model failure sets FAILED and performs no GitHub action.
+The smoke command creates no issue or GitHub write. Look for the exact model,
+digest and both stages `classification` and `rag`. If the installed tag has a
+different digest, stop and verify the approved model version; do not silently
+substitute another model. A tag mismatch, failed model call or invalid response
+does not fall back to rules. Repair the cause and regenerate the case.
 
-For offline evaluation, create a separate local environment:
-
-```powershell
-py -3.12 -m pip install uv
-uv sync --frozen --extra dev --extra snowflake
-uv run python scripts/evaluate.py --engine rules --out artifacts/rules.json
-uv run python scripts/evaluate.py --engine ollama --model qwen2.5:7b --out artifacts/ollama.json
-```
-
-The evaluator ignores `.env` and uses host Ollama at localhost:11434. Evaluation
-fixtures are synthetic. Read `docs/evaluation.md` before making performance claims.
+Outside Docker: run `uv sync --frozen`, `uv pip install -r requirements-tokenizer.txt`,
+then `uv run --no-sync python scripts/prepare_tokenizer.py`. To reuse the benchmark
+download, give `--from-file PATH_TO_TOKENIZER_JSON`; the same hash is enforced.
+Use `uv run --no-sync` for the native worker and API after provisioning. No cloud
+model API key, vector DB or judge is required for this profile.
 
 ## 5. Connect one real GitHub sandbox
 
 Create a new empty sandbox repository under your account. Do not start on someone
 else's repository or your production RDI repository. Keep its existing labels.
 Live mode reads the paginated GitHub label catalog; it never invents a missing label.
-The default policy permits `bug`, `documentation`, `enhancement`, `question` and
-`accessibility` only when present. Missing bug details result in a clarification
+The v0.4 binary profile permits `bug` and `feature-request` only when present. Missing bug details result in a clarification
 comment, not an automatic `needs-info` label. Other labels require maintainer handling.
 
 Create a fine-grained token limited to that repository with Issues read/write and
@@ -157,12 +153,13 @@ resources or billing have been created by this package.
 1. Create a new GitHub repository named `issuepilot` (or your preferred name).
 2. From VS Code's source control initialize Git and commit this project. Verify `.env`,
    `.venv`, runtime data and keys are not staged. Publish to the new repository.
-3. Check all CI jobs. PostgreSQL/checkpointer and Docker jobs must pass; a local unit
+3. Keep the three workflow files in `.github/workflows/` at the **Git root**, not under the app. Check all CI jobs. PostgreSQL/checkpointer and Docker jobs must pass; a local unit
    test result alone does not establish that the containers work.
-4. Create a version tag after CI passes, e.g. `v0.3.0`. The release workflow runs CI
+4. Create a version tag after CI passes, e.g. `v0.5.3`. The release workflow runs CI
    again, then publishes a GHCR image with a source-commit label and provenance.
 5. Provision your chosen Linux host with Docker Compose. Place the source/configuration
-   under `/opt/issuepilot`, generate its own `.env`, and create DNS names for app/webhook.
+   with the Git root at `/opt/issuepilot`, check out the release commit, generate its own
+   `/opt/issuepilot/issuepilot/.env`, and create DNS names for app/webhook.
    No host provider is prescribed and no paid account is necessary for local development.
 6. Put `APP_DOMAIN` and `WEBHOOK_DOMAIN` in the server `.env`. Open ports 80/443 for Caddy.
    Keep 8000,5678,5432 closed externally. Back up Postgres/n8n volumes.
@@ -242,7 +239,7 @@ is configured, but actual Snowflake charges depend on your account and usage.
 - Complete the live acceptance checklist in README and attach sanitized evidence before
   calling the portfolio deployment finished.
 
-## Upgrading to 0.3.0 and using the console
+## Existing console and recovery operations
 
 Keep your existing `.env`, Compose project name, and PostgreSQL volume. Copy the
 updated source over the old checkout, including `src/issuepilot/static/` and
@@ -263,13 +260,12 @@ created before 0.2.0 have no label-catalog snapshot: approval marks them STALE;
 use **Generate a fresh proposal** and review again. Completed actions remain intact.
 
 1. **Overview**: enter your reviewer token and connect. Check mode and engine.
-2. **Repository**: select **Refresh labels**. In live mode this reads GitHub; demo
-   explicitly uses a fixture. Check which labels the policy permits.
+2. **Repository**: select **Refresh labels**. Both modes display the canonical policy vocabulary. In live mode this also checks availability on GitHub; the sandbox provisions the local vocabulary.
 3. **Inbox**: select an existing case. In demo, expand **Create a local demo issue**;
    in live mode, create an issue on GitHub and wait for the configured webhook/worker.
-4. **Review**: read the source and evidence, inspect missing fields, edit the comment
+4. **Review**: read the ticket, open **View policy evidence**, inspect missing fields, edit the comment
    or permitted labels, then use **Review & approve** and confirm the exact action.
-5. **Activity**: inspect action results and the audit timeline. In live mode also
+5. **Open audit history** on the case: inspect action results and the audit timeline. In live mode also
    inspect the real GitHub issue. External Snowflake/CI status is not inferred here.
 
 The bottom-left theme control switches light/dark. The theme uses localStorage; the reviewer token uses tab-scoped sessionStorage,
@@ -290,7 +286,7 @@ refresh automatically; review edits are preserved. Technical JSON is collapsed.
    ```
 
 3. Refresh the UI with Ctrl+Shift+R and reconnect if needed. Open **Inbox**, select the
-   affected issue, then **Review**. Open **Activity** to inspect the exact approved
+   affected issue, then **Review**. Open **Execution trace → Open audit history** to inspect the exact approved
    payload and action results; compare with the actual GitHub issue.
 4. If no actions exist, use **Generate a fresh proposal** and review it again.
    Otherwise use **Recover execution** and choose **Resume remaining actions**.
@@ -316,7 +312,7 @@ use a new reviewed proposal when its content needs changing.
 - Connect once: Overview hides the token entry and shows the connected workspace.
 - Refresh the page: the same tab reconnects without entering the token again.
 - Disconnect, then refresh: token entry returns; the previous workspace is cleared.
-- Check light and dark themes, Review and Activity at your normal screen size.
+- Check light and dark themes, Review and the audit history dialog at your normal screen size.
 - Audit timeline is newest-first with a fixed-height internal scroll area; scrolling
   within it should not force the entire page to grow with every new event.
 - A blocked case shows recovery choices and approved payload, with the original model
@@ -324,3 +320,24 @@ use a new reviewed proposal when its content needs changing.
 
 This release does not change the database schema. Keep `.env`, data, secrets, artifacts
 and Docker volumes. Do not run `docker compose down -v` during this upgrade.
+
+
+## Upgrade an existing installation to v0.5
+
+1. Back up your database and local changes. Stop API and worker; keep Postgres and its volume.
+2. Extract the release into the **parent** of the existing `issuepilot` application folder.
+   The archive contains one top-level `issuepilot/` and no local environment, keys or databases.
+   Replace tracked app files (including the new `policies/runtime/`); preserve your
+   `.env`, Compose project name, volume, secrets and custom overrides.
+3. Set `IP_ENGINE=ollama`, `IP_MODEL=qwen3:8b` in your existing `.env`. Keep repo, tokens,
+   Ollama host and write setting unchanged. Do not delete volumes or rerun init_env.py.
+4. Rebuild and run the read-only smoke check in section 4. Hard refresh the console.
+   There should be four tabs and Repository should show the selected **AI model**.
+5. Existing history retains its original model. Pending older proposals are invalidated
+   by the new policy fingerprint; regenerate and review. Reconcile any outstanding
+   action first. No database schema migration, label creation, or new n8n import is needed.
+
+The full app distribution is based on v0.4 (including reporter replies). The earlier
+v0.3 sandbox source may lack those changes. Diff custom source before overlaying.
+Use the supplied AI benchmark separately for experiments. The retained legacy B1/B2
+CLI controls use deterministic rules fixtures and do not score the current AI profile.

@@ -6,6 +6,9 @@
     <meta name="color-scheme" content="light dark" />
     <title>IssuePilot · Maintainer workspace</title>
     <link rel="stylesheet" href="/static/app.css" />
+    <script src="/static/vendor/marked-17.0.5.js" defer></script>
+    <script src="/static/document.js" defer></script>
+    <script src="/static/history.js" defer></script>
     <script src="/static/app.js" defer></script>
   </head>
   <body>
@@ -57,16 +60,6 @@
           </button>
           <button
             role="tab"
-            id="tab-activity"
-            aria-controls="panel-activity"
-            aria-selected="false"
-            tabindex="-1"
-            data-tab="activity"
-          >
-            <span class="nav-icon">↗</span>Activity
-          </button>
-          <button
-            role="tab"
             id="tab-repository"
             aria-controls="panel-repository"
             aria-selected="false"
@@ -82,7 +75,7 @@
           <span class="subtle">No approval, no GitHub write.</span>
         </div>
         <div class="sidebar-bottom">
-          <span id="version">v0.3.0</span
+          <span id="version">v0.4.0</span
           ><button id="theme" class="theme" aria-label="Switch to dark mode">
             ◐ <span>Dark mode</span>
           </button>
@@ -224,14 +217,14 @@
                   Check action results and audit history. Confirm live changes
                   on GitHub.
                 </p>
-                <button class="text-button" data-go="activity">
-                  View activity →
+                <button class="text-button" data-go="inbox">
+                  Choose an issue history →
                 </button>
               </article>
             </div>
             <div class="section-heading">
               <h2>Loaded cases</h2>
-              <span class="subtle">Latest 100 · current repository</span>
+              <span class="subtle">Current inbox</span>
             </div>
             <div class="metrics">
               <article>
@@ -311,6 +304,11 @@
                   </thead>
                   <tbody id="case-rows"></tbody>
                 </table>
+              </div>
+              <div class="list-tools" id="inbox-pages" hidden>
+                <span id="page-range" aria-live="polite"></span>
+                <div><button class="button quiet" id="page-prev">Previous</button>
+                <button class="button quiet" id="page-next">Next</button></div>
               </div>
               <div class="empty" id="inbox-empty">
                 <span class="empty-symbol">≡</span>
@@ -403,22 +401,15 @@ The API returns an error when I save a draft.</textarea
               <div id="case-guidance" class="notice info"></div>
               <div class="review-grid">
                 <div>
-                  <article class="card">
-                    <span class="eyebrow">SOURCE ISSUE</span>
-                    <h2 id="issue-title"></h2>
-                    <div id="source-labels" class="chips"></div>
-                    <pre id="issue-body" class="prose"></pre>
-                  </article>
-                  <article class="card">
-                    <div class="section-heading">
-                      <h2>Policy evidence</h2>
-                      <span id="evidence-count" class="badge outline"></span>
-                    </div>
-                    <p class="hint">
-                      A quote is evidence to inspect, not a guarantee that the
-                      recommendation is correct.
-                    </p>
-                    <div id="evidence"></div>
+                  <article class="card ticket" aria-labelledby="issue-title">
+                    <header class="ticket-heading">
+                      <span class="eyebrow" id="source-repo">SOURCE ISSUE</span>
+                      <h2><span id="issue-title"></span> <span id="source-number" class="issue-id"></span></h2>
+                      <div class="ticket-meta"><span id="source-state" class="badge"></span><span id="source-labels" class="chips"></span></div>
+                    </header>
+                    <div class="ticket-comment"><header><strong>Issue description</strong><span id="source-byline"></span></header>
+                      <div id="issue-body" class="md-body"></div></div>
+                    <details class="raw-source"><summary>Original Markdown</summary><pre id="raw-body"></pre></details>
                   </article>
                 </div>
                 <div>
@@ -428,6 +419,7 @@ The API returns an error when I save a draft.</textarea
                       <span id="proposal-category" class="badge outline"></span>
                     </div>
                     <p id="proposal-summary"></p>
+                    <button id="open-evidence" type="button" class="button quiet" aria-haspopup="dialog" aria-controls="evidence-dialog">View policy evidence <span id="evidence-count"></span></button><p id="proposal-routing" class="hint"></p><details><summary>Reporter evidence</summary><div id="reporter-evidence" class="md-body source-scroll"></div></details>
                     <div class="field-block">
                       <span class="field-label">Why this action?</span>
                       <p id="proposal-reason"></p>
@@ -439,8 +431,7 @@ The API returns an error when I save a draft.</textarea
                     <fieldset id="label-field">
                       <legend>Labels to add</legend>
                       <p class="hint">
-                        Only existing repository labels permitted by policy are
-                        selectable.
+                        Suggest the reviewed category only. Live writes require the canonical label to exist on GitHub.
                       </p>
                       <div id="label-options" class="chips"></div>
                     </fieldset>
@@ -474,11 +465,13 @@ The API returns an error when I save a draft.</textarea
                     <div class="recovery-actions">
                       <button id="recover" class="button primary" hidden>
                         Recover interrupted work</button
-                      ><button id="regenerate" class="button quiet" hidden>
+                      ><button id="refresh-replies" class="button" hidden>Check reporter replies</button>
+                  <button id="demo-reply" class="button" hidden>Add demo reporter reply</button>
+                  <button id="regenerate" class="button quiet" hidden>
                         Generate a fresh proposal</button
                       ><button id="reconcile" class="button quiet" hidden>
                         Check uncertain writes</button
-                      ><button class="text-button" data-go="activity">
+                      ><button class="button quiet" id="trace-audit" aria-haspopup="dialog" aria-controls="audit-dialog">
                         Open audit history →
                       </button>
                     </div>
@@ -492,75 +485,6 @@ The API returns an error when I save a draft.</textarea
             </div>
           </section>
           <section
-            id="panel-activity"
-            role="tabpanel"
-            aria-labelledby="tab-activity"
-            hidden
-          >
-            <div class="page-head">
-              <div>
-                <span class="eyebrow">04 / VERIFY</span>
-                <h1>Activity & outcomes</h1>
-                <p class="lead">
-                  Check what was approved, what ran, and what still needs
-                  investigation.
-                </p>
-              </div>
-            </div>
-            <div id="activity-empty" class="card empty">
-              <h2>No case selected</h2>
-              <p>Choose a case from Inbox to see its recorded history.</p>
-              <button class="button primary" data-go="inbox">
-                Open inbox →
-              </button>
-            </div>
-            <div id="activity-content" hidden>
-              <div class="card">
-                <h2 id="activity-title"></h2>
-                <p id="decision-summary"></p>
-                <div id="approved-summary" class="approved-summary"></div>
-                <div id="action-results" class="action-results"></div>
-              </div>
-              <article class="card timeline-card">
-                <h2>Audit timeline</h2>
-                <p class="hint">
-                  Newest first · scroll inside this panel for earlier events
-                </p>
-                <div
-                  id="timeline-scroll"
-                  class="timeline-scroll"
-                  tabindex="0"
-                  role="region"
-                  aria-label="Audit timeline"
-                >
-                  <ol id="timeline" class="timeline"></ol>
-                </div>
-              </article>
-            </div>
-            <article class="card">
-              <h2>External verification</h2>
-              <p>
-                Snowflake sync and CI/CD run outside this console. Their status
-                is not inferred from an approved case.
-              </p>
-              <div class="external-grid">
-                <div>
-                  <span class="badge outline">Not checked here</span>
-                  <h3>Snowflake</h3>
-                  <p>
-                    Run the sync command and verify the event mirror in your
-                    account.
-                  </p>
-                </div>
-                <div>
-                  <span class="badge outline">Not checked here</span>
-                  <h3>CI / deployment</h3>
-                  <p>Inspect GitHub Actions and the deployed image digest.</p>
-                </div>
-              </div>
-            </article>
-          </section>
-          <section
             id="panel-repository"
             role="tabpanel"
             aria-labelledby="tab-repository"
@@ -568,10 +492,10 @@ The API returns an error when I save a draft.</textarea
           >
             <div class="page-head">
               <div>
-                <span class="eyebrow">05 / CONFIGURATION</span>
+                <span class="eyebrow">04 / CONFIGURATION</span>
                 <h1>Repository & label policy</h1>
                 <p class="lead">
-                  GitHub defines the vocabulary. Your policy defines permission.
+                  IssuePilot policy defines the labels. Live mode checks which names exist on the connected repository.
                 </p>
               </div>
               <button id="reload-labels" class="button primary">
@@ -598,22 +522,22 @@ The API returns an error when I save a draft.</textarea
                   <thead>
                     <tr>
                       <th>Label</th>
-                      <th>Description</th>
-                      <th>Agent permission</th>
+                      <th>Policy condition</th>
+                      <th>Availability / permission</th>
                     </tr>
                   </thead>
                   <tbody id="catalog-rows"></tbody>
                 </table>
               </div>
               <p id="catalog-note" class="hint">
-                Refresh to fetch the configured repository's labels.
+                Connect to load the canonical policy labels.
               </p>
             </article>
             <article class="card">
               <h2>How to change permissions</h2>
               <p>
                 Edit <code>policies/label_rules.json</code> and the matching
-                guidance in <code>policies/triage.md</code>. Adding a label on
+                vocabulary in <code>policies/runtime/issuepilot_policy.md</code>. Adding a label on
                 GitHub alone does not authorize it. Pending proposals are
                 invalidated when the catalog or permission policy changes.
               </p>
@@ -630,6 +554,38 @@ The API returns an error when I save a draft.</textarea
         </footer>
       </div>
     </div>
+    <dialog class="reader-dialog" id="audit-dialog" aria-labelledby="audit-heading">
+      <header class="reader-head"><div><span class="eyebrow">CASE RECORD</span><h2 id="audit-heading">Audit history</h2></div><button type="button" class="button quiet" data-close="audit-dialog" autofocus>Close</button></header>
+      <p id="audit-message" role="status" class="hint"></p>
+      <div id="activity-content" hidden>
+              <div class="card">
+                <h2 id="activity-title"></h2>
+                <p id="decision-summary"></p>
+                <div id="approved-summary" class="approved-summary"></div>
+                <div id="action-results" class="action-results"></div>
+              </div>
+              <article class="card timeline-card">
+                <h2>Audit timeline</h2>
+                <p class="hint">
+                  Newest first · scroll inside this panel for earlier events
+                </p>
+                <div
+                  id="timeline-scroll"
+                  class="timeline-scroll"
+                  tabindex="0"
+                  role="region"
+                  aria-label="Audit timeline"
+                >
+                  <ol id="timeline" class="timeline"></ol>
+                </div>
+              </article>
+</div>
+      <footer class="reader-actions"><button type="button" class="button quiet" id="audit-refresh">Refresh history</button><button type="button" class="button quiet" id="audit-source">Inspect source &amp; proposal</button></footer>
+    </dialog>
+    <dialog class="reader-dialog" id="evidence-dialog" aria-labelledby="evidence-heading">
+      <header class="reader-head"><div><span class="eyebrow">RETRIEVED POLICY</span><h2 id="evidence-heading">Policy evidence</h2></div><button type="button" class="button quiet" data-close="evidence-dialog" autofocus>Close</button></header>
+      <p class="hint" id="evidence-case"></p><div id="evidence"></div>
+    </dialog>
     <dialog id="recovery-dialog">
       <form method="dialog">
         <h2>Recover interrupted work</h2>

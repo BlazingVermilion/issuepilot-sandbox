@@ -1,0 +1,42 @@
+{
+  "type": "object",
+  "properties": {
+    "claims": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 8,
+      "items": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500,
+            "pattern": "^[^\\r\\n]*[^ \\t\\r\\n][^\\r\\n]*$"
+          },
+          "citations": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 8,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "enum": [
+                "EXAMPLE-SECTION"
+              ]
+            }
+          }
+        },
+        "required": [
+          "text",
+          "citations"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "claims"
+  ],
+  "additionalProperties": false
+}
