@@ -62,7 +62,7 @@ jobs:
           python demo.py status > "$RUNNER_TEMP/issuepilot-replay-status.json"
           python -c "import json, os; from pathlib import Path; d=json.loads((Path(os.environ['RUNNER_TEMP'])/'issuepilot-replay-status.json').read_text()); assert d['expected']==1993 and d['received']==0"
           curl --fail http://localhost:8021/health
-          curl --fail --retry 10 --retry-delay 2 --max-time 5 --retry-connrefused http://localhost:5698/healthz
+          curl --fail --retry 10 --retry-delay 2 --max-time 5 --retry-all-errors http://localhost:5698/healthz/readiness
       - name: Print replay diagnostics on failure
         if: failure()
         working-directory: .

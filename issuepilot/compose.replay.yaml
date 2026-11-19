@@ -1,5 +1,17 @@
 # Use the root demo.py for a clean checkout, or scripts/demo.py for the legacy replay instance.
 services:
+  n8n:
+    healthcheck:
+      # Wait for n8n's own database/migrations, not just the Docker process.
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:5678/healthz/readiness', {signal: AbortSignal.timeout(3000)}).then(r => process.exit(r.status === 200 ? 0 : 1)).catch(() => process.exit(1))"
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
   postgres:
     healthcheck:
       # Exercise the same password-authenticated TCP route used by the API, not a local socket.
