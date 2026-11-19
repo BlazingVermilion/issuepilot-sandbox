@@ -1,6 +1,7 @@
 """A new checkout must not reset an existing replay or send events during setup."""
 
 import importlib.util
+import hashlib
 import json
 import subprocess
 from pathlib import Path
@@ -46,6 +47,7 @@ def test_checkout_change_keeps_credentials_and_targets_the_same_case_store(tmp_p
     assert cmd[-3:] == ["scripts/dataset_run.py", "send", "--all"]
     assert cmd[cmd.index("-p") + 1] == "issuepilot-replay-full1993"
     assert Path(opts["env"]["IP_APP_ENV_FILE"]) == config
+    assert Path(opts["env"]["IP_REPLAY_DATA_DIR"]) == config.parent / "projection"
     assert "POSTGRES_PASSWORD" not in opts["env"]
     assert (opts["env"]["IP_API_PORT"], opts["env"]["IP_N8N_PORT"]) == ("8021", "5698")
 
@@ -71,8 +73,8 @@ def test_bad_download_never_enters_the_worker_or_scoring_cache(tmp_path, monkeyp
     # An HTML error page must not become the new dataset.
     monkeypatch.setattr(launcher, "urlopen", lambda *a, **kw: BytesIO(b"<html>unavailable</html>"))
     with pytest.raises(SystemExit, match="Checksum mismatch"):
-        launcher.prepare_dataset(app, merged=True)
-    assert not (app / "data/replay/issues.jsonl").exists()
+        launcher.prepare_dataset(app, tmp_path / "private", merged=True)
+    assert not (tmp_path / "private" / launcher.FRESH / "projection/issues.jsonl").exists()
     assert not (app.parent / "ai-bench/data/train.jsonl").exists()
     assert not (app.parent / "ai-bench/data/full-corpus/profile.json").exists()
 
@@ -85,3 +87,36 @@ def test_inputs_from_git_and_image_agree_on_corpus():
     a, b = (json.loads(p.read_bytes()) for p in paths)
     assert a == b
     assert sum(b["splits"].values()) == 1993
+
+
+def test_legacy_docker_data_path_is_not_needed_to_prepare_public_projection(tmp_path, monkeypatch):
+    app = checkout(tmp_path)
+    # Even an unusable path left by a different Compose stack cannot block this run.
+    (app / "data").write_text("not a writable directory")
+    source = tmp_path / "source"
+    source.mkdir()
+    row = dict(
+        issue_number=1,
+        input="Title: Draft\n\nDescription:\nLost",
+        label="bug",
+        created_at="2026-01-01",
+        messages=["gold-only"],
+    )
+    raw = (json.dumps(row) + "\n").encode()
+    (source / "test.jsonl").write_bytes(raw)
+    mapped = dict(number=1, title="Draft", body="Lost", created_at=row["created_at"], split="test")
+    expected = (launcher.replay.compact(mapped) + "\n").encode()
+    monkeypatch.setattr(launcher.replay, "SIZES", {"test": 1})
+    monkeypatch.setattr(launcher.replay, "PROJECTION_SHA", hashlib.sha256(expected).hexdigest())
+    manifest = dict(
+        repo=launcher.replay.DATASET,
+        revision=launcher.replay.REVISION,
+        splits={"test": 1},
+        sha256={"test": hashlib.sha256(raw).hexdigest()},
+    )
+    (app / "fixtures").mkdir()
+    (app / "fixtures/dataset_source.json").write_text(json.dumps(manifest))
+    state = tmp_path / "per-user"
+    launcher.prepare_dataset(app, state, source)
+    assert (state / launcher.FRESH / "projection/issues.jsonl").read_bytes() == expected
+    assert (app / "data").is_file()

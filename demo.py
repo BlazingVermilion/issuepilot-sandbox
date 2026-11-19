@@ -31,7 +31,7 @@ def atomic_bytes(path, data):
         pending.unlink(missing_ok=True)
 
 
-def prepare_dataset(root, source=None, merged=False):
+def prepare_dataset(root, state, source=None, merged=False):
     manifest = root / "fixtures/dataset_source.json"
     spec = json.loads(manifest.read_bytes())
     if (spec["repo"], spec["revision"], spec["splits"]) != (
@@ -40,7 +40,11 @@ def prepare_dataset(root, source=None, merged=False):
         replay.SIZES,
     ):
         fail("Dataset manifest differs from this release.")
-    dest = root / "data/replay/issues.jsonl"
+    # Standard Compose may have created issuepilot/data as root. The replay
+    # projection belongs to the same per-user instance as its database credentials.
+    instance = state / FRESH
+    instance.mkdir(parents=True, mode=0o700, exist_ok=True)
+    dest = instance / "projection/issues.jsonl"
     if not source and not merged and dest.is_file():
         rows = replay.snapshots(str(dest))
         print(f"Dataset ready: {len(rows)} verified issues.")
@@ -59,6 +63,10 @@ def prepare_dataset(root, source=None, merged=False):
                 fail(f"Checksum mismatch for {split}; the download was not saved.")
             atomic_bytes(path, data)
     report = replay.prepare(source, manifest, dest)
+    if os.name == "posix":
+        # Only the public, gold-free leaf is bound into the non-root container.
+        dest.parent.chmod(0o755)
+        dest.chmod(0o644)
     print(f"Dataset ready: {report['unique_issues']} verified issues (gold excluded from replay).")
     if merged:
         # This folder is deliberately outside every app/worker volume.
@@ -252,6 +260,7 @@ def fresh(root, state, action):
         env.pop(key, None)
     env.update(
         IP_APP_ENV_FILE=cfg.as_posix(),
+        IP_REPLAY_DATA_DIR=(folder / "projection").as_posix(),
         IP_API_PORT="8021",
         IP_N8N_PORT="5698",
         ISSUEPILOT_IMAGE=f"issuepilot-replay:{version(root)}",
@@ -370,11 +379,11 @@ def main():
         cli.error("--source path does not exist")
     if a.source is not None:
         a.source = a.source.resolve()
+    state = Path(os.environ.get("LOCALAPPDATA") or Path.home() / ".local/share") / "IssuePilot"
     if a.action in {"start", "prepare", "evaluation-data"}:
-        prepare_dataset(root, a.source, merged=a.action == "evaluation-data")
+        prepare_dataset(root, state, a.source, merged=a.action == "evaluation-data")
         if a.action != "start":
             return
-    state = Path(os.environ.get("LOCALAPPDATA") or Path.home() / ".local/share") / "IssuePilot"
     if a.action == "recover":
         recover(root, state, a.original_config)
     else:

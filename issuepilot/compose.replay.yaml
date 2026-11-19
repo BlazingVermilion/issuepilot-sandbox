@@ -13,12 +13,18 @@ services:
       IP_GITHUB_TOKEN: ""
       IP_WRITES_ENABLED: "false"
     volumes:
-      - ./data/replay:/app/data/replay:ro
+      - type: bind
+        source: ${IP_REPLAY_DATA_DIR:-./data/replay}
+        target: /app/data/replay
+        read_only: true
       - ./artifacts/replay:/app/artifacts
   worker:
     environment: *replay
     volumes:
-      - ./data/replay:/app/data/replay:ro
+      - type: bind
+        source: ${IP_REPLAY_DATA_DIR:-./data/replay}
+        target: /app/data/replay
+        read_only: true
   analytics:
     image: issuepilot-replay-analytics:0.5.3
     environment: *replay

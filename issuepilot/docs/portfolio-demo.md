@@ -12,7 +12,7 @@ ollama list
 py -3.12 demo.py start
 ```
 
-The first run downloads three pinned splits, verifies their hashes and 1,993 unique issue numbers, then builds the runtime. The Docker input contains the issue number, time, split, title and body; it excludes gold labels and historical assistant messages. The hashes are checked before use. If you already have the exact source files, `demo.py start --source <directory-or-original-benchmark.zip>` also works. `demo.py prepare` performs just the dataset step.
+The first run downloads three pinned splits, verifies their hashes and 1,993 unique issue numbers, then builds the runtime. The input projection lives under the private replay instance, outside Docker-created directories in the checkout. Only the public projection is mounted read-only. The Docker input contains the issue number, time, split, title and body; it excludes gold labels and historical assistant messages. The hashes are checked before use. If you already have the exact source files, `demo.py start --source <directory-or-original-benchmark.zip>` also works. `demo.py prepare` performs just the dataset step.
 
 1. Open <http://localhost:5698>, create/sign in to the local n8n owner, and import **issuepilot/n8n/github-intake.json** from the Git root once. Publish/activate it. The sender uses the production webhook `/webhook/issuepilot-github`, not n8n's test listener.
 2. Open <http://localhost:8021> → **Overview → Connect**. Copy only the `maintainer` token from the private file whose location the launcher prints. On Windows this is `%LOCALAPPDATA%\IssuePilot\issuepilot-replay-full1993\.env.replay`. GitHub writes are simulated. Do not share the file or a screenshot of its values.

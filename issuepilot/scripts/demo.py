@@ -51,6 +51,7 @@ def compose(*args):
         env.pop(key, None)
     env.update(
         IP_APP_ENV_FILE=".env.replay",
+        IP_REPLAY_DATA_DIR=(ROOT / "data/replay").as_posix(),
         IP_API_PORT="8011",
         IP_N8N_PORT="5688",
         ISSUEPILOT_IMAGE="issuepilot-replay:0.5.3",
