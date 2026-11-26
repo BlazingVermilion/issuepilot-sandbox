@@ -1,4 +1,4 @@
-"""Regressions for the pilot generation path and retained raw responses."""
+"""Regressions for the policy decision path and retained raw responses."""
 
 import unittest
 from unittest.mock import Mock
@@ -8,7 +8,7 @@ import jsonschema
 import dataset
 import lab
 import rag_generation
-import rag_refined
+import decision_contract
 import retrieval
 
 
@@ -26,7 +26,7 @@ class PilotGenerationTests(unittest.TestCase):
         }
         client = Mock()
         record = {"calls": []}
-        lab.generate_pilot(client, case, self.docs, record)
+        lab.generate_policy_decision(client, case, self.docs, record)
 
         client.chat.assert_not_called()
         self.assertEqual(record["computed_timing"]["deadline_hour"], 203)
@@ -46,7 +46,7 @@ class PilotGenerationTests(unittest.TestCase):
         client = Mock()
         client.chat.return_value = (wire, {})
         record = {"calls": []}
-        lab.generate_pilot(client, {"query": query, "task": "action"}, self.docs, record)
+        lab.generate_policy_decision(client, {"query": query, "task": "action"}, self.docs, record)
 
         client.chat.assert_called_once()
         self.assertIn("Hour 203 is at or after", client.chat.call_args.args[1])
@@ -66,7 +66,7 @@ class PilotGenerationTests(unittest.TestCase):
         client = Mock()
         client.chat.return_value = (wire, {})
         record = {"calls": []}
-        lab.generate_pilot(client, {"query": "Is delivery established?", "task": "action"},
+        lab.generate_policy_decision(client, {"query": "Is delivery established?", "task": "action"},
                            self.docs, record)
 
         self.assertEqual(record["output"]["action"], "NEED_FACTS")
@@ -85,7 +85,7 @@ class PilotGenerationTests(unittest.TestCase):
     def test_no_context_refuses_without_model(self):
         client = Mock()
         record = {"calls": []}
-        lab.generate_pilot(client, {"query": "May it close?", "task": "action"}, {}, record)
+        lab.generate_policy_decision(client, {"query": "May it close?", "task": "action"}, {}, record)
         client.chat.assert_not_called()
         self.assertFalse(record["output"]["policy_answerable"])
         self.assertIsNone(record["output"]["action"])
@@ -94,13 +94,13 @@ class PilotGenerationTests(unittest.TestCase):
     def test_refined_unknown_note_and_citation_limit(self):
         docs = {section: self.docs[section] for section in ("IP-VERIFY-001", "IP-VERIFY-002")}
         query = "The record does not establish whether the package opens."
-        self.assertIn("DECISION CHECK", rag_refined.prompt(query, "action", docs, None))
-        self.assertNotIn("DECISION CHECK", rag_refined.prompt(query, "explanation", docs, None))
-        self.assertNotIn("DECISION CHECK", rag_refined.prompt("The package failed to open.", "action", docs, None))
+        self.assertIn("DECISION CHECK", decision_contract.prompt(query, "action", docs, None))
+        self.assertNotIn("DECISION CHECK", decision_contract.prompt(query, "explanation", docs, None))
+        self.assertNotIn("DECISION CHECK", decision_contract.prompt("The package failed to open.", "action", docs, None))
         wire = {"decision": "NEED_FACTS", "claims": [
             {"text": "Verify the package is accessible.", "citations": ["IP-VERIFY-001"] * 2},
         ]}
-        self.assertFalse(jsonschema.Draft202012Validator(rag_refined.wire_schema(docs, "action")).is_valid(wire))
+        self.assertFalse(jsonschema.Draft202012Validator(decision_contract.wire_schema(docs, "action")).is_valid(wire))
 
     def test_refined_passing_timing_is_included_in_the_answer(self):
         query = (
@@ -112,8 +112,8 @@ class PilotGenerationTests(unittest.TestCase):
             {"text": "A pause blocks closure.", "citations": ["IP-CLOSE-001"]},
         ]}, {})
         record = {"calls": []}
-        lab.generate_pilot(client, {"query": query, "task": "action"},
-                           self.docs, record, "pilot-refined")
+        lab.generate_policy_decision(client, {"query": query, "task": "action"},
+                           self.docs, record, "policy-decision")
         self.assertEqual(record["output"]["action"], "BLOCK")
         self.assertIn("effective information deadline is hour 203",
                       record["output"]["claims"][0]["text"])

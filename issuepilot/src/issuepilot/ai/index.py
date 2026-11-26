@@ -6,7 +6,7 @@ import math
 from pathlib import Path
 import re
 from ..contracts import digest
-from .profile import PROFILE
+from .profile import APPROVAL_CONTRACT_KEY, PROFILE
 
 POLICY_MIN_SCORE = 8
 
@@ -88,7 +88,8 @@ class PolicyIndex:
         self.path = Path(directory) / "runtime" / "issuepilot_policy.md"
         full, self.docs = sections(self.path)
         self.content_sha256 = hashlib.sha256(full.encode()).hexdigest()
-        self.hash = digest({"profile": inference_profile, "policy": self.content_sha256})
+        contract = APPROVAL_CONTRACT_KEY if inference_profile == PROFILE else inference_profile
+        self.hash = digest({"profile": contract, "policy": self.content_sha256})
         self.by_id = {d["id"]: d["text"] for d in self.docs}
         if (
             not (set(POLICY_TOPICS) | set(DEPS) | {d for ds in DEPS.values() for d in ds})

@@ -38,7 +38,7 @@ services:
         target: /app/data/replay
         read_only: true
   analytics:
-    image: issuepilot-replay-analytics:0.5.3
+    image: issuepilot-replay-analytics:0.5.4
     environment: *replay
     volumes:
       - ./artifacts/replay:/app/artifacts

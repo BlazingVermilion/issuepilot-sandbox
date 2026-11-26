@@ -4,7 +4,7 @@ import argparse, copy, importlib.metadata, json, platform, sys, time
 from pathlib import Path
 import jsonschema
 import retrieval as util
-import dataset, contracts, storage, judging, pilot, rag_generation, rag_refined
+import dataset, contracts, storage, judging, quality_gates, rag_generation, decision_contract
 from client import Ollama, CallError
 from progress import Progress
 from evaluation import summarize
@@ -13,7 +13,7 @@ ROOT = Path(__file__).resolve().parent
 import bench_config as cfg
 JUDGE_CHALLENGES = cfg.CHALLENGES
 MODES = ["bm25", "dense", "hybrid", "hybrid-rerank", "policy", "full", "oracle", "none"]
-PILOT_PROTOCOLS = {"pilot": "single-call-policy-v1", "pilot-refined": "single-call-policy-v3"}
+POLICY_PROTOCOLS = {"policy-base": "single-call-policy-v1", "policy-decision": "single-call-policy-v3"}
 
 
 def release_cuda_cache():
@@ -40,7 +40,7 @@ def identity(a, client):
             pass
     return {
         "version": "ai-bench-0.2.1",
-        "protocol": PILOT_PROTOCOLS.get(getattr(a, "strategy", None), "decision-payload-v2"),
+        "protocol": POLICY_PROTOCOLS.get(getattr(a, "strategy", None), "decision-payload-v2"),
         "thinking": client.meta.get("thinking_control", False),
         "dependencies": dataset.DEPS,
         "code_hash": util.sha(
@@ -100,10 +100,10 @@ def precheck(client, ret, cases, a):
     for c in cases:
         progress.start(c["id"])
         docs, _ = dataset.assemble(ret, c, a.mode, a.k)
-        if a.strategy in PILOT_PROTOCOLS:
+        if a.strategy in POLICY_PROTOCOLS:
             timing = rag_generation.timing_check(c["query"], docs) if c["task"] == "action" else None
             if docs and (timing is None or timing["met"]):
-                prompt = rag_refined.prompt if a.strategy == "pilot-refined" else rag_generation.user_prompt
+                prompt = decision_contract.prompt if a.strategy == "policy-decision" else rag_generation.user_prompt
                 client.budget(
                     rag_generation.SYSTEM,
                     prompt(c["query"], c["task"], docs, timing),
@@ -136,7 +136,7 @@ def precheck(client, ret, cases, a):
         progress.finish("CHECKED")
 
 
-def generate_pilot(client, case, docs, record, strategy="pilot"):
+def generate_policy_decision(client, case, docs, record, strategy="policy-base"):
     task, query = case["task"], case["query"]
     timing = rag_generation.timing_check(query, docs) if task == "action" else None
     if timing is not None:
@@ -156,9 +156,9 @@ def generate_pilot(client, case, docs, record, strategy="pilot"):
 
     record["generation_path"] = "model"
     record["first_attempt_valid"] = False
-    refined = strategy == "pilot-refined"
-    prompt = rag_refined.prompt if refined else rag_generation.user_prompt
-    schema = rag_refined.wire_schema if refined else rag_generation.wire_schema
+    refined = strategy == "policy-decision"
+    prompt = decision_contract.prompt if refined else rag_generation.user_prompt
+    schema = decision_contract.wire_schema if refined else rag_generation.wire_schema
     wire_schema = schema(docs, task)
     wire = call(client, rag_generation.SYSTEM,
                 prompt(query, task, docs, timing),
@@ -264,9 +264,9 @@ def run(a, preflight=False):
                             ranked_ids=rank,
                             retrieval_seconds=time.perf_counter() - t,
                         )
-                        if a.strategy in PILOT_PROTOCOLS:
+                        if a.strategy in POLICY_PROTOCOLS:
                             stage = "answer"
-                            generate_pilot(client, c, docs, r, a.strategy)
+                            generate_policy_decision(client, c, docs, r, a.strategy)
                         else:
                             evidence = None
                             if a.strategy == "evidence-first":
@@ -664,7 +664,7 @@ def report(a):
         ]
     )
     (destination / "comparison.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
-    pilot.write(destination, results)
+    quality_gates.write(destination, results)
     print(destination / "comparison.md")
 
 
@@ -679,7 +679,7 @@ def main():
             "--modes", nargs="+", choices=MODES, default=["bm25", "hybrid", "oracle"]
         )
         r.add_argument(
-            "--strategy", choices=["direct", "evidence-first", *PILOT_PROTOCOLS], default="direct"
+            "--strategy", choices=["direct", "evidence-first", *POLICY_PROTOCOLS], default="direct"
         )
         r.add_argument(
             "--split", choices=["validation", "test", "all"], default="validation"
@@ -726,8 +726,8 @@ def main():
     ):
         p.error("k must be 1..8, limit positive, modes unique")
     if dataset.POLICY != cfg.BUILTIN_POLICY:
-        if "policy" in getattr(a,"modes",[]) or getattr(a,"strategy",None) in PILOT_PROTOCOLS:
-            p.error("The policy retriever and pilot strategies are IssuePilot-specific. For another policy use bm25/dense/hybrid with --strategy direct or evidence-first.")
+        if "policy" in getattr(a,"modes",[]) or getattr(a,"strategy",None) in POLICY_PROTOCOLS:
+            p.error("The policy retriever and policy-decision strategies are IssuePilot-specific. For another policy use bm25/dense/hybrid with --strategy direct or evidence-first.")
         if a.command in {"calibrate","judge"} and "judge_challenges" not in cfg.RAG:
             p.error("Supply gold judge_challenges for the custom policy before calibration.")
     if a.command == "validate":

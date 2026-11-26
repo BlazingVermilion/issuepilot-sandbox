@@ -14,6 +14,7 @@ from pathlib import Path
 
 from pydantic import BaseModel, ConfigDict
 from typing import Literal
+from . import issue_source
 from .config import Settings
 from .policy import Policies
 from .agent import Analyst
@@ -54,7 +55,7 @@ def read_jsonl(path):
 
 def fetch_dataset(directory):
     """Download only the approved pinned repository and verify distribution hashes."""
-    source = json.loads((ROOT / "fixtures/dataset_source.json").read_text())
+    source = issue_source.SOURCE
     directory = Path(directory)
     directory.mkdir(parents=True, exist_ok=True)
     for split in source["splits"]:
@@ -73,7 +74,7 @@ def fetch_dataset(directory):
 
 
 def audit_dataset(directory):
-    source = json.loads((ROOT / "fixtures/dataset_source.json").read_text())
+    source = issue_source.SOURCE
     seen_ids, seen_text, findings, splits = {}, {}, [], {}
     audit_inputs = []
     for split, expected in source["splits"].items():

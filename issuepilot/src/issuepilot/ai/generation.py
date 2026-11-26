@@ -166,7 +166,7 @@ def answer(client, index, query, task="action"):
     docs, rank = index.retrieve(query)
     trace = {
         "tool": "search_policy",
-        "profile": "policy--pilot-refined",
+        "profile": "policy--policy-decision",
         "ranked_ids": rank,
         "context_ids": list(docs),
     }

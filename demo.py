@@ -17,7 +17,7 @@ ORIGINAL = "issuepilot-replay"
 FRESH = "issuepilot-replay-full1993"
 APP = Path(__file__).resolve().parent / "issuepilot"
 sys.path.insert(0, str(APP / "src"))
-from issuepilot import replay  # noqa: E402
+from issuepilot import replay, existing_n8n  # noqa: E402
 
 
 def atomic_bytes(path, data):
@@ -202,7 +202,7 @@ def recover(root, state, old):
     print("Use the legacy launcher inside issuepilot/: py -3.12 scripts/demo.py up")
 
 
-def fresh(root, state, action):
+def fresh(root, state, action, *, resume=False):
     folder = state / FRESH
     cfg, overlay = folder / ".env.replay", folder / "artifacts.compose.json"
     if action == "start":
@@ -254,7 +254,13 @@ def fresh(root, state, action):
         atomic_bytes(overlay, json.dumps({"services": overrides}).encode())
     if not cfg.is_file() or not overlay.is_file():
         fail("Run demo.py start first. The original replay has not been changed.")
-    replay_values(cfg.read_bytes())
+    values = replay_values(cfg.read_bytes())
+    if action == "check":
+        print(json.dumps(existing_n8n.checked(values), indent=2))
+        return
+    if action == "all":
+        existing_n8n.submit(values, folder, resume=resume)
+        return
     env = dict(os.environ)
     for key in ("POSTGRES_PASSWORD", "N8N_ENCRYPTION_KEY", "N8N_IMAGE", "COMPOSE_PROFILES"):
         env.pop(key, None)
@@ -262,7 +268,6 @@ def fresh(root, state, action):
         IP_APP_ENV_FILE=cfg.as_posix(),
         IP_REPLAY_DATA_DIR=(folder / "projection").as_posix(),
         IP_API_PORT="8021",
-        IP_N8N_PORT="5698",
         ISSUEPILOT_IMAGE=f"issuepilot-replay:{version(root)}",
     )
     prefix = [
@@ -278,19 +283,17 @@ def fresh(root, state, action):
         "compose.replay.yaml",
         "-f",
         str(overlay),
-        "--profile",
-        "automation",
     ]
     steps = {
+        "link": [],
         "start": [
             ["config", "--quiet"],
             ["build", "api"],
-            ["up", "-d", "--no-build", "--wait", "postgres", "api", "worker", "n8n"],
+            ["up", "-d", "--no-build", "--wait", "postgres", "api", "worker"],
         ],
-        "all": [["exec", "-T", "api", "python", "scripts/dataset_run.py", "send", "--all"]],
         "status": [["exec", "-T", "api", "python", "scripts/dataset_run.py", "status"]],
-        "logs": [["logs", "--tail", "45", "api", "postgres", "worker", "n8n"]],
-        "stop": [["stop"]],
+        "logs": [["logs", "--tail", "45", "api", "postgres", "worker"]],
+        "stop": [["stop", "worker", "api", "postgres"]],
         "smoke": [["exec", "-T", "worker", "python", "scripts/check_ai.py", "--require-gpu"]],
         "pause": [["stop", "worker"]],
         "resume": [["up", "-d", "--wait", "worker"]],
@@ -327,10 +330,23 @@ def fresh(root, state, action):
                     f"Start stopped. Run: py -3.12 demo.py logs. This instance uses {cfg}; existing volumes and settings have been kept."
                 )
             fail(f"{action} failed (Docker exit {result.returncode}); use demo.py logs.")
-    if action == "start":
-        print("Inbox: http://localhost:8021 | n8n: http://localhost:5698")
+    if action in {"start", "link"}:
+        cid = subprocess.run(
+            prefix + ["ps", "-q", "api"],
+            cwd=root,
+            env=env,
+            capture_output=True,
+            check=True,
+            text=True,
+        ).stdout.strip()
+        if not cid:
+            fail("Replay API is not running. Use demo.py start first.")
+        existing_n8n.configure(folder, cid, root / "n8n/github-intake.json")
+        print("Inbox: http://localhost:8021")
         print("Reviewer token location (open locally):", cfg)
-        print("Import once and publish:", root / "n8n/github-intake.json")
+        print(
+            "Paste only the three replay nodes once in the existing workflow, publish, then run: py -3.12 demo.py check"
+        )
         print("Send all 1,993 issues: py -3.12 demo.py all")
     if action == "export":
         print("Local event export:", folder / "artifacts/analytics/events.json")
@@ -347,6 +363,8 @@ def main():
         "action",
         choices=[
             "start",
+            "link",
+            "check",
             "all",
             "status",
             "logs",
@@ -369,7 +387,14 @@ def main():
         type=Path,
         help="Optional pinned split directory or original dataset ZIP; otherwise download once",
     )
+    cli.add_argument(
+        "--resume",
+        action="store_true",
+        help="all only: skip stable deliveries already confirmed in this cohort",
+    )
     a = cli.parse_args()
+    if a.resume and a.action != "all":
+        cli.error("--resume applies only to all")
     root = APP
     if a.original_config and a.action != "recover":
         cli.error("--from applies only to recover")
@@ -387,7 +412,7 @@ def main():
     if a.action == "recover":
         recover(root, state, a.original_config)
     else:
-        fresh(root, state, a.action)
+        fresh(root, state, a.action, resume=a.resume)
 
 
 if __name__ == "__main__":

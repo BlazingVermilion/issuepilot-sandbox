@@ -1,0 +1,37 @@
+services:
+  postgres:
+    healthcheck:
+      # Exercise the same password-authenticated TCP route used by the API, not a local socket.
+      test: [CMD-SHELL, 'PGPASSWORD="$${POSTGRES_PASSWORD}" psql -X -w -h postgres -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}" -Atqc "SELECT 1" >/dev/null']
+  api:
+    environment: &snapshot_intake
+      IP_SNAPSHOT_INTAKE: "true"
+      IP_MODE: demo
+      IP_SNAPSHOT_PATH: /app/data/issues/issues.jsonl
+      IP_REPO: ${IP_REPO:?Configure the workspace repository}
+      IP_N8N_WORKFLOW_ID: ${IP_N8N_WORKFLOW_ID:?Configure the n8n workflow}
+      IP_ENGINE: ollama
+      IP_GITHUB_TOKEN: ""
+      IP_WRITES_ENABLED: "false"
+    volumes:
+      - type: bind
+        source: ${IP_SNAPSHOT_DIR:-./data/issues}
+        target: /app/data/issues
+        read_only: true
+      - type: bind
+        source: ${IP_WORKSPACE_ARTIFACTS:-./artifacts}
+        target: /app/artifacts
+  worker:
+    environment: *snapshot_intake
+    volumes:
+      - type: bind
+        source: ${IP_SNAPSHOT_DIR:-./data/issues}
+        target: /app/data/issues
+        read_only: true
+  analytics:
+    image: issuepilot-analytics:local
+    environment: *snapshot_intake
+    volumes:
+      - type: bind
+        source: ${IP_WORKSPACE_ARTIFACTS:-./artifacts}
+        target: /app/artifacts

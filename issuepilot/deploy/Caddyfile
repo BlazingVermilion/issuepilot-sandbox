@@ -6,8 +6,8 @@
     reverse_proxy api:8000
 }
 {$WEBHOOK_DOMAIN} {
-    @github path /webhook/issuepilot-github
-    handle @github {
+    @intake path /webhook/issuepilot/issues
+    handle @intake {
         reverse_proxy n8n:5678
     }
     handle {

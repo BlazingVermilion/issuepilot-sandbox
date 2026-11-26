@@ -1,7 +1,7 @@
 """Read-only smoke test of the installed profile and Ollama model; never opens a GitHub client."""
 
 from issuepilot.config import Settings
-from issuepilot import replay
+from issuepilot import issue_source
 from issuepilot.ai.index import PolicyIndex
 from issuepilot.ai.triage import draft
 import argparse
@@ -20,11 +20,11 @@ def main():
     settings = Settings()
     if settings.engine != "ollama":
         raise SystemExit("Use IP_ENGINE=ollama for this check")
-    if settings.dataset_replay:
-        rows = replay.snapshots(settings.replay_path)
-        # The pilot always starts with the first test row, irrespective of its label.
+    if settings.snapshot_intake:
+        rows = issue_source.load_snapshots(settings.snapshot_path)
+        # The model check starts with the first test row, irrespective of its label.
         snapshot = next(row for row in rows.values() if row["split"] == "test")
-        issue = replay.issue_source(snapshot)
+        issue = issue_source.to_issue_document(snapshot)
     else:
         issue = {
             "title": "Saving a draft now crashes the editor",
@@ -44,7 +44,7 @@ def main():
         "recommendation": proposal.next_step,
         "github_writes": 0,
     }
-    if settings.dataset_replay:
+    if settings.snapshot_intake:
         result["dataset_issue"] = issue["number"]
     if args.require_gpu:
         with httpx.Client(

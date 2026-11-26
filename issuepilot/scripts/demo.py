@@ -54,7 +54,7 @@ def compose(*args):
         IP_REPLAY_DATA_DIR=(ROOT / "data/replay").as_posix(),
         IP_API_PORT="8011",
         IP_N8N_PORT="5688",
-        ISSUEPILOT_IMAGE="issuepilot-replay:0.5.3",
+        ISSUEPILOT_IMAGE="issuepilot-replay:0.5.4",
     )
     return subprocess.run(
         [

@@ -30,7 +30,7 @@ jobs:
           python-version: '3.12'
       - run: pip install uv==0.13.6
       - run: uv sync --frozen --extra dev
-      - run: uv run ruff check . ../demo.py && uv run ruff format --check . ../demo.py
+      - run: uv run ruff check . ../manage.py && uv run ruff format --check . ../manage.py
       - run: uv run pytest -q
       - run: uv run pytest -q
         env:
@@ -50,7 +50,7 @@ jobs:
         with:
           python-version: '3.12'
       - run: python scripts/init_env.py
-      - run: docker compose -f compose.yaml -f compose.replay.yaml --profile automation --profile analytics config --quiet
+      - run: IP_N8N_WORKFLOW_ID=ci-inbox IP_REPO=sandbox/issuepilot docker compose -f compose.yaml -f compose.intake.yaml --profile automation --profile analytics config --quiet
       - run: docker compose build api && docker compose up -d --no-build --wait
       - run: curl --fail http://localhost:8000/health
       - name: Verify bundled Qwen tokenizer without loading the LLM
@@ -58,15 +58,16 @@ jobs:
       - name: Start the clean-checkout dataset stack and verify empty intake
         working-directory: .
         run: |
-          python demo.py start
-          python demo.py status > "$RUNNER_TEMP/issuepilot-replay-status.json"
-          python -c "import json, os; from pathlib import Path; d=json.loads((Path(os.environ['RUNNER_TEMP'])/'issuepilot-replay-status.json').read_text()); assert d['expected']==1993 and d['received']==0"
+          python manage.py start --workflow http://localhost:5678/workflow/ci-inbox
+          python manage.py status > "$RUNNER_TEMP/intake-status.json"
+          python -c "import json, os; from pathlib import Path; d=json.loads((Path(os.environ['RUNNER_TEMP'])/'intake-status.json').read_text()); assert d['expected']>0 and d['received']==0 and d['not_received']==d['expected']"
           curl --fail http://localhost:8021/health
-          curl --fail --retry 10 --retry-delay 2 --max-time 5 --retry-all-errors http://localhost:5698/healthz/readiness
-      - name: Print replay diagnostics on failure
+          # The user's existing n8n is outside CI. The workspace must not provision another one.
+          test -z "$(docker ps -aq --filter label=com.docker.compose.project=issuepilot-workspace --filter label=com.docker.compose.service=n8n)"
+      - name: Print intake diagnostics on failure
         if: failure()
         working-directory: .
-        run: python demo.py logs
+        run: python manage.py logs
       - run: docker compose down
         if: always()
   ai-bench:

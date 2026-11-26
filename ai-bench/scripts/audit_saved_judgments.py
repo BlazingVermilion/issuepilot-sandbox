@@ -88,7 +88,7 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--run", required=True, type=Path, help="Generator experiment directory")
     parser.add_argument("--judges", required=True, type=Path, help="Historical judge experiment directory")
-    parser.add_argument("--out", required=True, type=Path, help="Path to the new replay report JSON")
+    parser.add_argument("--out", required=True, type=Path, help="Path to the judgment audit report JSON")
     args = parser.parse_args(argv)
     policy_hash = retrieval.sha(dataset.POLICY.read_bytes())
     corpus = {row["id"]: row["text"] for row in retrieval.sections(dataset.POLICY)[1]}

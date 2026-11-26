@@ -1,7 +1,7 @@
-# Serving profile: IssuePilot v0.5
+# Serving model and evidence
 
 **Ship one candidate for human-reviewed triage:** direct Qwen3 8B classification
-followed, on supported cases, by the policy retriever and the refined single-call
+followed, on supported cases, by the policy retriever and the citation-constrained single-call
 Qwen3 8B protocol. No extra model or evaluator on the request path.
 
 ## Evidence used for the decision
@@ -32,10 +32,10 @@ is lower. Its rule comparator scored 18.00% and 0.2834 on the **same test**; the
 No training or reliable out-of-domain recognition is established here.
 
 For RAG, repaired direct generation reached at most **22/26** (full context).
-BM25 with the pilot generator reached **25/26** on development using these
-validation cases; policy retrieval with the original pilot reached **24/26**;
+BM25 with the base policy generator reached **25/26** on development using these
+validation cases; policy retrieval with the base policy generator reached **24/26**;
 the structured variant reached **11/26**, including 6 unsafe permissions.
-Both refined runs reached **26/26 on the same 26 decisions**. The final arm also
+Both citation-constrained experiments reached **26/26 on the same 26 decisions**. The final arm also
 matched all 36 expected response shapes; 31 cases invoked generation, one deadline
 block and four no-context refusals were deterministic. Full/oracle/none are controls.
 The ranked lexical profile needs no GPU embedder, Qdrant or reranker.
@@ -45,25 +45,12 @@ set. A separate 16-case test exercises retrieval only (14 answerable). No held-o
 end-to-end result or semantic score for the final refined generator was supplied.
 The stronger Qwen2.5:7b calibration (v3) passed 11/19 challenges with 4 false
 acceptances; the earlier direct-arm judge scores cannot be transferred to this arm.
-The archive's final pilot gate is **INCOMPLETE**. No end-to-end production certificate.
+The archive's final quality gate is **INCOMPLETE**. No end-to-end production certificate.
 
 ## Reproduce the selection
 
-Start with the [in-repo benchmark guide](../../ai-bench/BENCHMARK.md) for new runs. The paths in this table name the historical runs and are not required files in a clean checkout.
+Use the [benchmark guide](../../ai-bench/BENCHMARK.md) for a fresh run. The serving classifier is the `none` arm: direct classification without retrieval, context 16,384 / output 128. The RAG arm is `policy` with strategy `policy-decision`: topic-weighted BM25, top four qualifying sections, score floor eight, required policy dependencies, context 8,192 / output 512. Both stages use a fixed seed (42), temperature zero, and thinking disabled.
 
-| Layer | Exact run under ai-bench/runs | Runtime |
-|---|---|---|
-| Classification | `classification-qwen3/none` | category-v1; no retrieved policy; context 16384 / output 128 |
-| RAG | `rag-policy-pilot-final-validation/policy--pilot-refined` | policy-topics-bm25-v1; top 4, minimum score 8, normative dependencies; single-call-policy-v3; context 8192 / output 512 |
-| Retrieval check | `retrieval-policy-test/policy.json` | Ranks and assembled context only |
-| Judge limitation | `judge-calibration-qwen25-v3/calibration.json` | Offline diagnostic only |
+Model: `qwen3:8b`, digest `500a1f067a9f782620b40bee6f7b0c89e17ae61f686b92c24933e4ca4b2b8b41`. Policy: 32 sections, content digest `8a964180e7143302236b94cdd18e533f8562f8770b0f64e67f3030447b749ee5`. These numbers apply to the specified evidence and model, not every run of a similarly named tag.
 
-Model: `qwen3:8b`, digest `500a1f067a9f782620b40bee6f7b0c89e17ae61f686b92c24933e4ca4b2b8b41`.
-Policy (32 sections): `8a964180e7143302236b94cdd18e533f8562f8770b0f64e67f3030447b749ee5`.
-Both stages use temperature 0, seed 42 and thinking disabled.
-
-`scripts/replay_ai_bench.py --bench PATH_TO_EXTRACTED_AI_BENCH` compares the
-application against the archived inputs, rankings and recorded model outputs.
-It makes no model calls. `scripts/check_ai.py` instead calls the installed model
-using the actual app adapter, but performs no GitHub write. These two checks answer
-different questions. Neither measures a deployment SLA or user time saved.
+The [contract verifier](../scripts/verify_inference_contract.py) takes explicit classification, policy and retrieval results plus the source directory. It checks hashes, runtime rankings and recorded outputs without inference. Use its `--help` to select artifacts from any location. The [model check](../scripts/check_ai.py) instead calls the installed model without writing to GitHub.

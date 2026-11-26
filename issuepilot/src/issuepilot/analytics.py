@@ -5,7 +5,11 @@ import json
 
 ALLOWED = {
     "source_kind",
-    "replay_run_id",
+    "n8n_workflow_id",
+    "n8n_execution_id",
+    "workspace_id",
+    "source_size",
+    "replay_run_id",  # Retain the original hash when mirroring stored events.
     "dataset_revision",
     "source_number",
     "split",

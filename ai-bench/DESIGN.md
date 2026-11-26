@@ -1,10 +1,10 @@
-# Architecture and contracts — AI Bench 0.2.1
+# AI benchmark architecture and contracts
 
 ## Experiment boundary
 
-Two independent benchmark layers share a transport, model identity and error vocabulary. Classification has a fixed binary label space. RAG answers policy questions; it does not perform category classification or execute production actions. All measured labels/references are held outside ordinary inference payloads.
+Two independent benchmark layers share a transport, model identity and error vocabulary. The default source has two categories; a custom profile can define a different vocabulary. RAG answers policy questions; it does not perform category classification or execute production actions. All measured labels/references are held outside ordinary inference payloads.
 
-Main generator: `qwen3:8b`, temperature 0, seed 42, `think=false`. Determinism is not promised across hardware or runtime changes. Default output budgets: classification 128 tokens; RAG 1,536 tokens for each call. A 2,048-token template reserve is added to published Qwen tokenizer counts. This is a conservative content budget, not an exact reproduction of arbitrary Ollama templates.
+Main generator: `qwen3:8b`, temperature 0, seed 42, `think=false`. Determinism is not promised across hardware or runtime changes. The comparative runner defaults to 128 classification output tokens and 1,536 RAG output tokens; the selected policy arm uses 512 as documented in the benchmark guide. A 2,048-token template reserve is added to published Qwen tokenizer counts. This is a conservative content budget, not an exact reproduction of arbitrary Ollama templates.
 
 ```mermaid
 flowchart TD
@@ -53,7 +53,7 @@ Classification retrieval is prepared before generation and its time saved separa
 
 Embedding model: `BAAI/bge-small-en-v1.5`. Reranker: `cross-encoder/ms-marco-MiniLM-L6-v2`. Revisions resolve into `models.lock.json` on first use and enter run identity. Qdrant server version/collection fingerprint are recorded. Compose binds Qdrant to localhost.
 
-## Seven RAG arms
+## Retrieval arms and controls
 
 | Arm | Query → candidate algorithm | Ranked output | Final context |
 |---|---|---|---|
@@ -83,6 +83,10 @@ flowchart TD
 This is hybrid retrieval with optional reranking and parent-section context restoration. It is **not JEV**, and no paid JEV branch is included. There is no learned evidence gate whose quality is silently assumed.
 
 Dense queries above 400 tokens and reranker queries above 96 tokens are explicitly rejected. Reranker sections are windowed into 350-token passages with stride 300, preserving enough pair budget for a 96-token query and special tokens. Long classification issues may violate these query limits even when they fit the generator context. No undocumented truncation or query summarization is substituted.
+
+### Selected policy strategy
+
+`policy` is the application-specific retrieval arm: topic-weighted BM25 with a minimum evidence score and deterministic inclusion of required policy dependencies. Set `--strategy policy-decision` to run the selected single-call generator. It validates the applicable ALLOW, BLOCK, NEED_FACTS, EXPLANATION or NO_POLICY shape and checks cited IDs. An absent context or a deterministically failed time gate can bypass the LLM; these paths are reported separately. `policy-base` is the single-call comparison without the additional citation and timing constraints. The generic multistage comparison below is distinct from the selected single-call path.
 
 ## RAG generation: wire protocol v2
 

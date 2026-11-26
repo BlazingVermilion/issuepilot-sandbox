@@ -94,17 +94,17 @@ def run():
                 )
                 return
             if path == "/health":
-                data = {"mode": "demo", "version": "0.5.3", "model": "fixture"}
+                data = {"mode": "demo", "version": "test", "model": "fixture"}
             elif path == "/workspace":
                 data = dict(
-                    repo="replay/sandbox",
+                    repo="sandbox/issuepilot",
                     mode="demo",
                     model="fixture",
                     reviewer="maintainer",
                     engine="ollama",
                     database="postgresql",
                     writes_enabled=False,
-                    dataset={"total": 1993},
+                    dataset={"total": 2},
                 )
             elif path == "/cases":
                 data = [

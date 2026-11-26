@@ -19,9 +19,10 @@ class Settings(BaseSettings):
     github_token: str = ""
     writes_enabled: bool = False
     engine: str = "ollama"
-    dataset_replay: bool = False
-    replay_run_id: UUID | None = None
-    replay_path: Path = Path("data/replay/issues.jsonl")
+    snapshot_intake: bool = False
+    workspace_id: UUID | None = None
+    n8n_workflow_id: str = ""
+    snapshot_path: Path = Path("data/issues.jsonl")
     model: str = MODEL
     ai_profile: str = "selected"
     model_digest: str = ""
@@ -50,18 +51,23 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def validate_runtime(self):
-        if self.dataset_replay:
-            from .replay import REPO
+        if self.snapshot_intake:
+            from .issue_source import SANDBOX_REPOSITORY
+            from .workspace_compat import HISTORICAL_REPOSITORY
 
+            if not re.fullmatch(r"[A-Za-z0-9_-]{1,128}", self.n8n_workflow_id):
+                raise ValueError("Configure the existing n8n workflow for snapshot intake")
             if (
-                (self.mode, self.repo, self.engine) != ("demo", REPO, "ollama")
+                self.mode != "demo"
+                or self.engine != "ollama"
+                or self.repo not in {SANDBOX_REPOSITORY, HISTORICAL_REPOSITORY}
                 or self.github_token
                 or self.writes_enabled
                 or len(self.webhook_secret) < 32
-                or not self.replay_run_id
+                or not self.workspace_id
             ):
                 raise ValueError(
-                    "Dataset replay requires the isolated demo repository, Ollama, a signing secret, no GitHub token and disabled external writes"
+                    "Snapshot intake requires the isolated demo repository, Ollama, a signing secret, no GitHub token and disabled external writes"
                 )
         if self.mode not in {"demo", "live"} or self.engine not in {"rules", "ollama"}:
             raise ValueError("Unsupported mode or engine")

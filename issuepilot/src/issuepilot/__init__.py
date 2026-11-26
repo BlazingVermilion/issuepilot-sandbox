@@ -1,1 +1,1 @@
-"""IssuePilot: human-approved, evidence-grounded issue triage."""
+"""Selected inference profile. No benchmark runners or external write tools."""

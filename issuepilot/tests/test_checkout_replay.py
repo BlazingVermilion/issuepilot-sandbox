@@ -29,10 +29,12 @@ def test_checkout_change_keeps_credentials_and_targets_the_same_case_store(tmp_p
 
     def docker(argv, **kwargs):
         calls.append((argv, kwargs))
-        return subprocess.CompletedProcess(argv, 0, b"", b"")
+        return subprocess.CompletedProcess(argv, 0, "api-id" if "ps" in argv else b"", b"")
 
     monkeypatch.setattr(launcher.subprocess, "run", docker)
     monkeypatch.setenv("POSTGRES_PASSWORD", "from-an-unrelated-project")
+    configure = Mock()
+    monkeypatch.setattr(launcher.existing_n8n, "configure", configure)
     first, second = checkout(tmp_path / "project A"), checkout(tmp_path / "project B")
     launcher.fresh(first, state, "start")
     config = state / launcher.FRESH / ".env.replay"
@@ -42,14 +44,21 @@ def test_checkout_change_keeps_credentials_and_targets_the_same_case_store(tmp_p
     assert not any("send" in args for args, _ in calls)
     assert config.read_bytes() == initial
 
-    launcher.fresh(second, state, "all")
-    cmd, opts = calls[-1]
-    assert cmd[-3:] == ["scripts/dataset_run.py", "send", "--all"]
+    configure.assert_called_with(config.parent, "api-id", second / "n8n/github-intake.json")
+    cmd, opts = next((cmd, opts) for cmd, opts in calls if "up" in cmd)
+    assert cmd[-3:] == ["postgres", "api", "worker"]
+    assert not any("n8n" in cmd or "automation" in cmd for cmd, _ in calls)
     assert cmd[cmd.index("-p") + 1] == "issuepilot-replay-full1993"
     assert Path(opts["env"]["IP_APP_ENV_FILE"]) == config
     assert Path(opts["env"]["IP_REPLAY_DATA_DIR"]) == config.parent / "projection"
     assert "POSTGRES_PASSWORD" not in opts["env"]
-    assert (opts["env"]["IP_API_PORT"], opts["env"]["IP_N8N_PORT"]) == ("8021", "5698")
+    assert opts["env"]["IP_API_PORT"] == "8021"
+    sender = Mock()
+    monkeypatch.setattr(launcher.existing_n8n, "submit", sender)
+    launcher.fresh(second, state, "all", resume=True)
+    sender.assert_called_once_with(launcher.replay_values(initial), config.parent, resume=True)
+    launcher.fresh(second, state, "stop")
+    assert calls[-1][0][-4:] == ["stop", "worker", "api", "postgres"]
 
 
 def test_missing_private_configuration_does_not_rekey_volumes(tmp_path, monkeypatch):

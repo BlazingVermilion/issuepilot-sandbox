@@ -40,6 +40,9 @@ const names = {
   DECLINED: "Declined",
   CLOSED: "Issue closed",
 };
+function workspaceName() {
+  return workspace.dataset ? "IssuePilot sandbox" : workspace.repo;
+}
 function node(tag, text, cls) {
   const n = document.createElement(tag);
   if (text !== undefined) n.textContent = text;
@@ -208,7 +211,7 @@ function renderInbox() {
   $("page-range").textContent = filtered.length ? `${from + 1}–${Math.min(from + pageSize, filtered.length)} of ${filtered.length} matching cases` : "";
   $("page-prev").disabled = inboxPage === 0;
   $("page-next").disabled = inboxPage + 1 >= pageCount;
-  if (workspace?.dataset) empty.querySelector("p").textContent = "Replay the pinned VS Code dataset or change the filters.";
+  if (workspace?.dataset) empty.querySelector("p").textContent = "Import issues or change the filters.";
   for (const c of filtered.slice(from, from + pageSize)) {
     const tr = node("tr");
     const title = node("td");
@@ -270,11 +273,11 @@ function overview() {
         (workspace.writes_enabled
           ? "Approved actions can write to GitHub."
           : "GitHub writes are disabled.");
-  if (workspace.dataset) $("mode-note").textContent = `VS Code dataset replay · ${cases.length} / ${workspace.dataset.total} issues received · ${workspace.model} · actions stay in this sandbox.`;
+  if (workspace.dataset) $("mode-note").textContent = `Issue intake · ${cases.length} / ${workspace.dataset.total} issues received · ${workspace.model} · actions stay in this sandbox.`;
 }
 function renderSettings() {
   if (!workspace) return;
-  $("repo-name").textContent = workspace.repo;
+  $("repo-name").textContent = workspaceName();
   $("runtime").textContent = workspace.mode + " / " + (workspace.model || "Rules demo");
   $("identity").textContent = workspace.reviewer;
   $("disconnect").hidden = false;
@@ -283,7 +286,7 @@ function renderSettings() {
   $("token").value = "";
   $("connection-summary").hidden = false;
   $("connection-summary").textContent =
-    "Connected as " + workspace.reviewer + " · " + workspace.repo;
+    "Connected as " + workspace.reviewer + " · " + workspaceName();
   $("demo-box").hidden = workspace.mode !== "demo" || Boolean(workspace.dataset);
   $("new-github").hidden = workspace.mode !== "live";
   if (workspace.repo_url)
@@ -292,10 +295,10 @@ function renderSettings() {
     workspace.mode === "live"
       ? "Live intake: create an issue on GitHub → n8n receives its webhook → the worker drafts a proposal. This page does not create GitHub issues."
       : "Demo intake: use the sample form below. This path bypasses GitHub webhooks and n8n.";
-  if (workspace.dataset) $("intake-note").textContent = "Historical VS Code reports · signed dataset replay · original issue numbers · no writes to GitHub.";
+  if (workspace.dataset) $("intake-note").textContent = "Historical issues retain their original numbers. Approved actions stay in this workspace.";
   const grid = node("div", undefined, "settings-grid");
   for (const [label, value] of [
-    ["Repository", workspace.repo],
+    ["Repository", workspaceName()],
     ["Mode", workspace.mode],
     ["Engine", workspace.engine],
     ["AI model", workspace.model || "None — rules baseline"],
@@ -398,7 +401,7 @@ function renderCase() {
   const src = c.source || {};
   const hasBody = Object.hasOwn(src,"body");
   const raw = src.body ?? "";
-  $("source-repo").textContent = "Source issue · " + (workspace.dataset ? "microsoft / vscode" : workspace.repo);
+  $("source-repo").textContent = "Source issue · " + (workspace.dataset ? "microsoft / vscode" : workspaceName());
   $("source-number").textContent = "#" + c.number;
   $("source-state").textContent = src.state === "closed" ? "Closed" : src.state === "open" ? "Open" : "State not recorded";
   $("source-state").className = "badge ticket-state " + (src.state || "unknown");
@@ -669,7 +672,7 @@ function renderActivity(c) {
       REJECTION: `${e.data.reviewer} rejected the proposal.`,
       COMPLETED: "Recorded actions finished.",
       STALE: "The approval context changed. A new review is required.",
-      RECEIVED: e.data.source_kind === "dataset_replay" ? "A signed VS Code snapshot replay was accepted. External writes are simulated." : "A signed GitHub delivery was accepted.",
+      RECEIVED: e.data.source_number != null ? "A signed issue snapshot was accepted. Actions stay in this workspace." : "A signed GitHub delivery was accepted.",
       DEMO_EDIT: "A local demo issue was created or edited.",
     };
     if (copy[e.kind]) li.append(node("p", copy[e.kind]));
@@ -807,7 +810,7 @@ $("approve").onclick = () => {
       ? "Approve simulated actions?"
       : "Approve GitHub actions?";
   $("confirm-target").textContent =
-    workspace.repo +
+    workspaceName() +
     " · issue #" +
     active.number +
     " · version " +
@@ -924,7 +927,7 @@ $("recover").onclick = () => {
   if (!active || busy) return;
   recoveryTarget = { id: active.id, version: active.version };
   $("recovery-target").textContent =
-    workspace.repo + " · #" + active.number + " · v" + active.version;
+    workspaceName() + " · #" + active.number + " · v" + active.version;
   $("recovery-actions").replaceChildren(
     ...active.actions
       .filter((a) => a.version === active.version)

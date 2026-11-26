@@ -9,7 +9,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from .contracts import Proposal, revision, validate_proposal
 from .db import Case, Delivery, Action, DemoIssue, event, uid
-from . import replay
+from . import issue_source
 from .policy import runtime_policies
 from .labels import catalog
 
@@ -22,7 +22,7 @@ class Service:
     def __init__(self, settings, sessions, github):
         self.settings, self.sessions, self.github = settings, sessions, github
 
-    def ingest(self, raw, signature, delivery, event_name):
+    def ingest(self, raw, signature, delivery, event_name, *, workflow_context=None):
         expected = (
             "sha256="
             + hmac.new(self.settings.webhook_secret.encode(), raw, hashlib.sha256).hexdigest()
@@ -74,21 +74,21 @@ class Service:
         if "pull_request" in issue:
             return {"state": "IGNORED"}
         row = None
-        if self.settings.dataset_replay:
+        if self.settings.snapshot_intake:
             if (event_name, payload.get("action"), payload.get("issuepilot_dataset"), delivery) != (
                 "issues",
                 "opened",
-                replay.REVISION,
-                replay.delivery_id(issue["number"]),
+                issue_source.REVISION,
+                issue_source.issue_delivery_id(issue["number"], self.settings.repo),
             ):
                 raise PermissionError(
                     "This workspace accepts only stable dataset snapshot deliveries"
                 )
-            row = replay.snapshots(self.settings.replay_path).get(issue["number"])
+            row = issue_source.load_snapshots(self.settings.snapshot_path).get(issue["number"])
             if not row:
                 raise ValueError("Issue number is absent from the pinned corpus")
         elif "issuepilot_dataset" in payload:
-            raise PermissionError("Dataset events require the isolated replay workspace")
+            raise PermissionError("Dataset events require the snapshot workspace")
         try:
             with self.sessions.begin() as session:
                 prior = session.get(Delivery, delivery)
@@ -106,13 +106,13 @@ class Service:
                     if row:
                         if session.get(DemoIssue, row["number"]):
                             raise Conflict("An unrelated source already uses this issue number")
-                        case.source = replay.issue_source(row)
+                        case.source = issue_source.to_issue_document(row)
                         session.add(DemoIssue(number=row["number"], data=dict(case.source)))
                     session.add(case)
                     session.flush()
                 elif row:
                     raise Conflict(
-                        "Existing case without its matching stable delivery; inspect the replay database"
+                        "Existing case without its matching stable delivery; inspect the case store"
                     )
                 elif case.status in {"WAITING_REPORTER", "REPLY_FAILED"}:
                     case.status = "REPLY_QUEUED"
@@ -142,11 +142,15 @@ class Service:
                     {}
                     if not row
                     else {
-                        "source_kind": "dataset_replay",
-                        "dataset_revision": replay.REVISION,
-                        "replay_run_id": str(self.settings.replay_run_id),
+                        "source_kind": "issue_snapshot",
+                        "source_size": len(
+                            issue_source.load_snapshots(self.settings.snapshot_path)
+                        ),
+                        "dataset_revision": issue_source.REVISION,
+                        "workspace_id": str(self.settings.workspace_id),
                         "source_number": row["number"],
                         "split": row["split"],
+                        **(workflow_context or {}),
                     }
                 )
                 event(

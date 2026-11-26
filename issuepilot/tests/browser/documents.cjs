@@ -38,10 +38,11 @@ test('GitHub system diagnostics: disclosure around table, line break and linked 
 });
 if(process.env.ISSUEPILOT_ISSUE_DATA) test('render the pinned source corpus, with no parser fallback or automatic media',()=>{
   let count=0, fallback=0, disclosed=0,linkedAttachments=0;
+  const manifest=JSON.parse(fs.readFileSync(path.join(__dirname,'../../src/issuepilot/assets/issue-source.json'),'utf8'));
   const prior=Tree.prototype.replaceChildren;
   Tree.prototype.replaceChildren=function(...nodes){fallback++;prior.apply(this,nodes);};
   try {
-    for(const part of ['train','validation','test']){
+    for(const part of Object.keys(manifest.splits)){
       const lines=fs.readFileSync(path.join(process.env.ISSUEPILOT_ISSUE_DATA,part+'.jsonl'),'utf8').trimEnd().split(/\r?\n/);
       for(const line of lines){
         const row=JSON.parse(line), body=row.input.slice(row.input.indexOf('\n\nDescription:')+'\n\nDescription:'.length);
@@ -51,5 +52,5 @@ if(process.env.ISSUEPILOT_ISSUE_DATA) test('render the pinned source corpus, wit
       }
     }
   } finally {Tree.prototype.replaceChildren=prior;}
-  assert.equal(count,1993);assert.equal(fallback,0);console.log({count,disclosed,linkedAttachments,fallback});
+  assert.equal(count,Object.values(manifest.splits).reduce((a,b)=>a+b,0));assert.equal(fallback,0);console.log({count,disclosed,linkedAttachments,fallback});
 });

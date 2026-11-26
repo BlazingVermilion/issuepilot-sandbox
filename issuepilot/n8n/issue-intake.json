@@ -1,0 +1,102 @@
+{
+  "name": "Issue intake",
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "nodes": [
+    {
+      "id": "a658f999-de6f-5c80-9dbc-ffa83e736b40",
+      "name": "Receive issue event",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "issuepilot/issues",
+        "responseMode": "lastNode",
+        "responseData": "firstEntryJson",
+        "options": {
+          "rawBody": true
+        }
+      },
+      "webhookId": "fd7847d7-cd7e-5387-b8b9-5face40c3cc2"
+    },
+    {
+      "id": "c6eb1202-115a-5b4c-9eea-614dd025edd7",
+      "name": "Preserve signed payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        0
+      ],
+      "parameters": {
+        "jsCode": "const item = $input.first();\n// GitHub signs exact bytes. Never serialize the parsed body to reconstruct them.\nconst raw = await this.helpers.getBinaryDataBuffer(0, 'data');\nif (raw.length > 262144) throw new Error('Payload too large');\nconst headers = item.json.headers;\nreturn [{json: {\n  raw_body_base64: raw.toString('base64'),\n  signature: headers['x-hub-signature-256'] || '',\n  delivery_id: headers['x-github-delivery'] || '',\n  event: headers['x-github-event'] || ''\n}}];"
+      }
+    },
+    {
+      "id": "4199036d-4ebf-5d57-95de-f915e32170da",
+      "name": "Submit issue to triage",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        480,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://api:8000/webhooks/n8n/intake",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "timeout": 8000
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-IssuePilot-Workflow",
+              "value": "={{ $workflow.id }}"
+            },
+            {
+              "name": "X-IssuePilot-Execution",
+              "value": "={{ String($execution.id) }}"
+            }
+          ]
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 500
+    }
+  ],
+  "connections": {
+    "Receive issue event": {
+      "main": [
+        [
+          {
+            "node": "Preserve signed payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preserve signed payload": {
+      "main": [
+        [
+          {
+            "node": "Submit issue to triage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}
