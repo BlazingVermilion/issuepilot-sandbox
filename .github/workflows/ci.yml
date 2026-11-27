@@ -128,3 +128,10 @@ jobs:
       - run: python -m pip install "playwright>=1.49,<2"
       - run: python -m playwright install --with-deps chromium
       - run: python tests/browser/review_flow.py
+        env:
+          ISSUEPILOT_UI_CAPTURES: artifacts/ui
+      - uses: actions/upload-artifact@v4
+        with:
+          name: reviewer-ui-fixtures
+          path: issuepilot/artifacts/ui/*.png
+          if-no-files-found: error

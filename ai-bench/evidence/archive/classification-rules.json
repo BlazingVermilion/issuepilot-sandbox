@@ -1,0 +1,172 @@
+{
+  "overall": {
+    "n": 1993,
+    "accuracy": 0.26191670847967885,
+    "macro_f1": 0.39137940475123156,
+    "per_class": {
+      "bug": {
+        "precision": 0.8290993071593533,
+        "recall": 0.3604417670682731,
+        "f1": 0.5024492652204339,
+        "support": 996
+      },
+      "feature-request": {
+        "precision": 0.9819277108433735,
+        "recall": 0.16349047141424272,
+        "f1": 0.28030954428202925,
+        "support": 997
+      }
+    },
+    "coverage": 0.30055193176116407,
+    "abstentions": 1394,
+    "errors": 0,
+    "confusion": {
+      "bug": {
+        "bug": 359,
+        "ABSTAIN": 634,
+        "feature-request": 3
+      },
+      "feature-request": {
+        "ABSTAIN": 760,
+        "feature-request": 163,
+        "bug": 74
+      }
+    },
+    "latency_p50": 4.959997022524476e-05,
+    "latency_p95": 0.00022151999874040474,
+    "accuracy_wilson95_descriptive": [
+      0.24308435204362344,
+      0.28166513234211843
+    ],
+    "prompt_tokens": 0,
+    "output_tokens": 0
+  },
+  "splits": {
+    "train": {
+      "n": 1593,
+      "accuracy": 0.27055869428750784,
+      "macro_f1": 0.40242318656952814,
+      "per_class": {
+        "bug": {
+          "precision": 0.8380681818181818,
+          "recall": 0.3706030150753769,
+          "f1": 0.5139372822299653,
+          "support": 796
+        },
+        "feature-request": {
+          "precision": 0.9855072463768116,
+          "recall": 0.17063989962358847,
+          "f1": 0.29090909090909095,
+          "support": 797
+        }
+      },
+      "coverage": 0.3075957313245449,
+      "abstentions": 1103,
+      "errors": 0,
+      "confusion": {
+        "bug": {
+          "bug": 295,
+          "ABSTAIN": 499,
+          "feature-request": 2
+        },
+        "feature-request": {
+          "ABSTAIN": 604,
+          "feature-request": 136,
+          "bug": 57
+        }
+      },
+      "latency_p50": 4.8900023102760315e-05,
+      "latency_p95": 0.00022280000848695628,
+      "accuracy_wilson95_descriptive": [
+        0.24931399100704774,
+        0.2929073539278538
+      ],
+      "prompt_tokens": 0,
+      "output_tokens": 0
+    },
+    "validation": {
+      "n": 200,
+      "accuracy": 0.275,
+      "macro_f1": 0.4050543221539915,
+      "per_class": {
+        "bug": {
+          "precision": 0.8478260869565217,
+          "recall": 0.39,
+          "f1": 0.5342465753424658,
+          "support": 100
+        },
+        "feature-request": {
+          "precision": 1.0,
+          "recall": 0.16,
+          "f1": 0.2758620689655173,
+          "support": 100
+        }
+      },
+      "coverage": 0.31,
+      "abstentions": 138,
+      "errors": 0,
+      "confusion": {
+        "bug": {
+          "bug": 39,
+          "ABSTAIN": 61
+        },
+        "feature-request": {
+          "ABSTAIN": 77,
+          "feature-request": 16,
+          "bug": 7
+        }
+      },
+      "latency_p50": 5.2249961299821734e-05,
+      "latency_p95": 0.00020502504485193633,
+      "accuracy_wilson95_descriptive": [
+        0.21779604313809775,
+        0.3406846595251467
+      ],
+      "prompt_tokens": 0,
+      "output_tokens": 0
+    },
+    "test": {
+      "n": 200,
+      "accuracy": 0.18,
+      "macro_f1": 0.2833994708994709,
+      "per_class": {
+        "bug": {
+          "precision": 0.7142857142857143,
+          "recall": 0.25,
+          "f1": 0.37037037037037035,
+          "support": 100
+        },
+        "feature-request": {
+          "precision": 0.9166666666666666,
+          "recall": 0.11,
+          "f1": 0.19642857142857142,
+          "support": 100
+        }
+      },
+      "coverage": 0.235,
+      "abstentions": 153,
+      "errors": 0,
+      "confusion": {
+        "bug": {
+          "bug": 25,
+          "ABSTAIN": 74,
+          "feature-request": 1
+        },
+        "feature-request": {
+          "ABSTAIN": 79,
+          "bug": 10,
+          "feature-request": 11
+        }
+      },
+      "latency_p50": 5.1099981646984816e-05,
+      "latency_p95": 0.00024248003610409773,
+      "accuracy_wilson95_descriptive": [
+        0.13294550662534108,
+        0.2391159371623843
+      ],
+      "prompt_tokens": 0,
+      "output_tokens": 0
+    }
+  },
+  "note": "All-split result is descriptive, not an untouched test estimate. Errors and abstentions count as incorrect."
+}

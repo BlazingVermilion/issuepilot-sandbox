@@ -1,0 +1,241 @@
+{
+  "expected_n": 36,
+  "processed_n": 36,
+  "missing_n": 0,
+  "complete": true,
+  "errors": 0,
+  "error_rate_processed": 0.0,
+  "failure_counts": {},
+  "action_n": 26,
+  "action_correct": 26,
+  "action_accuracy": 1.0,
+  "action_accuracy_wilson95_descriptive": [
+    0.8712669561953784,
+    1.0000000000000002
+  ],
+  "answerable_n": 32,
+  "explanation_n": 10,
+  "confusion": {
+    "BLOCK -> BLOCK": 18,
+    "ALLOW -> ALLOW": 4,
+    "NEED_FACTS -> NEED_FACTS": 4
+  },
+  "protocol_validity_rate": 1.0,
+  "first_attempt_protocol_validity_rate": 1.0,
+  "normalization_n": 0,
+  "generation_paths": {
+    "model": 31,
+    "deadline_check": 1,
+    "no_context": 4
+  },
+  "failure_stages": {},
+  "decision_accuracy_before_payload_validation": 0.9615384615384616,
+  "model_only_raw_action": {
+    "denominator": 25,
+    "accuracy": 1.0
+  },
+  "complete_reference_context_rate": 1.0,
+  "critical_closure_context": {
+    "denominator": 19,
+    "missing_ids": []
+  },
+  "action_per_class": {
+    "ALLOW": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 4
+    },
+    "BLOCK": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 18
+    },
+    "NEED_FACTS": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 4
+    }
+  },
+  "action_macro_f1_present_classes": 1.0,
+  "action_macro_f1_fixed_classes": 1.0,
+  "wrong_action_or_failure_rate": 0.0,
+  "false_abstention": {
+    "denominator": 32,
+    "count": 0,
+    "errors": 0,
+    "rate": 0.0,
+    "failure_or_wrong_rate": 0.0
+  },
+  "false_answer": {
+    "denominator": 4,
+    "count": 0,
+    "errors": 0,
+    "rate": 0.0,
+    "failure_or_wrong_rate": 0.0
+  },
+  "unsafe_permission": {
+    "denominator": 18,
+    "count": 0,
+    "rate": 0.0
+  },
+  "unsafe_allow_non_allow": {
+    "denominator": 22,
+    "count": 0
+  },
+  "retrieval_n": 32,
+  "retrieval": {
+    "1": {
+      "recall": 0.6432291666666666,
+      "precision": 0.96875,
+      "mrr": 0.96875,
+      "ndcg": 0.96875
+    },
+    "4": {
+      "recall": 1.0,
+      "precision": 0.453125,
+      "mrr": 0.984375,
+      "ndcg": 0.9802368069825487
+    },
+    "8": {
+      "recall": 1.0,
+      "precision": 0.2265625,
+      "mrr": 0.984375,
+      "ndcg": 0.9802368069825487
+    }
+  },
+  "context_reference_recall": 1.0,
+  "citation_reference_recall_answerable_all": 0.7630208333333334,
+  "citation_reference_precision_valid": 0.859375,
+  "citation_id_validity": {
+    "denominator": 92,
+    "rate": 1.0,
+    "scope": "Observed string IDs in parsed payloads, including schema failures; not citation support or uniqueness."
+  },
+  "timing": {
+    "latency_seconds": {
+      "observed_n": 36,
+      "p50": 6.143242149999423,
+      "p95": 8.519499400004861
+    },
+    "retrieval_seconds": {
+      "observed_n": 36,
+      "p50": 0.003984049999417039,
+      "p95": 0.017238299999007722
+    }
+  },
+  "tokens": {
+    "prompt_eval_count": {
+      "total_observed": 38979,
+      "observed_calls": 31,
+      "total_calls": 31
+    },
+    "eval_count": {
+      "total_observed": 4629,
+      "observed_calls": 31,
+      "total_calls": 31
+    }
+  },
+  "valid_latency_seconds": {
+    "p50": 6.143242149999423,
+    "p95": 8.519499400004861
+  },
+  "cost_usd": null,
+  "cost_reason": "No measured electricity/hardware cost; local provider token billing is not total cost.",
+  "families": {
+    "backlog": {
+      "n": 2,
+      "action_accuracy": 1.0
+    },
+    "closure_gates": {
+      "n": 3,
+      "action_accuracy": 1.0
+    },
+    "duplicate": {
+      "n": 3,
+      "action_accuracy": 1.0
+    },
+    "injection": {
+      "n": 2,
+      "action_accuracy": 1.0
+    },
+    "late_reminder": {
+      "n": 4,
+      "action_accuracy": 1.0
+    },
+    "partial_reply": {
+      "n": 2,
+      "action_accuracy": 1.0
+    },
+    "readiness": {
+      "n": 3,
+      "action_accuracy": 1.0
+    },
+    "round_limit": {
+      "n": 3,
+      "action_accuracy": 1.0
+    },
+    "scope": {
+      "n": 3,
+      "action_accuracy": 1.0
+    },
+    "source_authority": {
+      "n": 2,
+      "action_accuracy": null
+    },
+    "unsupported_commercial": {
+      "n": 2,
+      "action_accuracy": null
+    },
+    "unsupported_security": {
+      "n": 2,
+      "action_accuracy": null
+    },
+    "verification_evidence": {
+      "n": 3,
+      "action_accuracy": 1.0
+    },
+    "verification_silence": {
+      "n": 2,
+      "action_accuracy": 1.0
+    }
+  },
+  "judge": {
+    "failed_n": 0,
+    "eligible_n": 36,
+    "scored_n": 0,
+    "missing_eligible_n": 36,
+    "coverage_valid": 0.0,
+    "coverage_all": 0.0,
+    "estimates": {
+      "correctness": null,
+      "completeness": null,
+      "groundedness": null,
+      "citation_precision": null,
+      "citation_recall": null
+    },
+    "estimate_n": {
+      "correctness": 0,
+      "completeness": 0,
+      "groundedness": 0,
+      "citation_precision": 0,
+      "citation_recall": 0
+    },
+    "objective_audit": {
+      "audited_n": 0,
+      "corrected_n": 0,
+      "numeric_checks": 0
+    },
+    "tokens": {
+      "prompt_eval_count": 0,
+      "eval_count": 0
+    },
+    "latency_seconds": {
+      "p50": null,
+      "p95": null
+    }
+  },
+  "semantic_task_success_all": null
+}

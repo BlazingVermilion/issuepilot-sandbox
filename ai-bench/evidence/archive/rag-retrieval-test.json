@@ -1,0 +1,410 @@
+{
+  "rows": [
+    {
+      "id": "RAG-033",
+      "rank": [
+        "IP-CLOSE-006",
+        "IP-CLOSE-001",
+        "IP-OPS-001",
+        "IP-LABEL-002",
+        "IP-CAT-003",
+        "IP-CLOSE-004",
+        "IP-INFO-001",
+        "IP-CONFIG-001"
+      ],
+      "context_ids": [
+        "IP-CLOSE-006",
+        "IP-CLOSE-001",
+        "IP-OPS-001",
+        "IP-LABEL-002"
+      ],
+      "gold": [
+        "IP-CLOSE-006"
+      ],
+      "task": "action",
+      "seconds": 0.000695100003213156
+    },
+    {
+      "id": "RAG-034",
+      "rank": [
+        "IP-CLOSE-006",
+        "IP-CLOSE-001",
+        "IP-LABEL-002",
+        "IP-GOV-003",
+        "IP-OPS-001",
+        "IP-CLOSE-003",
+        "IP-CLOSE-005",
+        "IP-CLOSE-002"
+      ],
+      "context_ids": [
+        "IP-CLOSE-006",
+        "IP-CLOSE-001",
+        "IP-LABEL-002",
+        "IP-GOV-003"
+      ],
+      "gold": [
+        "IP-CLOSE-006",
+        "IP-CLOSE-001"
+      ],
+      "task": "action",
+      "seconds": 0.0004804999989573844
+    },
+    {
+      "id": "RAG-035",
+      "rank": [
+        "IP-END-001",
+        "IP-OPS-001",
+        "IP-VERIFY-001",
+        "IP-GOV-003",
+        "IP-INFO-002",
+        "IP-GOV-001",
+        "IP-GOV-002",
+        "IP-CAT-004"
+      ],
+      "context_ids": [
+        "IP-END-001",
+        "IP-OPS-001",
+        "IP-VERIFY-001",
+        "IP-GOV-003"
+      ],
+      "gold": [
+        "IP-END-001"
+      ],
+      "task": "action",
+      "seconds": 0.0003690000012284145
+    },
+    {
+      "id": "RAG-036",
+      "rank": [
+        "IP-END-001",
+        "IP-OPS-001",
+        "IP-CLOSE-007",
+        "IP-VERIFY-001",
+        "IP-GOV-003",
+        "IP-EVAL-001",
+        "IP-GOV-001",
+        "IP-SOURCE-001"
+      ],
+      "context_ids": [
+        "IP-END-001",
+        "IP-OPS-001",
+        "IP-CLOSE-007"
+      ],
+      "gold": [
+        "IP-END-001"
+      ],
+      "task": "action",
+      "seconds": 0.00033409999741706997
+    },
+    {
+      "id": "RAG-037",
+      "rank": [
+        "IP-OPS-001",
+        "IP-INFO-003",
+        "IP-CLOSE-001",
+        "IP-CLOSE-002",
+        "IP-CLOSE-007",
+        "IP-INFO-004",
+        "IP-PLAN-001",
+        "IP-END-001"
+      ],
+      "context_ids": [
+        "IP-OPS-001",
+        "IP-INFO-003",
+        "IP-CLOSE-001",
+        "IP-CLOSE-002",
+        "IP-INFO-004"
+      ],
+      "gold": [
+        "IP-OPS-001"
+      ],
+      "task": "action",
+      "seconds": 0.0003715999991982244
+    },
+    {
+      "id": "RAG-038",
+      "rank": [
+        "IP-INFO-003",
+        "IP-OPS-001",
+        "IP-VERIFY-003",
+        "IP-INFO-002",
+        "IP-CLOSE-001",
+        "IP-GOV-003",
+        "IP-CLOSE-004",
+        "IP-CLOSE-002"
+      ],
+      "context_ids": [
+        "IP-INFO-003",
+        "IP-OPS-001",
+        "IP-VERIFY-003"
+      ],
+      "gold": [
+        "IP-OPS-001",
+        "IP-INFO-003"
+      ],
+      "task": "action",
+      "seconds": 0.0002736000024015084
+    },
+    {
+      "id": "RAG-039",
+      "rank": [
+        "IP-OPS-001",
+        "IP-VERIFY-001",
+        "IP-CONFIG-001",
+        "IP-CLOSE-005",
+        "IP-CLOSE-004",
+        "IP-VERIFY-003",
+        "IP-INFO-003",
+        "IP-INFO-002"
+      ],
+      "context_ids": [
+        "IP-OPS-001"
+      ],
+      "gold": [
+        "IP-OPS-001"
+      ],
+      "task": "action",
+      "seconds": 0.0002855000057024881
+    },
+    {
+      "id": "RAG-040",
+      "rank": [
+        "IP-OPS-001",
+        "IP-END-001",
+        "IP-LABEL-002",
+        "IP-CLOSE-007",
+        "IP-CAT-001",
+        "IP-CLOSE-004",
+        "IP-GOV-002",
+        "IP-EVAL-001"
+      ],
+      "context_ids": [
+        "IP-OPS-001",
+        "IP-END-001",
+        "IP-LABEL-002",
+        "IP-CLOSE-007"
+      ],
+      "gold": [
+        "IP-OPS-001",
+        "IP-END-001"
+      ],
+      "task": "action",
+      "seconds": 0.00037030000385129824
+    },
+    {
+      "id": "RAG-041",
+      "rank": [
+        "IP-CLOSE-003",
+        "IP-CLOSE-001",
+        "IP-VERIFY-002",
+        "IP-GOV-003",
+        "IP-LABEL-002",
+        "IP-CLOSE-002",
+        "IP-VERIFY-001",
+        "IP-EVAL-001"
+      ],
+      "context_ids": [
+        "IP-CLOSE-003",
+        "IP-CLOSE-001",
+        "IP-VERIFY-002",
+        "IP-GOV-003",
+        "IP-VERIFY-001"
+      ],
+      "gold": [
+        "IP-CLOSE-003",
+        "IP-CLOSE-001"
+      ],
+      "task": "explanation",
+      "seconds": 0.0005021000033593737
+    },
+    {
+      "id": "RAG-042",
+      "rank": [
+        "IP-CLOSE-003",
+        "IP-VERIFY-002",
+        "IP-CLOSE-001",
+        "IP-CLOSE-002",
+        "IP-VERIFY-003",
+        "IP-CONFIG-001",
+        "IP-CLOSE-004",
+        "IP-VERIFY-001"
+      ],
+      "context_ids": [
+        "IP-CLOSE-003",
+        "IP-VERIFY-002",
+        "IP-CLOSE-001",
+        "IP-CLOSE-002",
+        "IP-VERIFY-001",
+        "IP-INFO-003",
+        "IP-INFO-004"
+      ],
+      "gold": [
+        "IP-CLOSE-003",
+        "IP-VERIFY-002"
+      ],
+      "task": "action",
+      "seconds": 0.00046010000369278714
+    },
+    {
+      "id": "RAG-043",
+      "rank": [
+        "IP-INFO-001",
+        "IP-CAT-002",
+        "IP-CONFIG-001",
+        "IP-CLOSE-007",
+        "IP-CAT-001",
+        "IP-INFO-003",
+        "IP-CLOSE-002",
+        "IP-CLOSE-001"
+      ],
+      "context_ids": [
+        "IP-INFO-001",
+        "IP-CAT-002",
+        "IP-CONFIG-001"
+      ],
+      "gold": [
+        "IP-INFO-001"
+      ],
+      "task": "action",
+      "seconds": 0.00032900000223889947
+    },
+    {
+      "id": "RAG-044",
+      "rank": [
+        "IP-INFO-001",
+        "IP-EVAL-001",
+        "IP-CAT-001",
+        "IP-CAT-002",
+        "IP-LABEL-001",
+        "IP-CAT-004",
+        "IP-GOV-001",
+        "IP-VERIFY-001"
+      ],
+      "context_ids": [
+        "IP-INFO-001"
+      ],
+      "gold": [
+        "IP-INFO-001"
+      ],
+      "task": "action",
+      "seconds": 0.00022050000552553684
+    },
+    {
+      "id": "RAG-045",
+      "rank": [
+        "IP-CLOSE-001",
+        "IP-GOV-003",
+        "IP-INFO-002",
+        "IP-CONFIG-001",
+        "IP-GOV-002",
+        "IP-CLOSE-007",
+        "IP-VERIFY-003",
+        "IP-EVAL-001"
+      ],
+      "context_ids": [
+        "IP-CLOSE-001",
+        "IP-GOV-003"
+      ],
+      "gold": [
+        "IP-CLOSE-001"
+      ],
+      "task": "action",
+      "seconds": 0.0003149999974993989
+    },
+    {
+      "id": "RAG-046",
+      "rank": [
+        "IP-CLOSE-001",
+        "IP-CLOSE-004",
+        "IP-CLOSE-005",
+        "IP-LABEL-002",
+        "IP-CAT-001",
+        "IP-CLOSE-007",
+        "IP-LABEL-001",
+        "IP-INFO-004"
+      ],
+      "context_ids": [
+        "IP-CLOSE-001",
+        "IP-CLOSE-004",
+        "IP-CLOSE-005",
+        "IP-LABEL-002"
+      ],
+      "gold": [
+        "IP-CLOSE-001"
+      ],
+      "task": "action",
+      "seconds": 0.0003178000042680651
+    },
+    {
+      "id": "RAG-047",
+      "rank": [
+        "IP-VERIFY-003",
+        "IP-GOV-001",
+        "IP-END-001",
+        "IP-INFO-003",
+        "IP-CLOSE-003",
+        "IP-CAT-003",
+        "IP-LABEL-001",
+        "IP-CLOSE-004"
+      ],
+      "context_ids": [],
+      "gold": [],
+      "task": "explanation",
+      "seconds": 0.00018010000349022448
+    },
+    {
+      "id": "RAG-048",
+      "rank": [
+        "IP-CAT-004",
+        "IP-VERIFY-001",
+        "IP-CAT-002",
+        "IP-CLOSE-004",
+        "IP-VERIFY-003",
+        "IP-CAT-006",
+        "IP-CLOSE-002",
+        "IP-INFO-003"
+      ],
+      "context_ids": [],
+      "gold": [],
+      "task": "explanation",
+      "seconds": 0.00019850000535370782
+    }
+  ],
+  "metrics": {
+    "1": {
+      "recall": 0.8214285714285714,
+      "precision": 1.0,
+      "mrr": 1.0,
+      "ndcg": 1.0
+    },
+    "4": {
+      "recall": 1.0,
+      "precision": 0.3392857142857143,
+      "mrr": 1.0,
+      "ndcg": 1.0
+    },
+    "8": {
+      "recall": 1.0,
+      "precision": 0.16964285714285715,
+      "mrr": 1.0,
+      "ndcg": 1.0
+    }
+  },
+  "context_metrics": {
+    "reference_recall": 1.0,
+    "complete_reference_rate": 1.0,
+    "answerable_n": 14,
+    "critical_closure_n": 5,
+    "critical_closure_misses": []
+  },
+  "retrieval_p95_seconds": 0.0005503500033228192,
+  "retriever": {
+    "mode": "policy",
+    "device": "cpu",
+    "index_seconds": 0.002566200004366692,
+    "ranking": "policy-topics-bm25-v1",
+    "minimum_context_score": 8
+  },
+  "policy_hash": "8a964180e7143302236b94cdd18e533f8562f8770b0f64e67f3030447b749ee5",
+  "data_hash": "ca9d4cbb6095a9008e7137c2d2d54a0324279eed0ee9357249607382fd932e7d"
+}

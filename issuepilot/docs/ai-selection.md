@@ -4,7 +4,7 @@
 followed, on supported cases, by the policy retriever and the citation-constrained single-call
 Qwen3 8B protocol. No extra model or evaluator on the request path.
 
-[Machine-readable results and run provenance](../../ai-bench/evidence/) · [Targets](../../ai-bench/EVALUATION_TARGETS.md)
+[Original run files and checksums](../../ai-bench/evidence/) · [Classifier test confusion](../../ai-bench/evidence/archive/classification-qwen3.json) · [RAG quality gates](../../ai-bench/evidence/archive/rag-quality-gates.md) · [Targets](../../ai-bench/EVALUATION_TARGETS.md)
 
 ## Evidence used for the decision
 

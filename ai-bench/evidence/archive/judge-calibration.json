@@ -1,0 +1,239 @@
+{
+  "settings": {
+    "model_digest": "845dbda0ea48ed749caafd9e6037047aa19acfcfd82e704d7ca97d631a0b697e",
+    "model_family": "qwen2",
+    "num_ctx": 16384,
+    "max_output": 4096,
+    "seed": 42,
+    "thinking": false,
+    "budget_tokenizer": {
+      "method": "published-content-tokenizer-plus-reserve",
+      "repo": "Qwen/Qwen2.5-7B-Instruct",
+      "revision": "a09a35458c702b33eeacc393d103063234e8bc28",
+      "sha256": "c0382117ea329cdf097041132f6d735924b697924d6f6fc3945713e96ce87539",
+      "template_reserve": 2048
+    },
+    "prompt_hash": "8cbdbb79c489e95f05ffca159c497bbc616b73ed00ac435cdd3b1f84247ca582",
+    "judge_code_hash": "2d68841e95c1b0ee9f86b7d67fd650f3038d24073a47013490828bcf64fd776d",
+    "policy_hash": "8a964180e7143302236b94cdd18e533f8562f8770b0f64e67f3030447b749ee5",
+    "ollama_version": {
+      "version": "0.40.16"
+    }
+  },
+  "challenge_hash": "dbd8d993c6cd4d2985f72ed6c926024a3346baabc2bce95e054631364441a728",
+  "n": 19,
+  "matched": 11,
+  "false_accept": 4,
+  "errors": 0,
+  "passed": false,
+  "dimensions": {
+    "response_correct": {
+      "n": 12,
+      "matched": 9,
+      "false_accept": 0
+    },
+    "claim_checks.correct": {
+      "n": 6,
+      "matched": 5,
+      "false_accept": 0
+    },
+    "claim_checks.grounded": {
+      "n": 6,
+      "matched": 5,
+      "false_accept": 0
+    },
+    "reference_checks.covered": {
+      "n": 11,
+      "matched": 7,
+      "false_accept": 3
+    },
+    "citation_checks.supports": {
+      "n": 6,
+      "matched": 4,
+      "false_accept": 1
+    },
+    "refusal_correct": {
+      "n": 2,
+      "matched": 1,
+      "false_accept": 1
+    }
+  },
+  "cases": [
+    {
+      "id": "CAL-001",
+      "status": "matched",
+      "mismatches": []
+    },
+    {
+      "id": "CAL-002",
+      "status": "matched",
+      "mismatches": []
+    },
+    {
+      "id": "CAL-003",
+      "status": "mismatch",
+      "mismatches": [
+        {
+          "dimension": "response_correct",
+          "id": null,
+          "expected": true,
+          "actual": false
+        }
+      ]
+    },
+    {
+      "id": "CAL-004",
+      "status": "matched",
+      "mismatches": []
+    },
+    {
+      "id": "CAL-005",
+      "status": "mismatch",
+      "mismatches": [
+        {
+          "dimension": "response_correct",
+          "id": null,
+          "expected": true,
+          "actual": false
+        }
+      ]
+    },
+    {
+      "id": "CAL-006",
+      "status": "matched",
+      "mismatches": []
+    },
+    {
+      "id": "CAL-007",
+      "status": "matched",
+      "mismatches": []
+    },
+    {
+      "id": "CAL-008",
+      "status": "matched",
+      "mismatches": []
+    },
+    {
+      "id": "CAL-009",
+      "status": "mismatch",
+      "mismatches": [
+        {
+          "dimension": "response_correct",
+          "id": null,
+          "expected": true,
+          "actual": false
+        }
+      ]
+    },
+    {
+      "id": "CAL-010",
+      "status": "matched",
+      "mismatches": []
+    },
+    {
+      "id": "CAL-011",
+      "status": "matched",
+      "mismatches": []
+    },
+    {
+      "id": "CAL-012",
+      "status": "matched",
+      "mismatches": []
+    },
+    {
+      "id": "CAL-013",
+      "status": "mismatch",
+      "mismatches": [
+        {
+          "dimension": "reference_checks.covered",
+          "id": "r2",
+          "expected": false,
+          "actual": true
+        }
+      ]
+    },
+    {
+      "id": "CAL-014",
+      "status": "matched",
+      "mismatches": []
+    },
+    {
+      "id": "CAL-015",
+      "status": "mismatch",
+      "mismatches": [
+        {
+          "dimension": "citation_checks.supports",
+          "id": "c1:IP-INFO-004",
+          "expected": false,
+          "actual": true
+        }
+      ]
+    },
+    {
+      "id": "CAL-016",
+      "status": "mismatch",
+      "mismatches": [
+        {
+          "dimension": "reference_checks.covered",
+          "id": "r2",
+          "expected": false,
+          "actual": true
+        }
+      ]
+    },
+    {
+      "id": "CAL-017",
+      "status": "mismatch",
+      "mismatches": [
+        {
+          "dimension": "claim_checks.correct",
+          "id": "c2",
+          "expected": true,
+          "actual": false
+        },
+        {
+          "dimension": "claim_checks.grounded",
+          "id": "c2",
+          "expected": true,
+          "actual": false
+        },
+        {
+          "dimension": "reference_checks.covered",
+          "id": "r2",
+          "expected": true,
+          "actual": false
+        },
+        {
+          "dimension": "citation_checks.supports",
+          "id": "c2:IP-INFO-003",
+          "expected": true,
+          "actual": false
+        }
+      ]
+    },
+    {
+      "id": "CAL-018",
+      "status": "matched",
+      "mismatches": []
+    },
+    {
+      "id": "CAL-019",
+      "status": "mismatch",
+      "mismatches": [
+        {
+          "dimension": "refusal_correct",
+          "id": null,
+          "expected": false,
+          "actual": true
+        },
+        {
+          "dimension": "reference_checks.covered",
+          "id": "r2",
+          "expected": false,
+          "actual": true
+        }
+      ]
+    }
+  ],
+  "meaning": "Synthetic sanity check only; not independently expert-calibrated"
+}

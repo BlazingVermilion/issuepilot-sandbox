@@ -1,0 +1,42 @@
+{
+  "source_archive": "ai-bench.zip",
+  "source_archive_sha256": "33e33bc08d4520b98e28c22e9ef61253ec034366cad43cb3ce1f0edd7c0c89b2",
+  "members": [
+    {
+      "published_file": "classification-qwen3.json",
+      "archive_member": "runs/classification-qwen3/none/summary.json",
+      "sha256": "e794f22b4fc10e0ab1fbca256ac43a7bd5ce01f7c4253cd7ac5e55a512065e3e",
+      "bytes": 4379
+    },
+    {
+      "published_file": "classification-rules.json",
+      "archive_member": "runs/classification-qwen3/rules/summary.json",
+      "sha256": "c5985971e558b660161e93b4f8bf7a40c3dd947570b9ea4637227b9e52fa7d6b",
+      "bytes": 4423
+    },
+    {
+      "published_file": "rag-validation.json",
+      "archive_member": "runs/rag-policy-pilot-final-validation/policy--pilot-refined/summary.json",
+      "sha256": "525e1c47097f115aa5eed9c911fbf9bc66a9beb9e6eefd29bc7d1dfc036ea762",
+      "bytes": 5397
+    },
+    {
+      "published_file": "rag-retrieval-test.json",
+      "archive_member": "runs/retrieval-policy-test/policy.json",
+      "sha256": "00001a156744eb026856a12276bb23659e8430b204cc06f9b819f85209cddb88",
+      "bytes": 8815
+    },
+    {
+      "published_file": "judge-calibration.json",
+      "archive_member": "runs/judge-calibration-qwen25-v3/calibration.json",
+      "sha256": "e5a56f53e4b867c3afb5c4011f6ef6fc27d51db815606dd3ec52197971a2655b",
+      "bytes": 5410
+    },
+    {
+      "published_file": "rag-quality-gates.md",
+      "archive_member": "runs/rag-policy-pilot-final-validation/pilot.md",
+      "sha256": "0fc5123d116a11202259c019f20112e02665faa65714035ba436923d569c85db",
+      "bytes": 2521
+    }
+  ]
+}

@@ -64,6 +64,15 @@ for n, state in [(17, "COMPLETED"), (28, "REVIEW"), (37, "FAILED")]:
     cases[c["id"]] = c
 
 
+def capture(page, name):
+    """Preserve this test fixture only when an output directory is requested."""
+    output = os.getenv("ISSUEPILOT_UI_CAPTURES")
+    if output:
+        folder = Path(output)
+        folder.mkdir(parents=True, exist_ok=True)
+        page.screenshot(path=str(folder / f"{name}.png"), animations="disabled")
+
+
 def run():
     seen = []
     errors = []
@@ -143,11 +152,13 @@ def run():
         expect(content.locator("img")).to_have_count(0)
         expect(content.locator('a[href^="ftp:"]')).to_have_count(0)
         expect(page.locator("#evidence-dialog")).not_to_be_visible()
+        capture(page, "review")
         page.locator("#comment").fill("Reviewer draft survives")
         page.locator("#open-evidence").click()
         expect(page.locator("#evidence-dialog .md-table tbody tr")).to_have_count(5)
         expect(page.locator("#evidence-dialog .policy-current")).to_contain_text("bug")
         expect(page.locator("#evidence")).to_contain_text(section[-80:])
+        capture(page, "policy-evidence")
         page.keyboard.press("Escape")
         expect(page.locator("#open-evidence")).to_be_focused()
         page.locator("#tab-inbox").click()
@@ -156,6 +167,7 @@ def run():
         expect(page.locator("#timeline")).to_contain_text("event for 17")
         expect(page.locator("#timeline")).not_to_contain_text("event for 28")
         assert page.url.endswith("#inbox")
+        capture(page, "case-history")
         page.locator("#audit-refresh").click()
         expect(page.locator("#activity-title")).to_be_visible()
         page.locator("#audit-dialog [data-close]").click()

@@ -6,9 +6,11 @@
 
 ## What the demo shows
 
-![Recorded intake: 1,715 awaiting review, 9 processing, none completed, 269 needing attention](issuepilot/docs/figures/intake-snapshot.svg)
+[![Reviewing issue 327459: original VS Code report beside the proposed bug label and policy evidence](issuepilot/docs/images/review.png)](issuepilot/docs/portfolio-demo.md)
 
-The snapshot workspace received **1,993 distinct historical VS Code issues** without opening or modifying issues on GitHub. For [issue #327459](https://github.com/microsoft/vscode/issues/327459), a maintainer could compare the original report with a proposed `bug` label and open its saved evidence from `IP-INFO-001`. At capture time, 1,715 cases awaited review, 9 were processing, 269 needed attention and **none had completed**. The [walkthrough](issuepilot/docs/portfolio-demo.md) explains what each screen proves.
+[Workspace overview](issuepilot/docs/images/workspace-overview.png) · [Inbox](issuepilot/docs/images/inbox.png) · [Policy evidence](issuepilot/docs/images/policy-evidence.png) · [n8n intake](issuepilot/docs/images/n8n-intake.png)
+
+The snapshot workspace received **1,993 distinct historical VS Code issues** without opening or modifying issues on GitHub. For [issue #327459](https://github.com/microsoft/vscode/issues/327459), a maintainer could compare the original report with a proposed `bug` label and open its saved evidence from `IP-INFO-001`. At capture time, 1,715 cases awaited review, 9 were processing, 269 needed attention and **none had completed**. A separate full intake check produced 1,993 distinct n8n execution IDs and posting again with `--resume` added zero cases. The [walkthrough](issuepilot/docs/portfolio-demo.md) explains what each screen and check proves.
 
 ## How it works
 
@@ -39,7 +41,7 @@ The serving profile uses **Ollama / Qwen3 8B** for both stages. Classification u
 | Does the selected protocol make the expected action decision? | **26/26**; 4 allow, 18 block, 4 need facts | Development result within 36 validation scenarios, not a held-out generation score |
 | Is the answer faithful to the evidence? | **Unmeasured for the final generator** | 92/92 citation IDs valid on validation; no calibrated semantic score |
 
-These measurements support a **human-reviewed candidate**. The classifier remains below the project’s 90% accuracy and macro-F1 0.90 targets; the policy test does not establish held-out end-to-end accuracy. The original issue body can contain reporter hints such as “Type: Bug”; gold labels and prior assistant messages are excluded from inference. See [full results vs targets](issuepilot/docs/ai-selection.md), [machine-readable evidence](ai-bench/evidence/selection.json) and [dataset revision / checksums](ai-bench/fixtures/dataset_source.json).
+These measurements support a **human-reviewed candidate**. The classifier remains below the project’s 90% accuracy and macro-F1 0.90 targets; the policy test does not establish held-out end-to-end accuracy. The original issue body can contain reporter hints such as “Type: Bug”; gold labels and prior assistant messages are excluded from inference. See [full results vs targets](issuepilot/docs/ai-selection.md), [original run summaries and provenance](ai-bench/evidence/) and [dataset revision / checksums](ai-bench/fixtures/dataset_source.json).
 
 ## Try it without a GPU or accounts
 
