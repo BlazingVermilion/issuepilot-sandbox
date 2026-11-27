@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 225" role="img" aria-labelledby="title desc" font-family="system-ui, sans-serif">
+  <title id="title">IssuePilot workspace: 1,993 historical issues received</title>
+  <desc id="desc">One recorded snapshot. Of 1,993 cases, 1,715 awaited review, 9 were processing, 0 were completed, and 269 needed attention. Intake is not model accuracy.</desc>
+  <rect x="1" y="1" width="878" height="223" rx="14" fill="#f8fbfa" stroke="#cddedb"/>
+  <text x="32" y="35" font-size="13" font-weight="700" letter-spacing="1.1" fill="#28635d">RECORDED WORKSPACE SNAPSHOT</text>
+  <text x="32" y="72" font-size="29" font-weight="700" fill="#142c3a">1,993 of 1,993 issues received</text>
+  <rect x="32.00" y="93" width="702.18" height="18" fill="#0b766c"/>
+  <rect x="734.18" y="93" width="3.68" height="18" fill="#4b78c4"/>
+  <rect x="737.86" y="93" width="0.00" height="18" fill="#475569"/>
+  <rect x="737.86" y="93" width="110.14" height="18" fill="#bf721f"/>
+  <circle cx="36" cy="146" r="4" fill="#0b766c"/>
+  <text x="47" y="150" fill="#3a4c5d" font-size="14">Awaiting review</text>
+  <text x="32" y="182" fill="#142c3a" font-size="27" font-weight="700">1,715</text>
+  <circle cx="243" cy="146" r="4" fill="#4b78c4"/>
+  <text x="254" y="150" fill="#3a4c5d" font-size="14">Processing</text>
+  <text x="239" y="182" fill="#142c3a" font-size="27" font-weight="700">9</text>
+  <circle cx="450" cy="146" r="4" fill="#475569"/>
+  <text x="461" y="150" fill="#3a4c5d" font-size="14">Completed</text>
+  <text x="446" y="182" fill="#142c3a" font-size="27" font-weight="700">0</text>
+  <circle cx="657" cy="146" r="4" fill="#bf721f"/>
+  <text x="668" y="150" fill="#3a4c5d" font-size="14">Needs attention</text>
+  <text x="653" y="182" fill="#142c3a" font-size="27" font-weight="700">269</text>
+  <text x="32" y="208" font-size="13" fill="#536779">Source: reviewer console, sandbox mode. Case states at capture time; quality is measured separately.</text>
+</svg>

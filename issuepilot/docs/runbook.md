@@ -2,6 +2,17 @@
 
 For normal use, follow [Run on Windows](../../README.md#run-on-windows) from the extracted project. On Linux/macOS substitute `python3.12` for `py -3.12`. The CLI prints the location of local files when clipboard copying is unavailable.
 
+## First-time n8n
+
+Skip this section if you already have n8n. For a new local installation, check that port 5678 is free, then run from PowerShell:
+
+```powershell
+docker volume create issuepilot-n8n-data
+docker run -d --name issuepilot-n8n -p 127.0.0.1:5678:5678 -v issuepilot-n8n-data:/home/node/.n8n docker.n8n.io/n8nio/n8n:2.47.3
+```
+
+Open [localhost:5678](http://localhost:5678), complete local owner setup, create a workflow and **save** it so its address ends in `/workflow/<id>`. Give that address to `manage.py start`. The launcher never provisions a second instance. If you stop this container yourself, use `docker start issuepilot-n8n` to reuse it.
+
 ## Local services and intake
 
 The application uses port 8021. n8n stays at the local address in the editor URL you supplied. If n8n runs in Docker, the launcher identifies the container bound to that port and attaches it and the API to an internal bridge. Only the intake nodes use the DNS name `issuepilot-intake-api`. With a native n8n process the callback is on loopback. Do not use the editor URL or n8n's temporary test URL as the sender endpoint.

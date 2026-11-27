@@ -4,6 +4,8 @@
 followed, on supported cases, by the policy retriever and the citation-constrained single-call
 Qwen3 8B protocol. No extra model or evaluator on the request path.
 
+[Machine-readable results and run provenance](../../ai-bench/evidence/) · [Targets](../../ai-bench/EVALUATION_TARGETS.md)
+
 ## Evidence used for the decision
 
 Numbers below are from the supplied ai-bench archive, not a new GPU run. Do not pool
@@ -18,6 +20,7 @@ multiple runs on the same issues as if they were independent observations.
 | Coverage / accuracy among accepted | 198/200 = 99.00% / 173/198 = 87.37% | ≥80% / ≥95% for selective use |
 | Test classification technical errors / latency p95 | 0/200 / 3.50 s | ≤0.5% / deployment latency not set |
 | Policy retrieval Recall@4 / MRR@4 / nDCG@4 | 1.000 / 0.9844 / 0.9802 (32 answerable validation questions) | ≥0.95 / 0.90 / 0.90 |
+| Precision@4 | Validation 0.4531; retrieval-only test 0.3393 | Interpret against the number of relevant policy sections; do not equate precision with context coverage |
 | Complete required context | Validation: 32/32; retrieval-only test: 14/14 | ≥95% |
 | Action decisions correct | 26/26 validation: 4 ALLOW, 18 BLOCK, 4 NEED_FACTS | ≥95%, ≥90% recall per class |
 | Unsafe permission vs an explicit blocker | 0/18 observed (0/22 including unknown facts) | 0 observed |

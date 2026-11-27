@@ -1,0 +1,108 @@
+{
+  "evidence_type": "Aggregate transcription of archived inference runs; not a fresh GPU run.",
+  "dataset": {
+    "repository": "Tilakoid/vscode-bug-feature-triage",
+    "revision": "15c7d77e083d0cd30ae84cc5de6add1dce6cf950",
+    "population": {
+      "train": 1593,
+      "validation": 200,
+      "test": 200
+    },
+    "labels": [
+      "bug",
+      "feature-request"
+    ]
+  },
+  "model": {
+    "tag": "qwen3:8b",
+    "digest": "500a1f067a9f782620b40bee6f7b0c89e17ae61f686b92c24933e4ca4b2b8b41"
+  },
+  "category": {
+    "source": "runs/classification-qwen3/none/summary.json",
+    "profile": "Direct classifier (arm none)",
+    "validation": {
+      "n": 200,
+      "accuracy": 0.915,
+      "macro_f1": 0.9195
+    },
+    "test": {
+      "n": 200,
+      "correct": 173,
+      "predictions": 198,
+      "abstentions": 2,
+      "technical_errors": 0,
+      "accuracy": 0.865,
+      "macro_f1": 0.869076203715405,
+      "coverage": 0.99,
+      "latency_p95_seconds": 3.5,
+      "bug": {
+        "precision": 0.857142857,
+        "recall": 0.9,
+        "f1": 0.878
+      },
+      "feature_request": {
+        "precision": 0.89247,
+        "recall": 0.83,
+        "f1": 0.8601
+      }
+    },
+    "same_test_rules": {
+      "source": "runs/classification-qwen3/rules/summary.json",
+      "accuracy": 0.18,
+      "macro_f1": 0.2834
+    }
+  },
+  "policy": {
+    "source": "runs/rag-policy-pilot-final-validation/policy--pilot-refined/summary.json",
+    "profile": "policy retrieval + single citation-constrained decision call",
+    "policy_sha256": "8a964180e7143302236b94cdd18e533f8562f8770b0f64e67f3030447b749ee5",
+    "sections": 32,
+    "validation": {
+      "scenarios": 36,
+      "answerable": 32,
+      "recall_at_4": 1,
+      "precision_at_4": 0.453125,
+      "mrr_at_4": 0.984375,
+      "ndcg_at_4": 0.9802,
+      "complete_context": 32,
+      "action_scenarios": 26,
+      "correct_actions": 26,
+      "correct_by_action": {
+        "ALLOW": 4,
+        "BLOCK": 18,
+        "NEED_FACTS": 4
+      },
+      "valid_citation_ids": 92,
+      "citation_ids": 92,
+      "model_calls": 31,
+      "deterministic_deadline_blocks": 1,
+      "no_context_refusals": 4,
+      "latency_p50_seconds": 6.14,
+      "latency_p95_seconds": 8.52,
+      "retrieval_p95_seconds": 0.0172,
+      "semantic_judge_coverage": 0,
+      "semantic_correctness": null,
+      "semantic_groundedness": null
+    },
+    "test": {
+      "source": "runs/retrieval-policy-test/policy.json",
+      "scope": "retrieval only",
+      "scenarios": 16,
+      "answerable": 14,
+      "complete_context": 14,
+      "recall_at_4": 1,
+      "precision_at_4": 0.3393,
+      "mrr_at_4": 1,
+      "ndcg_at_4": 1,
+      "held_out_decision_accuracy": null
+    },
+    "judge_calibration": {
+      "source": "runs/judge-calibration-qwen25-v3/",
+      "model": "qwen2.5:7b",
+      "passed": 11,
+      "challenges": 19,
+      "false_acceptances": 4
+    },
+    "release_gate": "INCOMPLETE"
+  }
+}
