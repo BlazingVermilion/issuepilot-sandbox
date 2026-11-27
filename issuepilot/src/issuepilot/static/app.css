@@ -1230,3 +1230,12 @@ fieldset {
 .reader-dialog .evidence-item h3{overflow-wrap:anywhere;}.reader-dialog .timeline-scroll {height:clamp(12rem,34vh,22rem);overflow:auto;overscroll-behavior:contain;}
 .reader-actions{margin:.6rem 0 0;}.ticket-state.closed {background:var(--surface-2);color:var(--ink);}
 @media(max-width:48rem){.reader-dialog{width:96vw;padding-inline:.75rem;}.ticket-comment>.md-body{padding:.65rem;}.row-actions{gap:.4rem;}}
+/* Keep policy names readable when the evidence dialog is narrow. */
+.reader-dialog .md-table th:first-child,
+.reader-dialog .md-table td:first-child {
+  width: 8rem;
+  min-width: 7rem;
+  white-space: normal;
+  overflow-wrap: normal;
+  word-break: normal;
+}

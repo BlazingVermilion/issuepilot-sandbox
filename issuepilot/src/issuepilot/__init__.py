@@ -1,1 +1,1 @@
-"""Selected inference profile. No benchmark runners or external write tools."""
+"""IssuePilot: evidence-backed issue triage and a versioned reviewer workflow."""

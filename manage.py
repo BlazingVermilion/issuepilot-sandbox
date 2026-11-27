@@ -11,7 +11,7 @@ sys.path.insert(0, str(APP / "src"))
 from issuepilot.local_workspace import Workspace  # noqa: E402
 
 
-def main():
+def main(argv=None):
     cli = argparse.ArgumentParser(description=__doc__)
     sub = cli.add_subparsers(dest="command", required=True)
     start = sub.add_parser(
@@ -28,7 +28,7 @@ def main():
         "check": "Verify the signed webhook without creating a case.",
         "status": "Show intake, model and human review counts.",
         "reviewer": "Copy the reviewer token privately on Windows.",
-        "verify-model": "Check actual Ollama inference and GPU offload.",
+        "settings-path": "Print the workspace settings path without reading secrets.",
         "export": "Export event metadata locally.",
         "check-snowflake": "Verify the service role, destination and table read access.",
         "sync": "Verify the event mirror in Snowflake.",
@@ -38,6 +38,8 @@ def main():
         "resume": "Resume the model worker.",
     }.items():
         sub.add_parser(cmd, help=desc)
+    verify = sub.add_parser("verify-model", help="Run real predictions with the installed model.")
+    verify.add_argument("--require-gpu", action="store_true", help="Also require GPU offload.")
     submit = sub.add_parser(
         "submit", help="Submit the complete source through n8n and verify stored deliveries."
     )
@@ -55,7 +57,7 @@ def main():
             ),
         )
         p.add_argument("--source", type=Path)
-    args = cli.parse_args()
+    args = cli.parse_args(argv)
     if getattr(args, "source", None) and not args.source.exists():
         cli.error("Source path does not exist")
     state = Path(os.environ.get("LOCALAPPDATA") or Path.home() / ".local/share") / "IssuePilot"
@@ -64,11 +66,16 @@ def main():
         editor_url=getattr(args, "workflow", None),
         source=args.source.resolve() if getattr(args, "source", None) else None,
         resume=getattr(args, "resume", False),
+        require_gpu=getattr(args, "require_gpu", False),
     )
 
 
-if __name__ == "__main__":
+def run(argv=None):
     try:
-        main()
+        main(argv)
     except (OSError, ValueError, KeyError, subprocess.SubprocessError) as exc:
         sys.exit("Stopped: " + str(exc))
+
+
+if __name__ == "__main__":
+    run()

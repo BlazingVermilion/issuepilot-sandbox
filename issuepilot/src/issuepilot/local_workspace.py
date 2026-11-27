@@ -86,6 +86,8 @@ class Workspace:
             ),
             "POSTGRES_PASSWORD": secrets.token_hex(24),
             "N8N_ENCRYPTION_KEY": secrets.token_hex(32),
+            "IP_SF_ACCOUNT": "",
+            "IP_SF_USER": "",
         }
         template = read_settings((self.app / ".env.example").read_bytes())
         values["N8N_IMAGE"] = template["N8N_IMAGE"]
@@ -159,7 +161,10 @@ class Workspace:
         )
         return self.folder / n8n_workflow.NODE_FILE
 
-    def operate(self, command, *, editor_url=None, source=None, resume=False):
+    def operate(self, command, *, editor_url=None, source=None, resume=False, require_gpu=False):
+        if command == "settings-path":
+            print(self.settings_file)
+            return
         if command in {"prepare", "evaluation-data"}:
             prepare_source(self.app, self.folder, source, merged=command == "evaluation-data")
             return
@@ -220,7 +225,17 @@ class Workspace:
         elif command in {"check-snowflake", "sync"}:
             if not (self.app / "secrets/snowflake.p8").is_file():
                 raise ValueError(
-                    "Configure a Snowflake key before syncing. See the operator guide."
+                    "Expected issuepilot/secrets/snowflake.p8. See issuepilot/docs/snowflake.md."
+                )
+            missing = [
+                key
+                for key in ("IP_SF_ACCOUNT", "IP_SF_USER")
+                if not os.environ.get(key, values.get(key, "")).strip()
+            ]
+            if missing:
+                raise ValueError(
+                    f"Missing Snowflake settings: {', '.join(missing)}. Edit {self.settings_file} "
+                    "or set them in this terminal. No analytics container was started."
                 )
             self.compose(
                 values,
@@ -252,7 +267,7 @@ class Workspace:
                     "worker",
                     "python",
                     "scripts/check_ai.py",
-                    "--require-gpu",
+                    *(["--require-gpu"] if require_gpu else []),
                 ],
                 "pause": ["stop", "worker"],
                 "resume": ["up", "-d", "--wait", "worker"],

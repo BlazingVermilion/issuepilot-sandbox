@@ -69,7 +69,7 @@ def checked_session():
     import snowflake.connector
 
     names = {}
-    for key in ("role", "warehouse", "database", "schema"):
+    for key in ("role", "warehouse", "database", "schema", "account", "user", "private_key_file"):
         variable = f"IP_SF_{key.upper()}"
         value = os.environ.get(variable, "").strip()
         if not value:
@@ -78,10 +78,10 @@ def checked_session():
     # Only authenticate with the application role at login. Set the destination
     # explicitly below, rather than relying on an optional login default.
     with snowflake.connector.connect(
-        account=os.environ["IP_SF_ACCOUNT"],
-        user=os.environ["IP_SF_USER"],
+        account=names.pop("account"),
+        user=names.pop("user"),
         authenticator="SNOWFLAKE_JWT",
-        private_key_file=os.environ["IP_SF_PRIVATE_KEY_FILE"],
+        private_key_file=names.pop("private_key_file"),
         private_key_file_pwd=os.environ.get("IP_SF_PRIVATE_KEY_PASSWORD"),
         role=names["role"],
     ) as conn:

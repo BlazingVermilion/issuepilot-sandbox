@@ -86,6 +86,8 @@ def test_snowflake_check_and_sync_share_the_workspace_without_starting_other_ser
     monkeypatch.setattr(Workspace, "settings", lambda _: {"IP_COMPOSE_PROJECT": "existing"})
     compose = Mock()
     monkeypatch.setattr(Workspace, "compose", compose)
+    monkeypatch.setenv("IP_SF_ACCOUNT", "ORG-ACCOUNT")
+    monkeypatch.setenv("IP_SF_USER", "SERVICE")
     workspace.operate("check-snowflake")
     workspace.operate("sync")
     (check, sync) = compose.call_args_list
@@ -162,3 +164,38 @@ def test_legacy_docker_data_path_is_not_needed_to_prepare_public_projection(tmp_
     source_preparation.prepare_source(app, state, source)
     assert (state / "projection/issues.jsonl").read_bytes() == expected
     assert (app / "data").is_file()
+
+
+def test_empty_analytics_user_overrides_file_before_container_build(tmp_path, monkeypatch):
+    app = checkout(tmp_path / "product")
+    (app / "secrets").mkdir()
+    (app / "secrets/snowflake.p8").touch()
+    ws = Workspace(app, tmp_path / "local")
+    values = {"IP_SF_ACCOUNT": "ORG-A", "IP_SF_USER": "SVC"}
+    monkeypatch.setattr(Workspace, "settings", lambda _: values)
+    monkeypatch.setenv("IP_SF_ACCOUNT", "ORG-A")
+    monkeypatch.setenv("IP_SF_USER", "")
+    compose = Mock()
+    monkeypatch.setattr(Workspace, "compose", compose)
+    with pytest.raises(ValueError, match="IP_SF_USER"):
+        ws.operate("check-snowflake")
+    compose.assert_not_called()
+
+
+def test_settings_path_works_before_first_start_without_creating_secrets(tmp_path, capsys):
+    ws = Workspace(checkout(tmp_path / "product"), tmp_path / "local")
+    ws.operate("settings-path")
+    assert capsys.readouterr().out.strip() == str(ws.settings_file)
+    assert not ws.folder.exists()
+
+
+def test_demo_compatibility_routes_to_canonical_commands(monkeypatch):
+    monkeypatch.syspath_prepend(str(ROOT))
+    from demo import arguments
+
+    assert arguments(["all", "--resume"]) == ["submit", "--resume"]
+    assert arguments(["link"]) == ["workflow"]
+    assert arguments(["smoke"]) == ["verify-model", "--require-gpu"]
+    assert arguments(["start", "--source", "inputs"]) == ["start", "--source", "inputs"]
+    with pytest.raises(SystemExit, match="No data changed"):
+        arguments(["recover"])
